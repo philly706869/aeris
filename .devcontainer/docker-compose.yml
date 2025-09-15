@@ -1,9 +1,12 @@
 volumes:
   target:
 
+
 services:
   app:
-    image: ghcr.io/aeris-lang/aeris-devcontainer:1
+    build:
+      dockerfile: Dockerfile
+      context: .
     volumes:
       - ..:/workspaces/aeris:cached
       - target:/workspaces/aeris/target:cached
