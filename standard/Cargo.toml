@@ -1,0 +1,7 @@
+[package]
+name    = "aeris_standard"
+edition = "2024"
+publish = false
+
+[dependencies]
+aeris = { path = "../core" }

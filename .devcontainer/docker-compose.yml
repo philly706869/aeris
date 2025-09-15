@@ -1,0 +1,10 @@
+volumes:
+  target:
+
+services:
+  app:
+    image: ghcr.io/aeris-lang/aeris-devcontainer:1
+    volumes:
+      - ..:/workspaces/aeris:cached
+      - target:/workspaces/aeris/target:cached
+    command: sleep infinity
