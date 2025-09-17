@@ -1,0 +1,9 @@
+[package]
+name    = "aeris_standard_daemon"
+edition = "2024"
+publish = false
+
+[dependencies]
+aeris_standard_core = { path = "../core" }
+aeris_constants     = { path = "../constants" }
+tokio               = { version = "1.47", features = ["full"] }

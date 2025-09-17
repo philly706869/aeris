@@ -1,4 +1,3 @@
-pub mod source;
 pub mod syntax;
 
 pub struct AERIS {}
