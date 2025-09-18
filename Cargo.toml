@@ -1,4 +1,4 @@
 [workspace]
 resolver        = "3"
-members         = ["core", "constants", "daemon", "cli"]
-default-members = ["core"]
+members         = ["standard_core", "constants", "language_server", "cli"]
+default-members = ["standard_core"]

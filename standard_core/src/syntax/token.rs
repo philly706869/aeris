@@ -1,11 +1,11 @@
 use crate::syntax::Syntax;
 
-// pub struct Token<'s, 't> {
-//     source: &'s dyn Syntax,
-//     text: &'t str,
-//     type_: TokenType,
-//     modifier: TokenModifier,
-// }
+pub struct Token</*'s,*/ 't> {
+    // source: &'s dyn Syntax,
+    text: &'t str,
+    type_: TokenType,
+    modifier: TokenModifier,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TokenType {
