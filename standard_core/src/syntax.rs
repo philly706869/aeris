@@ -2,7 +2,9 @@ mod token;
 
 pub use token::{Token, TokenModifier, TokenType};
 
-use unicode_general_category::{GeneralCategory as UC, get_general_category};
+use unicode_properties::{
+    GeneralCategory as GC, GeneralCategoryGroup as GCG, UnicodeGeneralCategory,
+};
 
 pub trait Syntax<'i> {
     type Output;
@@ -31,42 +33,33 @@ pub struct IdentifierSyntax;
 
 impl IdentifierSyntax {
     fn match_id_start(chr: char) -> bool {
-        let category = get_general_category(chr);
-        matches!(
-            category,
-            UC::UppercaseLetter | // Lu
-            UC::LowercaseLetter | // Ll
-            UC::TitlecaseLetter | // Lt
-            UC::ModifierLetter | // Lm
-            UC::OtherLetter | // Lo
-            UC::LetterNumber // Nl
-        ) || Self::match_other_id_start(chr)
+        let category_group = chr.general_category_group();
+        let category = chr.general_category();
+        (category_group == GCG::Letter)
+            || (category == GC::LetterNumber)
+            || Self::match_other_id_start(chr)
             || Self::match_id_compat_math_start(chr)
+            || matches!(chr, '\u{0024}' | '\u{005F}')
     }
 
     fn match_id_continue(chr: char) -> bool {
-        let category = get_general_category(chr);
+        let category = chr.general_category();
         Self::match_id_start(chr)
             || matches!(
                 category,
-                UC::NonspacingMark | // Mn
-                UC::SpacingMark | // Mc
-                UC::DecimalNumber | // Nd 
-                UC::ConnectorPunctuation // Pc
+                GC::NonspacingMark | GC::SpacingMark | GC::DecimalNumber | GC::ConnectorPunctuation
             )
             || Self::match_other_id_continue(chr)
             || Self::match_id_compat_math_continue(chr)
     }
 
-    // fn match_xid_start(chr: char) -> bool {
-    //     let category = get_general_category(chr);
-    //     todo!()
-    // }
+    fn match_xid_start(chr: char) -> bool {
+        todo!()
+    }
 
-    // fn match_xid_continue(chr: char) -> bool {
-    //     let category = get_general_category(chr);
-    //     todo!()
-    // }
+    fn match_xid_continue(chr: char) -> bool {
+        todo!()
+    }
 
     fn match_other_id_start(chr: char) -> bool {
         matches!(chr, '\u{2118}' | '\u{212E}' | '\u{309B}' | '\u{309C}')
@@ -77,20 +70,50 @@ impl IdentifierSyntax {
     }
 
     fn match_id_compat_math_start(chr: char) -> bool {
-        todo!()
+        matches!(chr, '∂' | '∇' | '∞')
     }
 
     fn match_id_compat_math_continue(chr: char) -> bool {
-        todo!()
+        Self::match_id_compat_math_start(chr)
+            || matches!(
+                chr,
+                '⁽' | '₍'
+                    | '⁾'
+                    | '₎'
+                    | '⁺'
+                    | '₊'
+                    | '⁼'
+                    | '₌'
+                    | '⁻'
+                    | '₋'
+                    | '⁰'
+                    | '₀'
+                    | '¹'
+                    | '₁'
+                    | '²'
+                    | '₂'
+                    | '³'
+                    | '₃'
+                    | '⁴'
+                    | '₄'
+                    | '⁵'
+                    | '₅'
+                    | '⁶'
+                    | '₆'
+                    | '⁷'
+                    | '₇'
+                    | '⁸'
+                    | '₈'
+                    | '⁹'
+                    | '₉'
+            )
     }
 
     fn match_pattern_syntax(chr: char) -> bool {
-        let category = get_general_category(chr);
         todo!()
     }
 
     fn match_pattern_white_space(chr: char) -> bool {
-        let category = get_general_category(chr);
         todo!()
     }
 }
