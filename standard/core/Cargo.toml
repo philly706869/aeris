@@ -1,0 +1,10 @@
+[package]
+name    = "aeris_standard_core"
+edition = "2024"
+publish = false
+
+[dependencies]
+icu_properties = { version = "2.0" }
+inkwell        = { version = "0.6", features = ["llvm18-1"] }
+once_cell      = { version = "1.21" }
+uuid           = { version = "1.18", features = ["v4"] }

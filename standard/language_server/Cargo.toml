@@ -1,12 +1,13 @@
 [package]
-name    = "aeris_standard_cli"
+name    = "aeris_standard_language_server"
 version = "0.1.0"
 edition = "2024"
 publish = false
 
 [dependencies]
-aeris_standard_core = { path = "../standard_core" }
+aeris_standard_core = { path = "../core" }
 aeris_constants     = { path = "../constants" }
+anyhow              = { version = "1.0" }
 clap                = { version = "4.5", features = ["derive"] }
 rayon               = { version = "1.11" }
 tokio               = { version = "1.47", features = ["full"] }
