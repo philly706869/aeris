@@ -18,36 +18,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
-name = "aeris_constants"
+name = "aeris"
+version = "0.0.0"
+dependencies = [
+ "inkwell",
+]
+
+[[package]]
+name = "aeris-constants"
 version = "0.0.0"
 
 [[package]]
-name = "aeris_standard_cli"
+name = "aeris-standard-cli"
 version = "0.1.0"
 dependencies = [
- "aeris_constants",
- "aeris_standard_core",
+ "aeris-constants",
+ "aeris-standard-core",
  "clap",
  "rayon",
  "tokio",
 ]
 
 [[package]]
-name = "aeris_standard_core"
+name = "aeris-standard-core"
 version = "0.0.0"
 dependencies = [
+ "aeris",
  "icu_properties",
- "inkwell",
- "once_cell",
  "uuid",
 ]
 
 [[package]]
-name = "aeris_standard_language_server"
+name = "aeris-standard-language-server"
 version = "0.1.0"
 dependencies = [
- "aeris_constants",
- "aeris_standard_core",
+ "aeris-constants",
+ "aeris-standard-core",
  "anyhow",
  "clap",
  "rayon",

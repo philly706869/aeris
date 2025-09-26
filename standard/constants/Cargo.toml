@@ -1,4 +1,4 @@
 [package]
-name    = "aeris_constants"
+name    = "aeris-constants"
 edition = "2024"
 publish = false

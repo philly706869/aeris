@@ -1,9 +1,12 @@
 [workspace]
 resolver = "3"
 members = [
+  # AERIS
+  "core",
+
   # AERIS Standard
   "standard/core",
   "standard/constants",
-  "standard/language_server",
+  "standard/language-server",
   "standard/cli",
 ]

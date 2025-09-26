@@ -1,5 +1,3 @@
-use crate::syntax::Syntax;
-
 pub struct Token</*'s,*/ 't> {
     // source: &'s dyn Syntax,
     text: &'t str,
