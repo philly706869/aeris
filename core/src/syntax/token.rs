@@ -1,5 +1,5 @@
-pub struct Token</*'s,*/ 't> {
-    // source: &'s dyn Syntax,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Token<'t> {
     text: &'t str,
     type_: TokenType,
     modifier: TokenModifier,
@@ -79,7 +79,7 @@ pub enum TokenType {
     Operator,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TokenModifier {
     /// For declarations of symbols.
     pub declaration: bool,
