@@ -8,7 +8,16 @@ pub use token::{Token, TokenModifier, TokenType};
 pub trait Syntax<'i> {
     type Output;
 
-    fn mount(ctx: Context<'i>) -> Self::Output
-    where
-        Self: Sized;
+    fn mount(&self, ctx: Context<'i>) -> Self::Output;
+}
+
+impl<'i, F, O> Syntax<'i> for F
+where
+    F: Fn(Context<'i>) -> O,
+{
+    type Output = O;
+
+    fn mount(&self, ctx: Context<'i>) -> Self::Output {
+        self(ctx)
+    }
 }

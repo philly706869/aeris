@@ -1,11 +1,13 @@
 use aeris::syntax::{Context, Syntax};
 
-pub struct JSONSyntax;
+use crate::value::JSONValue;
 
-impl<'i> Syntax<'i> for JSONSyntax {
-    type Output = ();
+pub struct JSONValueSyntax;
 
-    fn parse(&self, ctx: Context<'i>) -> Self::Output {
-        todo!()
-    }
-}
+// impl<'i> Syntax<'i> for JSONValueSyntax {
+//     type Output = JSONValue;
+
+//     fn mount(ctx: Context<'i>) -> Self::Output {
+//         todo!()
+//     }
+// }

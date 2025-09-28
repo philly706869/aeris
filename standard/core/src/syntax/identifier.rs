@@ -34,16 +34,16 @@ impl Identifier {
     }
 }
 
-impl<'i> Syntax<'i> for Identifier {
-    type Output = Result<&'i str, String>;
+// impl<'i> Syntax<'i> for Identifier {
+//     type Output = Result<&'i str, String>;
 
-    fn parse(&self, ctx: Context<'i>) -> Self::Output {
-        let span = ctx.span();
-        let mut chars = ctx.input().chars();
-        if !chars.next().is_some_and(Self::match_start) {
-            return Err("".to_owned());
-        }
-        chars.take_while(|ch| Self::match_continue(*ch));
-        Ok(todo!())
-    }
-}
+//     fn parse(&self, ctx: Context<'i>) -> Self::Output {
+//         let span = ctx.span();
+//         let mut chars = ctx.input().chars();
+//         if !chars.next().is_some_and(Self::match_start) {
+//             return Err("".to_owned());
+//         }
+//         chars.take_while(|ch| Self::match_continue(*ch));
+//         Ok(todo!())
+//     }
+// }
