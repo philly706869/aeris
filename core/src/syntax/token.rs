@@ -7,8 +7,6 @@ pub struct Token<'t> {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TokenType {
-    Unknown,
-
     /// For identifiers that declare or reference a namespace, module, or package.
     Namespace,
 
