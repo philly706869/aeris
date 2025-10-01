@@ -22,6 +22,7 @@ name = "aeris"
 version = "0.0.0"
 dependencies = [
  "inkwell",
+ "uuid",
 ]
 
 [[package]]

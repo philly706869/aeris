@@ -1,21 +1,13 @@
 pub mod acm;
 pub mod syntax;
 
-pub struct AERIS {}
-
-impl AERIS {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
 #[cfg(test)]
 mod example {
     use inkwell::{AddressSpace, IntPredicate, context::Context, module::Linkage};
 
     #[test]
     #[ignore]
-    fn llvm_example_factorial() {
+    fn llvm_factorial_example() {
         // #include <stdio.h>
         //
         // int fact(int n) {
@@ -42,6 +34,16 @@ mod example {
         let i32_type = context.i32_type();
         let ptr_type = context.ptr_type(AddressSpace::default());
 
+        // Global Definition
+        let printf_format_string = {
+            let text = "fact(%d) = %d\n";
+            let const_string = context.const_string(text.as_bytes(), true);
+            let global = module.add_global(const_string.get_type(), None, "");
+            global.set_initializer(&const_string);
+            global.set_constant(true);
+            global.as_pointer_value()
+        };
+
         let printf_fn = {
             // Printf Function
             let name = "printf";
@@ -67,14 +69,14 @@ mod example {
             // entry:
             builder.position_at_end(entry_block);
             let n = {
-                let ptr = builder.build_alloca(i32_type, "n").unwrap();
                 let value = function.get_first_param().unwrap();
+                let ptr = builder.build_alloca(value.get_type(), "n").unwrap();
                 builder.build_store(ptr, value).unwrap();
                 ptr
             };
             let result = {
-                let ptr = builder.build_alloca(i32_type, "result").unwrap();
                 let value = i32_type.const_int(1, false);
+                let ptr = builder.build_alloca(value.get_type(), "result").unwrap();
                 builder.build_store(ptr, value).unwrap();
                 ptr
             };
@@ -159,10 +161,6 @@ mod example {
                 ptr
             };
             {
-                let printf_format_string = builder
-                    .build_global_string_ptr("fact(%d) = %d\n", "")
-                    .unwrap()
-                    .as_pointer_value();
                 let x = builder.build_load(i32_type, x, "").unwrap();
                 let y = builder.build_load(i32_type, y, "").unwrap();
                 builder

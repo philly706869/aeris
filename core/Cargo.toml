@@ -5,3 +5,4 @@ publish = false
 
 [dependencies]
 inkwell = { version = "0.6", features = ["llvm18-1"] }
+uuid    = { version = "1.18", features = ["v4"] }
