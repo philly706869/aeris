@@ -1,23 +1,26 @@
-use std::hash::{Hash, Hasher};
+use std::{
+    hash::{Hash, Hasher},
+    sync::Arc,
+};
 
 use crate::acm::uid::Uid;
 
 #[derive(Debug, Clone)]
-pub struct Global {
+pub struct Block {
     uid: Uid,
 }
 
-impl Global {}
+impl Block {}
 
-impl PartialEq for Global {
+impl PartialEq for Block {
     fn eq(&self, other: &Self) -> bool {
         self.uid == other.uid
     }
 }
 
-impl Eq for Global {}
+impl Eq for Block {}
 
-impl Hash for Global {
+impl Hash for Block {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.uid.hash(state);
     }

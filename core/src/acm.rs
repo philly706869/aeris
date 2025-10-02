@@ -1,10 +1,12 @@
 //! AERIS Code Model
 
+mod block;
 mod function;
 mod global;
 mod module;
 mod uid;
 
+pub use block::Block;
 pub use function::Function;
 pub use global::Global;
 pub use module::Module;

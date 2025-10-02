@@ -1,11 +1,12 @@
 use std::{
     collections::HashSet,
     hash::{Hash, Hasher},
-    sync::{Arc, RwLock},
+    sync::{Arc, RwLock, RwLockReadGuard},
 };
 
 use crate::acm::{Function, Global, uid::Uid};
 
+#[derive(Debug, Clone)]
 pub struct Module {
     uid: Uid,
     functions: Arc<RwLock<HashSet<Function>>>,
@@ -13,18 +14,34 @@ pub struct Module {
 }
 
 impl Module {
-    pub fn functions(&self) -> Arc<RwLock<HashSet<Function>>> {
-        self.functions.clone()
+    pub fn functions(&self) -> RwLockReadGuard<'_, HashSet<Function>> {
+        let functions = self.functions.read().unwrap();
+        functions
     }
 
     pub fn add_function(&self, function: Function) -> bool {
-        let mut function_set = self.functions.write().unwrap();
-        function_set.insert(function)
+        let mut functions = self.functions.write().unwrap();
+        functions.insert(function)
     }
 
     pub fn remove_function(&mut self, function: &Function) -> bool {
-        let mut function_set = self.functions.write().unwrap();
-        function_set.remove(function)
+        let mut functions = self.functions.write().unwrap();
+        functions.remove(function)
+    }
+
+    pub fn globals(&self) -> RwLockReadGuard<'_, HashSet<Global>> {
+        let globals = self.globals.read().unwrap();
+        globals
+    }
+
+    pub fn add_global(&self, global: Global) -> bool {
+        let mut globals = self.globals.write().unwrap();
+        globals.insert(global)
+    }
+
+    pub fn remove_global(&self, global: &Global) -> bool {
+        let mut globals = self.globals.write().unwrap();
+        globals.remove(global)
     }
 }
 

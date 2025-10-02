@@ -5,8 +5,8 @@ volumes:
 services:
   app:
     build:
-      dockerfile: Dockerfile
       context: .
+      dockerfile: Dockerfile
     volumes:
       - ..:/workspaces/aeris:cached
       - target:/workspaces/aeris/target:cached

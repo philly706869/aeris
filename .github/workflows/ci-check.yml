@@ -2,8 +2,7 @@ name: CI Check
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
@@ -26,8 +25,9 @@ jobs:
       - run: cargo clippy -- -D warnings
 
   test:
+    needs: [fmt, clippy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --all-features
+      - run: docker build -t devcontainer -f .devcontainer/Dockerfile .
+      - run: docker run --rm -v ${{ github.workspace }}:/app -w /app devcontainer cargo test --all-features
