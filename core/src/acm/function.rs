@@ -1,34 +1,16 @@
-use std::{
-    hash::{Hash, Hasher},
-    sync::{Arc, RwLock, RwLockReadGuard},
-};
+use std::hash::{Hash, Hasher};
 
-use indexmap::IndexSet;
+use crate::acm::{Block, type_::Type, uid::Uid};
 
-use crate::acm::{Block, uid::Uid};
-
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Function {
     uid: Uid,
-    blocks: Arc<RwLock<IndexSet<Block>>>,
+    return_type: Type,
+    param_type: Vec<Type>,
+    blocks: Vec<Block>,
 }
 
-impl Function {
-    pub fn blocks(&self) -> RwLockReadGuard<'_, IndexSet<Block>> {
-        let blocks = self.blocks.read().unwrap();
-        blocks
-    }
-
-    pub fn add_block(&self, block: Block) -> bool {
-        let mut blocks = self.blocks.write().unwrap();
-        blocks.insert(block)
-    }
-
-    pub fn remove_block(&self, block: &Block) -> bool {
-        let mut blocks = self.blocks.write().unwrap();
-        blocks.shift_remove(block)
-    }
-}
+impl Function {}
 
 impl PartialEq for Function {
     fn eq(&self, other: &Self) -> bool {

@@ -1,16 +1,21 @@
-use std::{
-    hash::{Hash, Hasher},
-    sync::Arc,
-};
+use std::hash::{Hash, Hasher};
 
-use crate::acm::uid::Uid;
+use crate::acm::{Instruction, uid::Uid};
 
 #[derive(Debug, Clone)]
 pub struct Block {
     uid: Uid,
+    pub instructions: Vec<Instruction>,
 }
 
-impl Block {}
+impl Block {
+    pub fn new() -> Self {
+        Self {
+            uid: Uid::new(),
+            instructions: Vec::new(),
+        }
+    }
+}
 
 impl PartialEq for Block {
     fn eq(&self, other: &Self) -> bool {
