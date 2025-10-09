@@ -1,14 +1,11 @@
-use std::{
-    collections::{HashMap, HashSet},
-    hash::{Hash, Hasher},
-};
+use std::collections::{HashMap, HashSet};
 
-use crate::acm::{Function, Global, uid::Uid};
+use crate::acm::{Function, Global};
 
 #[derive(Debug, Clone)]
 pub struct Module<'f, 'g> {
-    pub functions: HashMap<&'f Function, String>,
-    pub globals: HashSet<&'g Global>,
+    pub functions: HashMap<usize, &'f Function>,
+    pub globals: HashMap<usize, &'g Global>,
 }
 
 impl<'f, 'g> Module<'f, 'g> {}

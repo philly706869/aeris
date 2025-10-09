@@ -1,27 +1,27 @@
-use std::hash::{Hash, Hasher};
-
-use crate::acm::{Block, type_::Type, uid::Uid};
+use crate::acm::{Block, layout::Layout};
 
 #[derive(Debug)]
 pub struct Function {
-    uid: Uid,
-    return_type: Type,
-    param_type: Vec<Type>,
+    return_layout: Layout,
+    param_layout: Vec<Layout>,
+    variadic: bool,
     blocks: Vec<Block>,
 }
 
-impl Function {}
-
-impl PartialEq for Function {
-    fn eq(&self, other: &Self) -> bool {
-        self.uid == other.uid
+impl Function {
+    pub fn return_layout(&self) -> &Layout {
+        &self.return_layout
     }
-}
 
-impl Eq for Function {}
+    pub fn param_layout(&self) -> &Vec<Layout> {
+        &self.param_layout
+    }
 
-impl Hash for Function {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.uid.hash(state);
+    pub fn variadic(&self) -> bool {
+        self.variadic
+    }
+
+    pub fn blocks(&self) -> &[Block] {
+        &self.blocks
     }
 }

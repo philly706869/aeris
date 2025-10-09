@@ -4,8 +4,8 @@ mod block;
 mod function;
 mod global;
 mod instruction;
+mod layout;
 mod module;
-mod type_;
 mod uid;
 
 pub use block::Block;
@@ -28,11 +28,20 @@ impl<'m, 'f, 'g> AERISCodeModel<'m, 'f, 'g> {
     }
 
     fn build_llvm(&self) {
-        let context = inkwell::context::Context::create();
+        let ctx = inkwell::context::Context::create();
         for (module_id, module) in &self.modules {
-            let llvm_module = context.create_module("");
-            for function in &module.functions {
-                // llvm_module.add_function("", ty, linkage);
+            let llvm_module = ctx.create_module("");
+            for (function_id, function) in &module.functions {
+                let param_types: Vec<_> = function
+                    .param_layout()
+                    .iter()
+                    .map(|ty| ty.map_to_llvm_type(&ctx))
+                    .collect();
+                // let fn_type = function
+                //     .return_type()
+                //     .map_to_llvm_type(&ctx)
+                //     .fn_type(&param_types, function.variadic());
+                // let llvm_function = llvm_module.add_function("", ty, linkage);
             }
         }
     }

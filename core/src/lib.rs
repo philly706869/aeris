@@ -180,4 +180,60 @@ mod example {
         module.verify().unwrap();
         module.print_to_stderr();
     }
+
+    #[test]
+    #[ignore]
+    fn llvm_function_ptr_call_example() {
+        let ctx = Context::create();
+        let module = ctx.create_module("");
+        let builder = ctx.create_builder();
+
+        let ptr_type = ctx.ptr_type(AddressSpace::default());
+
+        let printf_fn = {
+            let ty = ctx.i32_type().fn_type(&[ptr_type.into()], true);
+            let function = module.add_function("printf", ty, None);
+            function
+        };
+
+        let (lambda_fn, lambda_ty) = {
+            let ty = ctx.i32_type().fn_type(&[], false);
+            let function = module.add_function("lambda", ty, None);
+            let block = ctx.append_basic_block(function, "");
+            builder.position_at_end(block);
+            let text = builder
+                .build_global_string_ptr("Hello, World!", "")
+                .unwrap()
+                .as_pointer_value();
+            builder.build_call(printf_fn, &[text.into()], "").unwrap();
+            let value = ctx.i32_type().const_int(42, false);
+            builder.build_return(Some(&value)).unwrap();
+            (function, ty)
+        };
+
+        {
+            let ty = ctx.i32_type().fn_type(&[], false);
+            let function = module.add_function("main", ty, None);
+            let block = ctx.append_basic_block(function, "");
+            builder.position_at_end(block);
+            let lambda_ptr = builder.build_alloca(ptr_type, "").unwrap();
+            builder
+                .build_store(lambda_ptr, lambda_fn.as_global_value())
+                .unwrap();
+            let lambda_addr = builder
+                .build_load(ptr_type, lambda_ptr, "")
+                .unwrap()
+                .into_pointer_value();
+            let value = builder
+                .build_indirect_call(lambda_ty, lambda_addr, &[], "")
+                .unwrap()
+                .try_as_basic_value()
+                .left()
+                .unwrap();
+            builder.build_return(Some(&value)).unwrap();
+        }
+
+        module.verify().unwrap();
+        module.print_to_stderr();
+    }
 }
