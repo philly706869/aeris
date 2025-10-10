@@ -230,9 +230,6 @@ mod example {
                 .try_as_basic_value()
                 .left()
                 .unwrap();
-            builder
-                .build_alloca(ctx.custom_width_int_type(0), "")
-                .unwrap();
             builder.build_return(Some(&value)).unwrap();
         }
 
