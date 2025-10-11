@@ -1,4 +1,2 @@
-pub mod function;
-pub mod instruction;
-pub mod module;
+pub mod ascm;
 pub mod syntax;

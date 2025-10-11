@@ -8,4 +8,8 @@ pub struct Module<'f, 'g> {
     pub globals: HashMap<usize, &'g Global>,
 }
 
-impl<'f, 'g> Module<'f, 'g> {}
+impl<'f, 'g> Module<'f, 'g> {
+    pub(crate) fn to_llvm_module(&self) -> inkwell::module::Module {
+        todo!()
+    }
+}

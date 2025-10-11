@@ -34,15 +34,13 @@ impl<'m, 'f, 'g> AERISCodeModel<'m, 'f, 'g> {
         for (module_id, module) in &self.modules {
             let llvm_module = ctx.create_module("");
             for (function_id, function) in &module.functions {
+                let return_type = function.return_layout().to_llvm_basic_type_enum(&ctx);
                 let param_types: Vec<BasicMetadataTypeEnum> = function
                     .param_layout()
                     .iter()
                     .map(|ty| ty.to_llvm_basic_type_enum(&ctx).into())
                     .collect();
-                let fn_type = function
-                    .return_layout()
-                    .to_llvm_basic_type_enum(&ctx)
-                    .fn_type(&param_types, function.variadic());
+                let fn_type = return_type.fn_type(&param_types, function.variadic());
                 let llvm_function = llvm_module.add_function("", fn_type, None);
             }
         }
