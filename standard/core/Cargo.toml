@@ -1,5 +1,5 @@
 [package]
-name    = "aeris-standard-core"
+name    = "aeris-standard"
 edition = "2024"
 publish = false
 

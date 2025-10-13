@@ -31,18 +31,7 @@ name = "aeris-constants"
 version = "0.0.0"
 
 [[package]]
-name = "aeris-standard-cli"
-version = "0.1.0"
-dependencies = [
- "aeris-constants",
- "aeris-standard-core",
- "clap",
- "rayon",
- "tokio",
-]
-
-[[package]]
-name = "aeris-standard-core"
+name = "aeris-standard"
 version = "0.0.0"
 dependencies = [
  "aeris",
@@ -51,11 +40,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "aeris-standard-cli"
+version = "0.1.0"
+dependencies = [
+ "aeris-constants",
+ "aeris-standard",
+ "clap",
+ "rayon",
+ "tokio",
+]
+
+[[package]]
 name = "aeris-standard-language-server"
 version = "0.1.0"
 dependencies = [
  "aeris-constants",
- "aeris-standard-core",
+ "aeris-standard",
  "anyhow",
  "clap",
  "rayon",

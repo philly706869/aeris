@@ -5,9 +5,9 @@ edition = "2024"
 publish = false
 
 [dependencies]
-aeris-standard-core = { path = "../core" }
-aeris-constants     = { path = "../constants" }
-anyhow              = { version = "1.0" }
-clap                = { version = "4.5", features = ["derive"] }
-rayon               = { version = "1.11" }
-tokio               = { version = "1.47", features = ["full"] }
+aeris-standard  = { path = "../core" }
+aeris-constants = { path = "../constants" }
+anyhow          = { version = "1.0" }
+clap            = { version = "4.5", features = ["derive"] }
+rayon           = { version = "1.11" }
+tokio           = { version = "1.47", features = ["full"] }
