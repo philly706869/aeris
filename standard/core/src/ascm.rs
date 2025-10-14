@@ -1,28 +1,70 @@
 //! AERIS Standard Code Model
 
-pub trait Module {}
+use std::collections::HashMap;
 
-pub trait Function {}
+pub struct Module {
+    pub table: HashMap<String, Item>,
+}
 
-// pub struct Function<'f> {
-//     return_type: Type<'f>,
-//     parameter_types: Vec<Type<'f>>,
-//     blocks: Vec<Block>,
-// }
+impl Module {
+    pub fn new() -> Self {
+        Self {
+            table: HashMap::new(),
+        }
+    }
+}
 
-// pub struct Block {
-//     instructions: Vec<Instruction>,
-// }
+pub enum Item {
+    Module(Module),
+    Function(Function),
+    Global(Global),
+}
 
-// pub enum Instruction {}
+pub struct Function {
+    return_type: (),
+    params: Vec<()>,
+    blocks: Option<Vec<Block>>,
+}
 
-// pub struct Type<'f> {
-//     domain: Domain<'f>,
-// }
+pub struct Block {
+    instructions: Vec<Instruction>,
+}
 
-// pub enum Domain<'f> {
-//     External(Layout),
-//     Internal(&'f Function<'f>),
-// }
+pub enum Instruction {}
 
-// pub enum Layout {}
+pub struct Global {}
+
+pub trait MemoryLayout {}
+
+pub enum Type {
+    Bool,
+    I8,
+    I16,
+    I32,
+    I64,
+    I128,
+    U8,
+    U16,
+    U32,
+    U64,
+    U128,
+    F32,
+    F64,
+    F128,
+    Tuple(Tuple),
+    Class(Class),
+}
+
+pub struct Tuple {
+    elements: Vec<Type>,
+}
+
+pub struct Array {
+    element_type: Type,
+    count: usize,
+}
+
+pub struct Class {
+    parents: Vec<Type>,
+    fields: Vec<Type>,
+}
