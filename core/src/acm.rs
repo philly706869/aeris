@@ -3,7 +3,6 @@
 mod block;
 mod function;
 mod global;
-mod instruction;
 mod layout;
 mod module;
 mod uid;
@@ -11,7 +10,6 @@ mod uid;
 pub use block::Block;
 pub use function::Function;
 pub use global::Global;
-pub use instruction::Instruction;
 pub use module::Module;
 
 use std::collections::HashMap;

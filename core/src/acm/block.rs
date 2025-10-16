@@ -1,11 +1,11 @@
 use std::hash::{Hash, Hasher};
 
-use crate::acm::{Instruction, uid::Uid};
+use crate::acm::uid::Uid;
 
 #[derive(Debug, Clone)]
 pub struct Block {
     uid: Uid,
-    pub instructions: Vec<Instruction>,
+    pub instructions: Vec<()>,
 }
 
 impl Block {
