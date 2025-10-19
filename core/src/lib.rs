@@ -236,4 +236,85 @@ mod example {
         module.verify().unwrap();
         module.print_to_stderr();
     }
+
+    #[test]
+    #[ignore]
+    fn llvm_multi_function_example() {
+        let ctx = Context::create();
+        let module = ctx.create_module("");
+
+        let fn_ty = ctx.void_type().fn_type(&[], false);
+
+        module.add_function("", fn_ty, None);
+        module.add_function("", fn_ty, None);
+
+        module.verify().unwrap();
+        module.print_to_stderr();
+    }
+
+    #[test]
+    #[ignore]
+    fn llvm_buffer_overflow_example() {
+        let ctx = Context::create();
+        let module = ctx.create_module("");
+        let builder = ctx.create_builder();
+
+        let ptr_type = ctx.ptr_type(AddressSpace::default());
+
+        let printf_fn = {
+            let ty = ctx.i32_type().fn_type(&[ptr_type.into()], true);
+            let function = module.add_function("printf", ty, None);
+            function
+        };
+
+        let i32_ty = ctx.i32_type();
+        let i64_ty = ctx.i64_type();
+        let fn_ty = ctx.void_type().fn_type(&[], false);
+
+        let func = module.add_function("main", fn_ty, None);
+        let block = ctx.append_basic_block(func, "");
+        builder.position_at_end(block);
+        let a_ptr = {
+            let ptr = builder.build_alloca(i32_ty, "a").unwrap();
+            builder
+                .build_store(ptr, i32_ty.const_int(0xAAAAAAAA, false))
+                .unwrap();
+            ptr
+        };
+        let b_ptr = {
+            let ptr = builder.build_alloca(i32_ty, "b").unwrap();
+            builder
+                .build_store(ptr, i32_ty.const_int(0xBBBBBBBB, false))
+                .unwrap();
+            ptr
+        };
+        builder
+            .build_store(b_ptr, i64_ty.const_int(0xCCCCCCCCCCCCCCCC, false))
+            .unwrap();
+        let a = builder.build_load(i32_ty, a_ptr, "").unwrap();
+        let b = builder.build_load(i32_ty, b_ptr, "").unwrap();
+        let format = builder
+            .build_global_string_ptr("[%llx] a = 0x%x(%u)\n[%llx] b = 0x%x(%u)\n", "")
+            .unwrap()
+            .as_pointer_value();
+        builder
+            .build_call(
+                printf_fn,
+                &[
+                    format.into(),
+                    a_ptr.into(),
+                    a.into(),
+                    a.into(),
+                    b_ptr.into(),
+                    b.into(),
+                    b.into(),
+                ],
+                "",
+            )
+            .unwrap();
+        builder.build_return(None).unwrap();
+
+        module.verify().unwrap();
+        module.print_to_stderr();
+    }
 }

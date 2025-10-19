@@ -2,71 +2,77 @@
 
 use std::collections::HashMap;
 
-trait PropAccessable {
-    fn prop(&self, name: &str) -> Option<&dyn Prop>;
-
-    fn props_hint(&self) -> Vec<&str>;
+pub struct Function {
+    return_type: Option<Type>,
+    parameter_type: Type,
+    blocks: HashMap<usize, Block>,
 }
 
-trait Prop {}
-
-pub struct Module {
-    prop_table: HashMap<String, Box<dyn Prop>>,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Type {
+    S1,
+    S8,
+    S16,
+    S32,
+    S64,
+    S128,
+    Ptr,
 }
 
-impl Module {
-    pub fn new() -> Self {
-        Self {
-            prop_table: HashMap::new(),
+pub struct Block {
+    instructions: Vec<Instruction>,
+}
+
+impl Block {}
+
+pub struct Instruction {
+    data: Box<dyn inst::Instruction>,
+}
+
+mod inst {
+    use super::Type;
+
+    pub trait Instruction {
+        fn ssa_type(&self) -> Option<Type>;
+    }
+
+    pub struct Alloca {
+        ttype: Type,
+    }
+
+    impl Instruction for Alloca {
+        fn ssa_type(&self) -> Type {
+            Type::Ptr
         }
     }
-}
 
-impl Prop for Module {}
-
-impl PropAccessable for Module {
-    fn prop(&self, name: &str) -> Option<&dyn Prop> {
-        self.prop_table.get(name).map(Box::as_ref)
+    pub struct Store {
+        ttype: Type,
     }
 
-    fn props_hint(&self) -> Vec<&str> {
-        self.prop_table.keys().map(String::as_str).collect()
-    }
-}
-
-pub struct Function {
-    return_type: (),
-    params: Vec<()>,
-    expression: Box<dyn Expression>,
-}
-
-impl Prop for Function {}
-
-pub trait Expression {}
-
-pub struct Scope {
-    expressions: Vec<Box<dyn Expression>>,
-}
-
-impl Expression for Scope {}
-
-pub struct Invoke {
-    invokable: (),
-}
-
-pub struct Class {
-    parents: HashMap<String, ()>,
-    fields: HashMap<String, ()>,
-}
-
-impl Prop for Class {}
-
-impl PropAccessable for Class {
-    fn prop(&self, name: &str) -> Option<&dyn Prop> {
-        todo!()
+    impl Instruction for Store {
+        fn ssa_type(&self) -> Type {
+            Type::Void
+        }
     }
 
-    fn props_hint(&self) -> Vec<&str> {
-        todo!()
+    pub struct Load {
+        ttype: Type,
     }
+
+    impl Instruction for Load {
+        fn ssa_type(&self) -> Type {
+            self.ttype
+        }
+    }
+
+    pub struct Add {}
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test() {}
 }
