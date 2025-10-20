@@ -4,6 +4,6 @@ edition = "2024"
 publish = false
 
 [dependencies]
-indexmap = { version = "2.11" }
+indexmap = { version = "2.12" }
 inkwell  = { version = "0.6", features = ["llvm18-1"] }
 uuid     = { version = "1.18", features = ["v4"] }
