@@ -41,8 +41,8 @@ mod inst {
     }
 
     impl Instruction for Alloca {
-        fn ssa_type(&self) -> Type {
-            Type::Ptr
+        fn ssa_type(&self) -> Option<Type> {
+            Some(Type::Ptr)
         }
     }
 
@@ -51,8 +51,8 @@ mod inst {
     }
 
     impl Instruction for Store {
-        fn ssa_type(&self) -> Type {
-            Type::Void
+        fn ssa_type(&self) -> Option<Type> {
+            None
         }
     }
 
@@ -61,8 +61,8 @@ mod inst {
     }
 
     impl Instruction for Load {
-        fn ssa_type(&self) -> Type {
-            self.ttype
+        fn ssa_type(&self) -> Option<Type> {
+            Some(self.ttype)
         }
     }
 
