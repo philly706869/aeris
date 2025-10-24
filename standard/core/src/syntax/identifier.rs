@@ -1,8 +1,9 @@
-use aeris::syntax::{Context, Syntax};
 use icu_properties::{
     CodePointSetData,
     props::{IdContinue, IdStart},
 };
+
+use crate::ui::{UIParseContext, UIParseErr, UIParser, UISyntax};
 
 /// Identifier syntax conforms to [UAX #31](https://www.unicode.org/reports/tr31/tr31-43.html),
 /// using [R1-2](https://www.unicode.org/reports/tr31/tr31-43.html#R1-2) with the following profile:
@@ -34,16 +35,32 @@ impl Identifier {
     }
 }
 
-// impl<'i> Syntax<'i> for Identifier {
-//     type Output = Result<&'i str, String>;
+impl UISyntax for Identifier {
+    type Parser = Self;
 
-//     fn parse(&self, ctx: Context<'i>) -> Self::Output {
-//         let span = ctx.span();
-//         let mut chars = ctx.input().chars();
-//         if !chars.next().is_some_and(Self::match_start) {
-//             return Err("".to_owned());
-//         }
-//         chars.take_while(|ch| Self::match_continue(*ch));
-//         Ok(todo!())
-//     }
-// }
+    fn parser() -> impl Iterator<Item = Self::Parser> {
+        Some(Identifier).into_iter()
+    }
+}
+
+impl UIParser for Identifier {
+    type Output<'i> = &'i str;
+    type Error = UIParseErr;
+
+    fn parse<'ctx>(
+        &mut self,
+        ctx: &'ctx mut UIParseContext<'ctx>,
+    ) -> Result<Self::Output<'ctx>, Self::Error> {
+        let input = ctx.input();
+        let mut chars = input.chars();
+        let mut length: usize = 0;
+
+        if let Some(first) = chars.next().filter(|c| Self::match_start(*c)) {
+            length += first.len_utf8();
+        } else {
+            return todo!();
+        }
+        while chars.next().is_some_and(Self::match_continue) {}
+        Ok(&input[0..length])
+    }
+}

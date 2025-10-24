@@ -1,3 +1,55 @@
+pub struct UISource {}
+
+pub trait UISyntax {
+    type Parser: UIParser;
+
+    fn parser() -> impl Iterator<Item = Self::Parser>;
+}
+
+pub trait UIParser {
+    type Output<'i>;
+    type Error: UIParseError;
+
+    fn parse<'ctx>(
+        &mut self,
+        ctx: &'ctx mut UIParseContext<'ctx>,
+    ) -> Result<Self::Output<'ctx>, Self::Error>;
+}
+
+pub trait UIParseError {
+    fn index(&self) -> usize;
+}
+
+pub struct UIParseErr {
+    index: usize,
+}
+
+impl UIParseError for UIParseErr {
+    fn index(&self) -> usize {
+        self.index
+    }
+}
+
+pub struct UIParseContext<'i> {
+    full_input: &'i str,
+    input: &'i str,
+}
+
+impl<'i> UIParseContext<'i> {
+    pub fn full_input(&self) -> &str {
+        self.full_input
+    }
+
+    pub fn input(&self) -> &str {
+        self.input
+    }
+}
+
+struct TokenNode<'t> {
+    token: Token<'t>,
+    next: Option<Box<TokenNode<'t>>>,
+}
+
 pub struct Token<'t> {
     text: &'t str,
     pub token_type: TokenType,
