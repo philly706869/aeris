@@ -1,4 +1,44 @@
+use std::collections::HashMap;
+
 pub struct UISource {}
+
+pub struct UIFrame {
+    layers: HashMap<usize, Box<dyn UILayer>>,
+}
+
+impl UIFrame {}
+
+pub struct UIFrameBuilder {
+    next_id: usize,
+    layers: HashMap<usize, Box<dyn UILayer>>,
+}
+
+impl UIFrameBuilder {
+    pub fn new() -> Self {
+        Self {
+            next_id: 0,
+            layers: HashMap::new(),
+        }
+    }
+
+    pub fn add_layer<L>(&mut self, layer: L) -> &mut Self
+    where
+        L: UILayer + 'static,
+    {
+        let key = self.next_id;
+        self.next_id += 1;
+        self.layers.insert(key, Box::new(layer));
+        self
+    }
+
+    pub fn build(self) -> UIFrame {
+        UIFrame {
+            layers: self.layers,
+        }
+    }
+}
+
+pub trait UILayer {}
 
 pub trait UISyntax {
     type Parser: UIParser;
