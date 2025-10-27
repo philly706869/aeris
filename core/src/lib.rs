@@ -1,5 +1,5 @@
 pub mod acm;
-pub mod syntax;
+pub mod ui;
 
 #[cfg(test)]
 mod example {

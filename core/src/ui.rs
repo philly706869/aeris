@@ -1,8 +1,105 @@
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+use std::collections::HashMap;
+
+pub struct UISource {}
+
+pub struct UIFrame {
+    layers: HashMap<usize, Box<dyn UILayer>>,
+}
+
+impl UIFrame {}
+
+pub struct UIFrameBuilder {
+    next_id: usize,
+    layers: HashMap<usize, Box<dyn UILayer>>,
+}
+
+impl UIFrameBuilder {
+    pub fn new() -> Self {
+        Self {
+            next_id: 0,
+            layers: HashMap::new(),
+        }
+    }
+
+    pub fn add_layer<L>(&mut self, layer: L) -> &mut Self
+    where
+        L: UILayer + 'static,
+    {
+        let key = self.next_id;
+        self.next_id += 1;
+        self.layers.insert(key, Box::new(layer));
+        self
+    }
+
+    pub fn build(self) -> UIFrame {
+        UIFrame {
+            layers: self.layers,
+        }
+    }
+}
+
+pub trait UILayer {}
+
+pub trait UISyntax {
+    type Parser: UIParser;
+
+    fn parser() -> impl Iterator<Item = Self::Parser>;
+}
+
+pub trait UIParser {
+    type Output<'i>;
+    type Error: UIParseError;
+
+    fn parse<'ctx>(
+        &mut self,
+        ctx: &'ctx mut UIParseContext<'ctx>,
+    ) -> Result<Self::Output<'ctx>, Self::Error>;
+}
+
+pub trait UIParseError {
+    fn index(&self) -> usize;
+}
+
+pub struct UIParseErr {
+    index: usize,
+}
+
+impl UIParseError for UIParseErr {
+    fn index(&self) -> usize {
+        self.index
+    }
+}
+
+pub struct UIParseContext<'i> {
+    full_input: &'i str,
+    input: &'i str,
+}
+
+impl<'i> UIParseContext<'i> {
+    pub fn full_input(&self) -> &str {
+        self.full_input
+    }
+
+    pub fn input(&self) -> &str {
+        self.input
+    }
+}
+
+struct TokenNode<'t> {
+    token: Token<'t>,
+    next: Option<Box<TokenNode<'t>>>,
+}
+
 pub struct Token<'t> {
     text: &'t str,
-    type_: TokenType,
-    modifier: TokenModifier,
+    pub token_type: TokenType,
+    pub token_modifier: TokenModifier,
+}
+
+impl<'t> Token<'t> {
+    pub fn text(&self) -> &str {
+        self.text
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -77,7 +174,7 @@ pub enum TokenType {
     Operator,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TokenModifier {
     /// For declarations of symbols.
     pub declaration: bool,
