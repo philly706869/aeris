@@ -5,5 +5,5 @@ publish = false
 
 [dependencies]
 aeris          = { path = "../../core" }
-icu_properties = { version = "2.0" }
+icu_properties = { version = "2.1" }
 uuid           = { version = "1.18", features = ["v4"] }
