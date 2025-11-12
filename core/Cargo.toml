@@ -1,9 +1,9 @@
 [package]
 name    = "aeris"
-edition = "2024"
-publish = false
+edition = { workspace = true }
+publish = { workspace = true }
 
 [dependencies]
-indexmap = { version = "2.12" }
-inkwell  = { version = "0.6", features = ["llvm18-1"] }
-uuid     = { version = "1.18", features = ["v4"] }
+indexmap = { workspace = true }
+inkwell  = { workspace = true }
+uuid     = { workspace = true }

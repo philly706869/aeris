@@ -155,7 +155,7 @@ mod example {
                     .build_call(factorial_fn, &[value.into()], "")
                     .unwrap()
                     .try_as_basic_value()
-                    .left()
+                    .basic()
                     .unwrap();
                 builder.build_store(ptr, value).unwrap();
                 ptr
@@ -228,7 +228,7 @@ mod example {
                 .build_indirect_call(lambda_ty, lambda_addr, &[], "")
                 .unwrap()
                 .try_as_basic_value()
-                .left()
+                .basic()
                 .unwrap();
             builder.build_return(Some(&value)).unwrap();
         }

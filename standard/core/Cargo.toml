@@ -1,9 +1,9 @@
 [package]
 name    = "aeris-standard"
-edition = "2024"
-publish = false
+edition = { workspace = true }
+publish = { workspace = true }
 
 [dependencies]
-aeris          = { path = "../../core" }
-icu_properties = { version = "2.1" }
-uuid           = { version = "1.18", features = ["v4"] }
+aeris          = { workspace = true }
+icu_properties = { workspace = true }
+uuid           = { workspace = true }
