@@ -7,7 +7,7 @@ members = [
   # AERIS Standard
   "standard/core",
   "standard/constants",
-  "standard/language-server",
+  "standard/ui",
   "standard/cli",
 ]
 

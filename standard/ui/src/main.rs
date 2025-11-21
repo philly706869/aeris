@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use aeris_constants::*;
-use aeris_standard_language_server::*;
+use aeris_standard_ui::*;
 use anyhow::Context;
 use clap::Parser;
 use tokio::{
