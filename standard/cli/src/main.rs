@@ -1,6 +1,5 @@
 use std::env;
 
-use aeris_constants::*;
 use aeris_standard_cli::*;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -9,10 +8,11 @@ use tokio::{
 };
 
 fn main() {
+    todo!();
     let current_path = env::current_dir().expect("Cannot get current directory.");
-    let (root_path, config_path) = find_nearest_path(&current_path, CONFIG_FILE_NAME)
-        .expect(&format!("Cannot find {}.", CONFIG_FILE_NAME));
-    let daemon_socket_path = root_path.join(DAEMON_SOCK_NAME);
+    let (root_path, config_path) =
+        find_nearest_path(&current_path, "").expect(&format!("Cannot find {}.", ""));
+    let daemon_socket_path = root_path.join("");
 
     if !daemon_socket_path.exists() {
         panic!("Cannot find daemon socket. ({:#?})", daemon_socket_path)

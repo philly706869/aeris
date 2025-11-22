@@ -1,11 +1,12 @@
 [package]
-name    = "aeris-standard-cli"
+name    = "aeris-standard-ui-server"
 version = "0.1.0"
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
 aeris-standard = { workspace = true }
+anyhow         = { workspace = true }
 clap           = { workspace = true }
 rayon          = { workspace = true }
 tokio          = { workspace = true }

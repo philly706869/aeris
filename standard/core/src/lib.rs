@@ -1,2 +1,2 @@
 pub mod ascm;
-pub mod ui;
+pub use aeris_standard_ui as ui;

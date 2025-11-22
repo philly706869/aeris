@@ -6,21 +6,24 @@ version = 4
 name = "aeris"
 version = "0.0.0"
 dependencies = [
+ "aeris-code",
+ "aeris-ui",
+]
+
+[[package]]
+name = "aeris-code"
+version = "0.0.0"
+dependencies = [
  "indexmap",
  "inkwell",
  "uuid",
 ]
 
 [[package]]
-name = "aeris-constants"
-version = "0.0.0"
-
-[[package]]
 name = "aeris-standard"
 version = "0.0.0"
 dependencies = [
- "aeris",
- "icu_properties",
+ "aeris-standard-ui",
  "uuid",
 ]
 
@@ -28,7 +31,6 @@ dependencies = [
 name = "aeris-standard-cli"
 version = "0.1.0"
 dependencies = [
- "aeris-constants",
  "aeris-standard",
  "clap",
  "rayon",
@@ -37,15 +39,26 @@ dependencies = [
 
 [[package]]
 name = "aeris-standard-ui"
+version = "0.0.0"
+dependencies = [
+ "aeris",
+ "icu_properties",
+]
+
+[[package]]
+name = "aeris-standard-ui-server"
 version = "0.1.0"
 dependencies = [
- "aeris-constants",
  "aeris-standard",
  "anyhow",
  "clap",
  "rayon",
  "tokio",
 ]
+
+[[package]]
+name = "aeris-ui"
+version = "0.0.0"
 
 [[package]]
 name = "anstream"
@@ -559,9 +572,9 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "signal-hook-registry"
-version = "1.4.6"
+version = "1.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2a4719bff48cee6b39d12c020eeb490953ad2443b7055bd0b21fca26bd8c28b"
+checksum = "7664a098b8e616bdfcc2dc0e9ac44eb231eedf41db4e9fe95d8d32ec728dedad"
 dependencies = [
  "libc",
 ]
