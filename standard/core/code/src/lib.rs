@@ -1,5 +1,3 @@
-//! AERIS Standard Code Model
-
 use std::collections::HashMap;
 
 pub struct Function {
