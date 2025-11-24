@@ -1,5 +1,5 @@
 [package]
-name    = "aeris-standard-ui-server"
+name    = "aeris-standard_ui-server"
 version = "0.1.0"
 edition = { workspace = true }
 publish = { workspace = true }

@@ -1,5 +1,5 @@
 [package]
-name    = "aeris-code"
+name    = "aeris_code"
 edition = { workspace = true }
 publish = { workspace = true }
 

@@ -1,4 +1,4 @@
 [package]
-name    = "aeris-ui"
+name    = "aeris_ui"
 edition = { workspace = true }
 publish = { workspace = true }

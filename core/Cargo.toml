@@ -4,5 +4,5 @@ edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris-ui   = { workspace = true }
-aeris-code = { workspace = true }
+aeris_ui   = { workspace = true }
+aeris_code = { workspace = true }

@@ -6,30 +6,21 @@ version = 4
 name = "aeris"
 version = "0.0.0"
 dependencies = [
- "aeris-code",
- "aeris-ui",
-]
-
-[[package]]
-name = "aeris-code"
-version = "0.0.0"
-dependencies = [
- "indexmap",
- "inkwell",
- "uuid",
+ "aeris_code",
+ "aeris_ui",
 ]
 
 [[package]]
 name = "aeris-standard"
 version = "0.0.0"
 dependencies = [
- "aeris-standard-code",
- "aeris-standard-ui",
+ "aeris-standard_code",
+ "aeris-standard_ui",
  "uuid",
 ]
 
 [[package]]
-name = "aeris-standard-cli"
+name = "aeris-standard_cli"
 version = "0.1.0"
 dependencies = [
  "aeris-standard",
@@ -39,14 +30,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "aeris-standard-code"
+name = "aeris-standard_code"
 version = "0.0.0"
 dependencies = [
  "aeris",
 ]
 
 [[package]]
-name = "aeris-standard-ui"
+name = "aeris-standard_ui"
 version = "0.0.0"
 dependencies = [
  "aeris",
@@ -54,7 +45,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "aeris-standard-ui-server"
+name = "aeris-standard_ui-server"
 version = "0.1.0"
 dependencies = [
  "aeris-standard",
@@ -65,7 +56,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "aeris-ui"
+name = "aeris_code"
+version = "0.0.0"
+dependencies = [
+ "indexmap",
+ "inkwell",
+ "uuid",
+]
+
+[[package]]
+name = "aeris_ui"
 version = "0.0.0"
 
 [[package]]
