@@ -1,3 +1,24 @@
+#[derive(Debug)]
+pub struct Token<'t> {
+    text: &'t str,
+    type_: TokenType,
+    modifier: TokenModifier,
+}
+
+impl<'t> Token<'t> {
+    pub fn text(&self) -> &str {
+        self.text
+    }
+
+    pub fn type_(&self) -> TokenType {
+        self.type_
+    }
+
+    pub fn modifier(&self) -> &TokenModifier {
+        &self.modifier
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TokenType {
     /// For identifiers that declare or reference a namespace, module, or package.
