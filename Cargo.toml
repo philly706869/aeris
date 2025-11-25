@@ -4,6 +4,8 @@ members = [
   # AERIS
   "core",
   "core/ui",
+  "core/ui/lib",
+  "core/ui/macro",
   "core/code",
 
   # AERIS Standard
@@ -21,6 +23,8 @@ publish = false
 [workspace.dependencies]
 aeris               = { path = "core" }
 aeris_ui            = { path = "core/ui" }
+aeris_ui-lib        = { path = "core/ui/lib" }
+aeris_ui-macro      = { path = "core/ui/macro" }
 aeris_code          = { path = "core/code" }
 aeris-standard      = { path = "standard/core" }
 aeris-standard_ui   = { path = "standard/core/ui" }
@@ -30,6 +34,8 @@ clap                = { version = "4.5", features = ["derive"] }
 icu_properties      = { version = "2.1" }
 indexmap            = { version = "2.12" }
 inkwell             = { version = "0.7", features = ["llvm21-1"] }
+proc-macro2         = { version = "1.0" }
+quote               = { version = "1.0" }
 rayon               = { version = "1.11" }
 tokio               = { version = "1.48", features = ["full"] }
 uuid                = { version = "1.18", features = ["v4"] }

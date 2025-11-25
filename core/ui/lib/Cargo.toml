@@ -1,0 +1,4 @@
+[package]
+name    = "aeris_ui-lib"
+edition = { workspace = true }
+publish = { workspace = true }
