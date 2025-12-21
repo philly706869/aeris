@@ -20,7 +20,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - run: cargo clippy -- -D warnings
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
 
   test:
     needs: [fmt, clippy]
@@ -28,4 +28,4 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: docker build -t devcontainer -f .devcontainer/Dockerfile .
-      - run: docker run --rm -v ${{ github.workspace }}:/app -w /app devcontainer cargo test --all-features
+      - run: docker run --rm -v ${{ github.workspace }}:/app -w /app devcontainer cargo test --locked --all-features
