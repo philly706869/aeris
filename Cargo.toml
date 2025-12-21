@@ -29,7 +29,6 @@ aeris-code          = { path = "core/code" }
 aeris-standard      = { path = "standard/core" }
 aeris-standard-ui   = { path = "standard/core/ui" }
 aeris-standard-code = { path = "standard/core/code" }
-anyhow              = { version = "1.0" }
 clap                = { version = "4.5", features = ["derive"] }
 icu_properties      = { version = "2.1" }
 indexmap            = { version = "2.12" }

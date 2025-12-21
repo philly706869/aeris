@@ -58,7 +58,6 @@ name = "aeris-standard-ui-server"
 version = "0.1.0"
 dependencies = [
  "aeris-standard",
- "anyhow",
  "clap",
  "rayon",
  "tokio",
