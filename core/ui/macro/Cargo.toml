@@ -1,5 +1,5 @@
 [package]
-name    = "aeris_ui-macro"
+name    = "aeris-ui-macro"
 edition = { workspace = true }
 publish = { workspace = true }
 
@@ -7,6 +7,6 @@ publish = { workspace = true }
 proc-macro = true
 
 [dependencies]
-aeris_ui-lib = { workspace = true }
+aeris-ui-lib = { workspace = true }
 proc-macro2  = { workspace = true }
 quote        = { workspace = true }

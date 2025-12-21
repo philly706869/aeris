@@ -22,13 +22,13 @@ publish = false
 
 [workspace.dependencies]
 aeris               = { path = "core" }
-aeris_ui            = { path = "core/ui" }
-aeris_ui-lib        = { path = "core/ui/lib" }
-aeris_ui-macro      = { path = "core/ui/macro" }
-aeris_code          = { path = "core/code" }
+aeris-ui            = { path = "core/ui" }
+aeris-ui-lib        = { path = "core/ui/lib" }
+aeris-ui-macro      = { path = "core/ui/macro" }
+aeris-code          = { path = "core/code" }
 aeris-standard      = { path = "standard/core" }
-aeris-standard_ui   = { path = "standard/core/ui" }
-aeris-standard_code = { path = "standard/core/code" }
+aeris-standard-ui   = { path = "standard/core/ui" }
+aeris-standard-code = { path = "standard/core/code" }
 anyhow              = { version = "1.0" }
 clap                = { version = "4.5", features = ["derive"] }
 icu_properties      = { version = "2.1" }
