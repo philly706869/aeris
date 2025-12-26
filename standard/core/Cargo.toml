@@ -6,4 +6,3 @@ publish = { workspace = true }
 [dependencies]
 aeris-standard-ui   = { workspace = true }
 aeris-standard-code = { workspace = true }
-uuid                = { workspace = true }

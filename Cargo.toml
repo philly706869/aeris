@@ -29,12 +29,10 @@ aeris-code          = { path = "core/code" }
 aeris-standard      = { path = "standard/core" }
 aeris-standard-ui   = { path = "standard/core/ui" }
 aeris-standard-code = { path = "standard/core/code" }
-clap                = { version = "4.5", features = ["derive"] }
-icu_properties      = { version = "2.1" }
-indexmap            = { version = "2.12" }
+clap                = { version = "4", features = ["derive"] }
+icu_properties      = { version = "2" }
 inkwell             = { version = "0.7", features = ["llvm21-1"] }
-proc-macro2         = { version = "1.0" }
-quote               = { version = "1.0" }
-rayon               = { version = "1.11" }
-tokio               = { version = "1.48", features = ["full"] }
-uuid                = { version = "1.18", features = ["v4"] }
+proc-macro2         = { version = "1" }
+quote               = { version = "1" }
+rayon               = { version = "1" }
+tokio               = { version = "1", features = ["full"] }

@@ -1,7 +1,10 @@
-name: CI Check
+name: CI
 
 on:
   pull_request:
+
+permissions:
+  packages: write
 
 jobs:
   fmt:
@@ -27,5 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: docker build -t devcontainer -f .devcontainer/Dockerfile .
-      - run: docker run --rm -v ${{ github.workspace }}:/app -w /app devcontainer cargo test --workspace --locked --all-features
+      - uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-ci
+          cacheFrom: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-ci
+          push: always
+          runCmd: cargo test --workspace --locked --all-features
