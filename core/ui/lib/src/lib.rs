@@ -1,3 +1,4 @@
+mod macros;
 pub mod token;
 
-pub struct Syntax {}
+pub struct UISyntax {}
