@@ -31,7 +31,7 @@ aeris-standard-ui   = { path = "standard/core/ui" }
 aeris-standard-code = { path = "standard/core/code" }
 clap                = { version = "4", features = ["derive"] }
 icu_properties      = { version = "2" }
-inkwell             = { version = "0.7", features = ["llvm21-1"] }
+inkwell             = { version = "0.8", features = ["llvm21-1"] }
 proc-macro2         = { version = "1" }
 quote               = { version = "1" }
 rayon               = { version = "1" }
