@@ -28,13 +28,12 @@ jobs:
   test:
     needs: [fmt, clippy]
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
     steps:
       - uses: actions/checkout@v6
-      - uses: devcontainers/ci@v0.3
-        with:
-          imageName: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-ci
-          cacheFrom: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-ci
-          push: always
-          runCmd: cargo test --workspace --locked --all-features
+      - run: echo "deb http://apt.llvm.org/trixie/ llvm-toolchain-trixie-21 main" >> /etc/apt/sources.list.d/llvm.list
+      - run: echo "deb-src http://apt.llvm.org/trixie/ llvm-toolchain-trixie-21 main" >> /etc/apt/sources.list.d/llvm.list
+      - run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+      - run: apt-get update && apt-get install -y libllvm21 llvm-21 clang-21 clang-tools-21 libpolly-21-dev lld-21
+      - run: export PATH=$PATH:/lib/llvm-21/bin
+      - run: export LLVM_SYS_211_PREFIX=/lib/llvm-21
+      - run: cargo test --workspace --locked --all-features

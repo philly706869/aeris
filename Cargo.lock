@@ -27,7 +27,7 @@ dependencies = [
 
 [[package]]
 name = "aeris-standard-cli"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "aeris-standard",
  "clap",
@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "aeris-standard-ui-server"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "aeris-standard",
  "clap",
