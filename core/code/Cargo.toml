@@ -1,7 +1,0 @@
-[package]
-name    = "aeris-code"
-edition = { workspace = true }
-publish = { workspace = true }
-
-[dependencies]
-inkwell = { workspace = true, features = ["llvm21-1"] }

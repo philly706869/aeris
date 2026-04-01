@@ -1,8 +1,0 @@
-[package]
-name    = "aeris-standard"
-edition = { workspace = true }
-publish = { workspace = true }
-
-[dependencies]
-aeris-standard-ui   = { workspace = true }
-aeris-standard-code = { workspace = true }

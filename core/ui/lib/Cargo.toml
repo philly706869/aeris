@@ -1,4 +1,0 @@
-[package]
-name    = "aeris-ui-lib"
-edition = { workspace = true }
-publish = { workspace = true }

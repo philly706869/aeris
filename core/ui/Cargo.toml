@@ -1,8 +1,0 @@
-[package]
-name    = "aeris-ui"
-edition = { workspace = true }
-publish = { workspace = true }
-
-[dependencies]
-aeris-ui-lib   = { workspace = true }
-aeris-ui-macro = { workspace = true }
