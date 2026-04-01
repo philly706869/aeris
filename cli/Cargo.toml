@@ -1,5 +1,6 @@
 [package]
-name    = "aeris-standard-cli"
+name    = "aeris-cli"
+version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 

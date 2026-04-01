@@ -3,13 +3,13 @@ resolver = "3"
 members  = ["core", "cli", "ui-server"]
 
 [workspace.package]
+version = "0.0.0-prenext.1"
 edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris          = { path = "core" }
-clap           = { version = "4" }
-icu_properties = { version = "2" }
-inkwell        = { version = "0.8" }
-rayon          = { version = "1" }
-tokio          = { version = "1" }
+aeris   = { path = "core" }
+clap    = { version = "4" }
+inkwell = { version = "0.8" }
+rayon   = { version = "1" }
+tokio   = { version = "1" }
