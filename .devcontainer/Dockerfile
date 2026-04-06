@@ -1,5 +1,4 @@
 FROM mcr.microsoft.com/devcontainers/rust:trixie
-
 RUN echo "deb http://apt.llvm.org/trixie/ llvm-toolchain-trixie-21 main" >> /etc/apt/sources.list.d/llvm.list
 RUN echo "deb-src http://apt.llvm.org/trixie/ llvm-toolchain-trixie-21 main" >> /etc/apt/sources.list.d/llvm.list
 RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
