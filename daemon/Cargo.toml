@@ -1,11 +1,10 @@
 [package]
-name    = "aeris-ui-server"
+name    = "aeris-daemon"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
 aeris = { workspace = true }
-clap  = { workspace = true, features = ["derive"] }
 rayon = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
