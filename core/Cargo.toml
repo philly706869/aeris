@@ -6,5 +6,5 @@ publish = { workspace = true }
 
 [dependencies]
 aeris-ui = { workspace = true }
-inkwell  = { version = "0.8", features = ["llvm21-1-force-static"] }
+inkwell  = { workspace = true }
 rayon    = { workspace = true }

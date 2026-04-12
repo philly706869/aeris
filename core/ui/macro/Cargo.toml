@@ -6,5 +6,5 @@ publish = { workspace = true }
 
 [dependencies]
 aeris-ui-lib = { workspace = true }
-proc-macro2  = { version = "1" }
-quote        = { version = "1" }
+proc-macro2  = { workspace = true }
+quote        = { workspace = true }

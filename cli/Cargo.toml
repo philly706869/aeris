@@ -6,6 +6,6 @@ publish = { workspace = true }
 
 [dependencies]
 aeris = { workspace = true }
-clap  = { workspace = true, features = ["derive"] }
+clap  = { workspace = true }
 rayon = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
+tokio = { workspace = true }
