@@ -1,16 +1,6 @@
 [workspace]
 resolver = "3"
-members = [
-  # lib
-  "core",
-  "core/ui",
-  "core/ui/lib",
-  "core/ui/macro",
-
-  # bin
-  "cli",
-  "daemon",
-]
+members  = ["core", "cli", "daemon"]
 
 [workspace.package]
 version = "0.0.0-prenext.1"
@@ -18,10 +8,7 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris          = { path = "core" }
-aeris-ui       = { path = "core/ui" }
-aeris-ui-lib   = { path = "core/ui/lib" }
-aeris-ui-macro = { path = "core/ui/macro" }
-clap           = { version = "4" }
-rayon          = { version = "1" }
-tokio          = { version = "1" }
+aeris = { path = "core" }
+clap  = { version = "4" }
+rayon = { version = "1" }
+tokio = { version = "1" }
