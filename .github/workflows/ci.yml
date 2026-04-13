@@ -30,10 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: echo "deb http://apt.llvm.org/trixie/ llvm-toolchain-trixie-21 main" >> /etc/apt/sources.list.d/llvm.list
-      - run: echo "deb-src http://apt.llvm.org/trixie/ llvm-toolchain-trixie-21 main" >> /etc/apt/sources.list.d/llvm.list
-      - run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-      - run: apt-get update && apt-get install -y libllvm21 llvm-21 clang-21 clang-tools-21 libpolly-21-dev lld-21
-      - run: export PATH=$PATH:/lib/llvm-21/bin
-      - run: export LLVM_SYS_211_PREFIX=/lib/llvm-21
+      - run: echo "deb http://apt.llvm.org/trixie/ llvm-toolchain-trixie-22 main" >> /etc/apt/sources.list.d/llvm.list
+      - run: echo "deb-src http://apt.llvm.org/trixie/ llvm-toolchain-trixie-22 main" >> /etc/apt/sources.list.d/llvm.list
+      - run: wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key > /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+      - run: apt-get update && apt-get install -y llvm-22-dev libpolly-22-dev
+      - run: export LLVM_SYS_221_PREFIX=/usr/lib/llvm-22
       - run: cargo test --workspace --locked --all-features
