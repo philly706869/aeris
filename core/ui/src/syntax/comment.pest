@@ -1,0 +1,2 @@
+singleline_comment = { "//" ~ (!"\n" ~ ANY)* }
+multiline_comment = { "/*" ~ (!"*/" ~ ANY)* ~ "*/" }

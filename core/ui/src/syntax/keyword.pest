@@ -1,0 +1,4 @@
+kw = {
+  kw_fn
+}
+kw_fn = { "fn" ~ !(ident_continue*) }
