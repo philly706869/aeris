@@ -1,3 +1,0 @@
-ident = { !kw ~ ident_start ~ ident_continue* }
-ident_start = { ASCII_ALPHA | "_" }
-ident_continue = { ASCII_ALPHANUMERIC | "_" }
