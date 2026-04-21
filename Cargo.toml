@@ -4,6 +4,8 @@ members = [
   # Lib
   "core",
   "core/ui",
+  "core/ui/lib",
+  "core/ui/macro",
 
   # Bin
   "cli",
@@ -16,9 +18,11 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris    = { path = "core" }
-aeris-ui = { path = "core/ui" }
-clap     = { version = "4", features = ["derive"] }
-inkwell  = { version = "0.9", features = ["llvm22-1-force-static"] }
-rayon    = { version = "1" }
-tokio    = { version = "1", features = ["full"] }
+aeris          = { path = "core" }
+aeris-ui       = { path = "core/ui" }
+aeris-ui-lib   = { path = "core/ui/lib" }
+aeris-ui-macro = { path = "core/ui/macro" }
+clap           = { version = "4", features = ["derive"] }
+inkwell        = { version = "0.9", features = ["llvm22-1-force-static"] }
+rayon          = { version = "1" }
+tokio          = { version = "1", features = ["full"] }
