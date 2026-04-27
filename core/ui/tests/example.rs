@@ -1,29 +1,8 @@
-use aeris_ui::syntax;
+use aeris_ui::parser;
 
-syntax! {
-    FunctionDefinition -> Def
-    Def -> Ident>"fn" W name:Ident W ParamDef W BodyDef
-    ParamDef -> "(" Params W ")"
-    Params -> W Param W "," Params
-    Params -> Param
-    Params -> W
-    Param -> Ident W ":" W Type
-    BodyDef -> "{" "}"
-}
-
-syntax! {
-    SingleLineComment -> "//" {!'\n'}*
-}
-
-syntax! {
-    MultiLineComment -> "/*" {!}*? "*/"
-}
-
-syntax! {
-    W -> C*
-    C -> SingleLineComment
-    C -> MultilineComment
-    C -> "\r"
-    C -> "\t"
-    C -> " "
+parser! {
+    "example/function_definition.asyn"
+    "example/singleline_comment.asyn"
+    "example/multiline_comment.asyn"
+    "example/whitespace.asyn"
 }

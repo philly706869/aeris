@@ -24,6 +24,7 @@ aeris-ui-lib   = { path = "core/ui/lib" }
 aeris-ui-macro = { path = "core/ui/macro" }
 clap           = { version = "4", features = ["derive"] }
 inkwell        = { version = "0.9", features = ["llvm22-1-force-static"] }
+nom            = { version = "8" }
 quote          = { version = "1" }
 rayon          = { version = "1" }
 syn            = { version = "2" }

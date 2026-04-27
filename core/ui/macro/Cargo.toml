@@ -9,5 +9,6 @@ proc-macro = true
 
 [dependencies]
 aeris-ui-lib = { workspace = true }
+nom          = { workspace = true }
 quote        = { workspace = true }
 syn          = { workspace = true }

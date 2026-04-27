@@ -1,59 +1,47 @@
-use std::collections::HashMap;
+mod parser;
 
-use proc_macro::TokenStream;
+use proc_macro::{Span, TokenStream};
 use syn::{
-    Ident, LitStr, Token,
+    LitStr,
     parse::{Parse, ParseStream},
     parse_macro_input,
 };
 
-struct Syntax {
-    main_rule: Ident,
-    rules: HashMap<Ident, Vec<Vec<Char>>>,
+use crate::parser::parse_syntax;
+
+struct Paths {
+    values: Vec<LitStr>,
 }
 
-enum Char {
-    Terminal(LitStr),
-    NonTerminal(Option<Ident>, Ident),
-}
-
-impl Parse for Syntax {
+impl Parse for Paths {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut main_rule: Option<Ident> = None;
-        let mut rules: HashMap<Ident, Vec<Vec<Char>>> = HashMap::new();
-        'outer: loop {
-            let mut stack: Vec<Char> = Vec::new();
-            let name: Ident = input.parse()?;
-            input.parse::<Token![->]>()?;
-            loop {
-                if let Ok(rule) = input.parse::<LitStr>() {
-                    stack.push(Char::Terminal(rule));
-                } else if let Ok(rule) = input.parse::<Ident>() {
-                    stack.push(Char::NonTerminal(None, rule));
-                } else {
-                    return Err(input.error("expected Terminal or Non-Terminal"));
-                }
-
-                if input.is_empty() {
-                    break 'outer;
-                }
-
-                if input.peek2(Token![->]) {
-                    break;
-                }
-            }
-            main_rule.get_or_insert_with(|| name.clone());
-            rules.entry(name).or_insert_with(|| Vec::new()).push(stack);
+        let mut paths = Vec::new();
+        while !input.is_empty() {
+            paths.push(input.parse()?);
         }
-        Ok(Syntax {
-            main_rule: main_rule.unwrap(),
-            rules,
-        })
+        Ok(Paths { values: paths })
     }
 }
 
 #[proc_macro]
-pub fn syntax(stream: TokenStream) -> TokenStream {
-    // parse_macro_input!(stream as Syntax);
+pub fn parser(stream: TokenStream) -> TokenStream {
+    let mut current_path = Span::call_site()
+        .local_file()
+        .expect("cannot get local file");
+    current_path.pop();
+
+    let paths = parse_macro_input!(stream as Paths);
+
+    for lit in paths.values {
+        let path = current_path.join(lit.value());
+        let content = match std::fs::read_to_string(&path) {
+            Ok(content) => content,
+            Err(err) => {
+                return syn::Error::new(lit.span(), err).into_compile_error().into();
+            }
+        };
+        let res = parse_syntax(&content);
+    }
+
     TokenStream::new()
 }
