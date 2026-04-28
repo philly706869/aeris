@@ -24,7 +24,7 @@ impl Parse for Paths {
 }
 
 #[proc_macro]
-pub fn parser(stream: TokenStream) -> TokenStream {
+pub fn syntax(stream: TokenStream) -> TokenStream {
     let mut current_path = Span::call_site()
         .local_file()
         .expect("cannot get local file");
