@@ -7,12 +7,20 @@ use syn::{
 
 /*
 NCFG
-extern Ident RArrow LitStr
 
-Definition -> Pub | Rule
-Pub -> "pub" Ident
-Rule -> Ident "->" Item
-Item -> Ident | Ident ":" Item | LitStr | "{" "}"
+S -> StatementList
+StatementList -> Statement | Statement StatementList
+Statement -> PubDecl | RuleDef
+PubDecl -> "pub" Ident
+RuleDef -> Ident "->" Body
+Body -> Sequence | Sequence "|" Body
+Sequence -> Item | Item Sequence
+Item -> Atom | Atom Quantifier | Ident ":" Atom | Ident ":" Atom Quantifier
+Atom -> Ident | LitStr | LitChar | Set | Group
+Quantifier -> "*" | "+" | "?"
+Set -> "{" SetElement "}" | "{" "!" SetElement "}"
+SetElement -> LitChar SetElement | eps
+Group -> "(" Body ")"
 
 DCFG
 
