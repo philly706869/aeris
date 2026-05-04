@@ -4,6 +4,8 @@ use syn::{
     parse_macro_input,
 };
 
+// TODO: 2026-05-05부터 작업일 7일 이내 완성
+
 // Syntax Definition NCFG
 //         X -> Statement*
 // Statement -> PubDecl | RuleDef
