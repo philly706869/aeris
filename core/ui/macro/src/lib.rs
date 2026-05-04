@@ -4,26 +4,18 @@ use syn::{
     parse_macro_input,
 };
 
-/*
-NCFG
-
-S -> StatementList
-StatementList -> Statement | Statement StatementList
-Statement -> PubDecl | RuleDef
-PubDecl -> "pub" Ident
-RuleDef -> Ident "->" Body
-Body -> Sequence | Sequence "|" Body
-Sequence -> Item | Item Sequence
-Item -> Atom | Atom Quantifier | Ident ":" Atom | Ident ":" Atom Quantifier
-Atom -> Ident | LitStr | LitChar | Set | Group
-Quantifier -> "*" | "+" | "?"
-Set -> "{" SetElement "}" | "{" "!" SetElement "}"
-SetElement -> LitChar SetElement | eps
-Group -> "(" Body ")"
-
-DCFG
-
-*/
+// Syntax Definition NCFG
+//         X -> Statement*
+// Statement -> PubDecl | RuleDef
+//   PubDecl -> "pub" Ident
+//   RuleDef -> Ident "->" Sequence
+//  Sequence -> L1Item+ ("|" L1Item+)*
+//    L1Item -> (Ident ":")? L2Item
+//    L2Item -> L3Item Quant?
+//    L3Item -> Ident | LitStr | LitChar | Set | Group
+//     Quant -> "*" | "+" | "?"
+//       Set -> "{" "!"? LitChar* "}"
+//     Group -> "(" Sequence ")"
 
 struct SyntaxDefinition {}
 
