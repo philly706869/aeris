@@ -10,4 +10,4 @@ proc-macro = true
 [dependencies]
 aeris-ui-lib = { workspace = true }
 quote        = { workspace = true }
-syn          = { workspace = true }
+syn          = { workspace = true, features = ["extra-traits"] }

@@ -1,34 +1,21 @@
+mod ast;
+
 use proc_macro::TokenStream;
-use syn::{
-    parse::{Parse, ParseStream},
-    parse_macro_input,
-};
+use syn::parse_macro_input;
 
-// DUE 0/7
-
-// Syntax Definition NCFG
-//         X -> Statement*
-// Statement -> PubDecl | RuleDef
-//   PubDecl -> "pub" Ident
-//   RuleDef -> Ident "->" Sequence
-//  Sequence -> L1Item+ ("|" L1Item+)*
-//    L1Item -> (Ident ":")? L2Item
-//    L2Item -> L3Item Quant?
-//    L3Item -> Ident | LitStr | LitChar | Set | Group
-//     Quant -> "*" | "+" | "?"
-//       Set -> "{" "!"? LitChar* "}"
-//     Group -> "(" Sequence ")"
-
-struct SyntaxDefinition {}
-
-impl Parse for SyntaxDefinition {
-    fn parse(stream: ParseStream) -> syn::Result<Self> {
-        Ok(SyntaxDefinition {})
-    }
-}
+// DUE 1/7
 
 #[proc_macro]
 pub fn syntax(stream: TokenStream) -> TokenStream {
-    parse_macro_input!(stream as SyntaxDefinition);
+    let syntax = parse_macro_input!(stream as ast::Syntax);
+    let mut pubs = Vec::new();
+    let mut rules = Vec::new();
+    for statement in syntax.statements {
+        match statement {
+            ast::Statement::PubDecl(pub_decl) => pubs.push(pub_decl),
+            ast::Statement::RuleDef(rule_def) => rules.push(rule_def),
+        }
+    }
+
     TokenStream::new()
 }
