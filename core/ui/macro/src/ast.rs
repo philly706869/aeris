@@ -9,7 +9,7 @@ use syn::{
 // Statement -> PubDecl | RuleDef
 //   PubDecl -> "pub" Ident
 //   RuleDef -> Ident "->" Sequence
-//  Sequence -> L1Item+ ("|" L1Item+)*
+//  Sequence -> "|"? L1Item+ ("|" L1Item+)*
 //    L1Item -> (Ident ":")? L2Item
 //    L2Item -> L3Item Quant?
 //    L3Item -> Ident | LitStr | LitChar | Set | Group
