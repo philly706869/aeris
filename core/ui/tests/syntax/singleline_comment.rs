@@ -1,6 +1,6 @@
-use aeris_ui::syntax;
+// use aeris_ui::syntax;
 
-syntax! {
-    pub SingleLineComment
-    SingleLineComment -> "//" {!'\n'}*
-}
+// syntax! {
+//     pub SingleLineComment
+//     SingleLineComment -> "//" {!'\n'}*
+// }

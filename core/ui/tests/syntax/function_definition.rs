@@ -1,13 +1,13 @@
-use aeris_ui::syntax;
+// use aeris_ui::syntax;
 
-syntax! {
-    pub FunctionDefinition
-    FunctionDefinition -> Def
-    Def -> "fn" W name:Ident W ParamDef W BodyDef
-    ParamDef -> "(" Params W ")"
-    Params -> W Param W "," Params
-    Params -> Param
-    Params -> W
-    Param -> Ident W ":" W Type
-    BodyDef -> "{" "}"
-}
+// syntax! {
+//     pub FunctionDefinition
+//     FunctionDefinition -> Def
+//     Def -> "fn" W name:Ident W ParamDef W BodyDef
+//     ParamDef -> "(" Params W ")"
+//     Params -> W Param W "," Params
+//     Params -> Param
+//     Params -> W
+//     Param -> Ident W ":" W Type
+//     BodyDef -> "{" "}"
+// }
