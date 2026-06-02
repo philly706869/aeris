@@ -6,9 +6,9 @@ mod proto_json {
 
         syntax! {
             pub struct JSON {
-                [ws]:WS
+                (ws):WS
                 value:JSONValue
-                [ws]:WS
+                (ws):WS
             }
         }
 
