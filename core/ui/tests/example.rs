@@ -1,6 +1,5 @@
 mod syntax;
 
-// Ready for implement
 mod proto_json {
     mod syntax {
         use aeris_ui::syntax;
