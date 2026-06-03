@@ -1,6 +1,6 @@
 use syn::{
     Ident, LitInt, Token, Visibility, braced, bracketed, parenthesized,
-    parse::{Lookahead1, Parse, ParseStream},
+    parse::{Parse, ParseStream},
     token::{Brace, Bracket, Paren},
 };
 
