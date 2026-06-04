@@ -19,8 +19,8 @@ pub struct Syntax {
 
 #[derive(Debug)]
 pub enum Statement {
-    Struct(Struct),
-    Enum(Enum),
+    Struct(Visibility, Struct),
+    Enum(Visibility, Enum),
     Lambda(Lambda),
 }
 
@@ -28,28 +28,39 @@ impl Parse for Syntax {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut statements = Vec::new();
         loop {
-            let fork = input.fork();
-            if let Ok(struct_) = fork.parse() {
-                input.advance_to(&fork);
-                statements.push(Statement::Struct(struct_));
+            let lookahead1 = input.lookahead1();
+            if lookahead1.peek(Token![pub]) {
+                let visibility: Visibility = input.parse()?;
+                let lookahead1 = input.lookahead1();
+                if lookahead1.peek(Token![struct]) {
+                    let struct_: Struct = input.parse()?;
+                    statements.push(Statement::Struct(visibility, struct_));
+                    continue;
+                } else if lookahead1.peek(Token![enum]) {
+                    let enum_: Enum = input.parse()?;
+                    statements.push(Statement::Enum(visibility, enum_));
+                    continue;
+                } else {
+                    return Err(lookahead1.error());
+                }
+            } else if lookahead1.peek(Token![struct]) {
+                let struct_: Struct = input.parse()?;
+                statements.push(Statement::Struct(Visibility::Inherited, struct_));
                 continue;
-            }
-
-            let fork = input.fork();
-            if let Ok(enum_) = fork.parse() {
-                input.advance_to(&fork);
-                statements.push(Statement::Enum(enum_));
+            } else if lookahead1.peek(Token![enum]) {
+                let enum_: Enum = input.parse()?;
+                statements.push(Statement::Enum(Visibility::Inherited, enum_));
                 continue;
-            }
-
-            let fork = input.fork();
-            if let Ok(lambda) = fork.parse() {
-                input.advance_to(&fork);
+            } else if lookahead1.peek(Ident) {
+                let lambda: Lambda = input.parse()?;
                 statements.push(Statement::Lambda(lambda));
                 continue;
+            } else {
+                if input.is_empty() {
+                    break;
+                }
+                return Err(lookahead1.error());
             }
-
-            break;
         }
         Ok(Self { statements })
     }
@@ -57,14 +68,12 @@ impl Parse for Syntax {
 
 #[derive(Debug)]
 pub struct Struct {
-    visibility: Visibility,
     name: Ident,
 }
 
 impl Parse for Struct {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let visibility: Visibility = input.parse()?;
-        let _: Token![struct] = input.parse()?;
+        input.parse::<Token![struct]>()?;
         let name: Ident = input.parse()?;
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Brace) {
@@ -76,24 +85,22 @@ impl Parse for Struct {
         } else {
             return Err(lookahead1.error());
         }
-        Ok(Self { visibility, name })
+        Ok(Self { name })
     }
 }
 
 #[derive(Debug)]
 pub struct Enum {
-    visibility: Visibility,
     name: Ident,
 }
 
 impl Parse for Enum {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let visibility: Visibility = input.parse()?;
-        let _: Token![enum] = input.parse()?;
+        input.parse::<Token![enum]>()?;
         let name: Ident = input.parse()?;
         let content;
         braced!(content in input);
-        Ok(Self { visibility, name })
+        Ok(Self { name })
     }
 }
 
@@ -164,6 +171,13 @@ pub enum Quantifier {
     Min(LitInt),
     Max(LitInt),
     Range(LitInt, LitInt),
+    LazyPlus,
+    LazyStar,
+    LazyOption,
+    LazyVal(LitInt),
+    LazyMin(LitInt),
+    LazyMax(LitInt),
+    LazyRange(LitInt, LitInt),
 }
 
 impl Parse for Quantifier {

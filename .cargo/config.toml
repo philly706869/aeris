@@ -1,0 +1,5 @@
+[alias]
+ui = "run --package aeris-std-ui-preprocessor"
+
+[env]
+SYNTAX_PATH = { value = "target/aeris/syntax/std", relative = true }

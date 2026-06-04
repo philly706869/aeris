@@ -1,11 +1,8 @@
 [package]
-name    = "aeris-cli"
+name    = "aeris-std-ui"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
 aeris = { workspace = true }
-clap  = { workspace = true }
-rayon = { workspace = true }
-tokio = { workspace = true }

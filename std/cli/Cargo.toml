@@ -1,0 +1,11 @@
+[package]
+name    = "aeris-cli"
+version = { workspace = true }
+edition = { workspace = true }
+publish = { workspace = true }
+
+[dependencies]
+aeris-std = { workspace = true }
+clap      = { workspace = true }
+rayon     = { workspace = true }
+tokio     = { workspace = true }

@@ -5,6 +5,6 @@ edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris = { workspace = true }
-rayon = { workspace = true }
-tokio = { workspace = true }
+aeris-std = { workspace = true }
+rayon     = { workspace = true }
+tokio     = { workspace = true }
