@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use aeris_ui_lib::SyntaxShard;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -14,27 +15,10 @@ enum Commands {
     Check,
 }
 
-pub fn main<P>(path: P)
+pub fn main<S, P>(shard: S, path: P)
 where
+    S: SyntaxShard,
     P: AsRef<Path>,
 {
     let cli = Cli::parse();
-    match cli.command {
-        Commands::Sync => sync(path),
-        Commands::Check => check(path),
-    }
-}
-
-fn sync<P>(path: P)
-where
-    P: AsRef<Path>,
-{
-    todo!()
-}
-
-fn check<P>(path: P)
-where
-    P: AsRef<Path>,
-{
-    todo!()
 }
