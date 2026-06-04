@@ -45,18 +45,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "aeris-std-ui-definition"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
-]
-
-[[package]]
 name = "aeris-std-ui-preprocessor"
 version = "0.0.0-prenext.1"
 dependencies = [
  "aeris",
- "aeris-std-ui-definition",
+ "aeris-std-ui-shard",
+]
+
+[[package]]
+name = "aeris-std-ui-shard"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "aeris",
 ]
 
 [[package]]
