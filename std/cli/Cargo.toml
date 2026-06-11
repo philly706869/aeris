@@ -9,3 +9,4 @@ aeris-std = { workspace = true }
 clap      = { workspace = true }
 rayon     = { workspace = true }
 tokio     = { workspace = true }
+tracing   = { workspace = true }

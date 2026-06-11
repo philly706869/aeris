@@ -5,6 +5,7 @@ mod proto_json {
         use aeris_ui::syntax;
 
         syntax! {
+            #[derive(Debug)]
             pub struct JSON {
                 (ws): WS
                 value: JSONValue
@@ -94,7 +95,8 @@ mod proto_json {
                 )*
             )
             Escape (
-                {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'} | ('u' {'0'..'9' 'A'..'F' 'a'..'f'}[4])
+                | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
+                | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}[4]
             )
         }
 
@@ -139,7 +141,7 @@ mod proto_json {
         }
 
         syntax! {
-            struct WS ( {' ' '\t' '\n' '\r'}* )
+            pub struct WS ( {' ' '\t' '\n' '\r'}* )
         }
     }
 }

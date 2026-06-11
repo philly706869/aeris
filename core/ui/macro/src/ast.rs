@@ -1,112 +1,102 @@
+use proc_macro2::TokenStream;
 use syn::{
-    Ident, LitChar, LitInt, LitStr, Token, Visibility, braced, bracketed, parenthesized,
+    Attribute, Ident, LitChar, LitInt, LitStr, Token, Visibility, braced, bracketed, parenthesized,
     parse::{Parse, ParseStream, discouraged::Speculative},
     token::{Brace, Bracket, Paren},
 };
 
-//  Sequence -> "|"? L1Item+ ("|" L1Item+)*
-//    L1Item -> (Ident ":")? L2Item
-//    L2Item -> L3Item Quant?
-//    L3Item -> Ident | LitStr | LitChar | Set | Group
-//     Quant -> "*" | "+" | "?"
-//       Set -> "{" "!"? LitChar* "}"
-//     Group -> "(" Sequence ")"
-
 #[derive(Debug)]
-pub struct Syntax {
-    statements: Vec<Statement>,
+pub struct Statements(pub Vec<Statement>);
+
+impl Parse for Statements {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let mut statements = Vec::new();
+        while !input.is_empty() {
+            statements.push(input.parse()?);
+        }
+        Ok(Self(statements))
+    }
 }
 
 #[derive(Debug)]
 pub enum Statement {
-    Struct(Visibility, Struct),
-    Enum(Visibility, Enum),
+    Struct(Struct),
+    Enum(Enum),
     Lambda(Lambda),
 }
 
-impl Parse for Syntax {
+impl Parse for Statement {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut statements = Vec::new();
-        loop {
-            let lookahead1 = input.lookahead1();
-            if lookahead1.peek(Token![pub]) {
-                let visibility: Visibility = input.parse()?;
-                let lookahead1 = input.lookahead1();
-                if lookahead1.peek(Token![struct]) {
-                    let struct_: Struct = input.parse()?;
-                    statements.push(Statement::Struct(visibility, struct_));
-                    continue;
-                } else if lookahead1.peek(Token![enum]) {
-                    let enum_: Enum = input.parse()?;
-                    statements.push(Statement::Enum(visibility, enum_));
-                    continue;
-                } else {
-                    return Err(lookahead1.error());
-                }
-            } else if lookahead1.peek(Token![struct]) {
-                let struct_: Struct = input.parse()?;
-                statements.push(Statement::Struct(Visibility::Inherited, struct_));
-                continue;
-            } else if lookahead1.peek(Token![enum]) {
-                let enum_: Enum = input.parse()?;
-                statements.push(Statement::Enum(Visibility::Inherited, enum_));
-                continue;
-            } else if lookahead1.peek(Ident) {
-                let lambda: Lambda = input.parse()?;
-                statements.push(Statement::Lambda(lambda));
-                continue;
-            } else {
-                if input.is_empty() {
-                    break;
-                }
-                return Err(lookahead1.error());
-            }
+        if input.peek(Ident) {
+            return Ok(Self::Lambda(input.parse()?));
         }
-        Ok(Self { statements })
+
+        let fork = input.fork();
+        Attribute::parse_outer(&fork)?;
+        fork.parse::<Visibility>()?;
+
+        if fork.peek(Token![struct]) {
+            Ok(Self::Struct(input.parse()?))
+        } else if fork.peek(Token![enum]) {
+            Ok(Self::Enum(input.parse()?))
+        } else {
+            Err(fork.error("unexpected token"))
+        }
     }
 }
 
 #[derive(Debug)]
 pub struct Struct {
-    name: Ident,
+    pub attrs: Vec<Attribute>,
+    pub vis: Visibility,
+    pub name: Ident,
 }
 
 impl Parse for Struct {
     fn parse(input: ParseStream) -> syn::Result<Self> {
+        let attrs = Attribute::parse_outer(input)?;
+        let vis: Visibility = input.parse()?;
         input.parse::<Token![struct]>()?;
         let name: Ident = input.parse()?;
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Brace) {
             let content;
             braced!(content in input);
+            let TODO: TokenStream = content.parse()?;
         } else if lookahead1.peek(Paren) {
             let content;
             parenthesized!(content in input);
+            let TODO: TokenStream = content.parse()?;
         } else {
             return Err(lookahead1.error());
         }
-        Ok(Self { name })
+        Ok(Self { attrs, vis, name })
     }
 }
 
 #[derive(Debug)]
 pub struct Enum {
-    name: Ident,
+    pub attrs: Vec<Attribute>,
+    pub vis: Visibility,
+    pub name: Ident,
 }
 
 impl Parse for Enum {
     fn parse(input: ParseStream) -> syn::Result<Self> {
+        let attrs: Vec<Attribute> = Attribute::parse_outer(input)?;
+        let vis: Visibility = input.parse()?;
         input.parse::<Token![enum]>()?;
         let name: Ident = input.parse()?;
         let content;
         braced!(content in input);
-        Ok(Self { name })
+        let TODO: TokenStream = content.parse()?;
+        Ok(Self { attrs, vis, name })
     }
 }
 
 #[derive(Debug)]
 pub struct Lambda {
-    name: Ident,
+    pub name: Ident,
 }
 
 impl Parse for Lambda {
@@ -114,9 +104,14 @@ impl Parse for Lambda {
         let name: Ident = input.parse()?;
         let content;
         parenthesized!(content in input);
+        let TODO: TokenStream = content.parse()?;
         Ok(Self { name })
     }
 }
+
+//////////////////////////////
+// TODOS BELOW
+//////////////////////////////
 
 #[derive(Debug)]
 pub struct NamedEntry {

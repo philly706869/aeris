@@ -20,18 +20,23 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris                 = { path = "core" }
-aeris-ui              = { path = "core/ui" }
-aeris-ui-lib          = { path = "core/ui/lib" }
-aeris-ui-macro        = { path = "core/ui/macro" }
-aeris-ui-preprocessor = { path = "core/ui/preprocessor" }
-aeris-std             = { path = "std/core" }
-aeris-std-ui          = { path = "std/core/ui" }
-aeris-std-ui-shard    = { path = "std/core/ui/shard" }
-clap                  = { version = "4", features = ["derive"] }
-inkwell               = { version = "0.9", features = ["llvm22-1-force-static"] }
-quote                 = { version = "1" }
-rayon                 = { version = "1" }
-rkyv                  = { version = "0.8" }
-syn                   = { version = "2" }
-tokio                 = { version = "1", features = ["full"] }
+aeris                     = { path = "core" }
+aeris-ui                  = { path = "core/ui" }
+aeris-ui-lib              = { path = "core/ui/lib" }
+aeris-ui-macro            = { path = "core/ui/macro" }
+aeris-ui-preprocessor     = { path = "core/ui/preprocessor" }
+aeris-std                 = { path = "std/core" }
+aeris-std-ui              = { path = "std/core/ui" }
+aeris-std-ui-shard        = { path = "std/core/ui/shard" }
+aeris-std-ui-preprocessor = { path = "std/core/ui/preprocessor" }
+aeris-cli                 = { path = "std/cli" }
+aeris-daemon              = { path = "std/daemon" }
+clap                      = { version = "4", features = ["derive"] }
+inkwell                   = { version = "0.9", features = ["llvm22-1-force-static"] }
+proc-macro2               = { version = "1" }
+quote                     = { version = "1" }
+rayon                     = { version = "1" }
+rkyv                      = { version = "0.8" }
+syn                       = { version = "2" }
+tokio                     = { version = "1", features = ["full"] }
+tracing                   = { version = "0.1" }
