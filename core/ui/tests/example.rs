@@ -2,7 +2,7 @@ mod syntax;
 
 mod proto_json {
     mod syntax {
-        use aeris_ui::syntax;
+        // use aeris_ui::syntax;
 
         syntax! {
             #[derive(Debug)]
