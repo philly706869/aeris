@@ -12,6 +12,7 @@ members = [
   "std/core/ui/preprocessor",
   "std/cli",
   "std/daemon",
+  "test/core/ui",
 ]
 
 [workspace.package]
@@ -31,6 +32,7 @@ aeris-std-ui-shard        = { path = "std/core/ui/shard" }
 aeris-std-ui-preprocessor = { path = "std/core/ui/preprocessor" }
 aeris-cli                 = { path = "std/cli" }
 aeris-daemon              = { path = "std/daemon" }
+aeris-ui-test             = { path = "test/core/ui" }
 clap                      = { version = "4", features = ["derive"] }
 inkwell                   = { version = "0.9", features = ["llvm22-1-force-static"] }
 proc-macro2               = { version = "1" }

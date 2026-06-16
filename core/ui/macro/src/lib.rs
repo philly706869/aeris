@@ -16,22 +16,28 @@ pub fn syntax(input: TokenStream) -> TokenStream {
                 let attrs = &s.attrs;
                 let vis = &s.vis;
                 let name = &s.name;
+                let trait_name = &s.trait_name;
                 quote! {
                     #(#attrs)*
-                    #vis struct #name {}
+                    #vis struct #name where Self: #trait_name {}
 
-                    impl aeris_ui::SyntaxShard for #name {}
+                    trait #trait_name {}
+
+                    impl ::aeris::ui::SyntaxShard for #name {}
                 }
             }
             Statement::Enum(e) => {
                 let attrs = &e.attrs;
                 let vis = &e.vis;
                 let name = &e.name;
+                let trait_name = &e.trait_name;
                 quote! {
                     #(#attrs)*
-                    #vis enum #name {}
+                    #vis enum #name where Self: #trait_name {}
 
-                    impl aeris_ui::SyntaxShard for #name {}
+                    trait #trait_name {}
+
+                    impl ::aeris::ui::SyntaxShard for #name {}
                 }
             }
             _ => quote! {},

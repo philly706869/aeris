@@ -26,22 +26,21 @@ pub enum Statement {
 
 impl Parse for Statement {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let fork = input.fork();
-        if let Ok(struct_) = fork.parse() {
-            return Ok(Self::Struct(struct_));
+        if input.peek(Ident) {
+            return Ok(Self::Lambda(input.parse()?));
         }
 
         let fork = input.fork();
-        if let Ok(enum_) = fork.parse() {
-            return Ok(Self::Enum(enum_));
+        Attribute::parse_outer(&fork)?;
+        fork.parse::<Visibility>()?;
+        let lookahead1 = fork.lookahead1();
+        if lookahead1.peek(Token![struct]) {
+            Ok(Self::Struct(input.parse()?))
+        } else if lookahead1.peek(Token![enum]) {
+            Ok(Self::Enum(input.parse()?))
+        } else {
+            Err(lookahead1.error())
         }
-
-        let fork = input.fork();
-        if let Ok(lambda) = fork.parse() {
-            return Ok(Self::Lambda(lambda));
-        }
-
-        Err(input.error("unexpected token"))
     }
 }
 
@@ -51,6 +50,8 @@ pub struct Struct {
     pub vis: Visibility,
     pub keyword: Token![struct],
     pub name: Ident,
+    pub trait_keyword: Token![trait],
+    pub trait_name: Ident,
     pub body: Body,
 }
 
@@ -61,6 +62,8 @@ impl Parse for Struct {
             vis: input.parse()?,
             keyword: input.parse()?,
             name: input.parse()?,
+            trait_keyword: input.parse()?,
+            trait_name: input.parse()?,
             body: input.parse()?,
         })
     }
@@ -72,6 +75,8 @@ pub struct Enum {
     pub vis: Visibility,
     pub keyword: Token![enum],
     pub name: Ident,
+    pub trait_keyword: Token![trait],
+    pub trait_name: Ident,
     pub brace: Brace,
     pub variants: Vec<Variant>,
 }
@@ -84,6 +89,8 @@ impl Parse for Enum {
             vis: input.parse()?,
             keyword: input.parse()?,
             name: input.parse()?,
+            trait_keyword: input.parse()?,
+            trait_name: input.parse()?,
             brace: braced!(content in input),
             variants: {
                 let mut variants = Vec::new();
@@ -352,8 +359,7 @@ impl Parse for Sequence {
                 'alts: loop {
                     let mut entries = Vec::new();
                     loop {
-                        let entry: L1Entry = content.parse()?;
-                        entries.push(entry);
+                        entries.push(content.parse()?);
                         if content.peek(Token![|]) {
                             alts.push(entries);
                             content.parse::<Token![|]>()?;

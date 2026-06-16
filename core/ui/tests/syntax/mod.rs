@@ -1,9 +1,0 @@
-mod escape_char;
-mod function_definition;
-mod ident;
-mod lit_char;
-mod lit_decimal;
-mod lit_str;
-mod multiline_comment;
-mod singleline_comment;
-mod whitespace;
