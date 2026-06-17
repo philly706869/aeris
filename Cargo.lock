@@ -32,6 +32,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "aeris-proto-json"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "aeris-proto-json-shard",
+]
+
+[[package]]
+name = "aeris-proto-json-preprocessor"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "aeris",
+ "aeris-proto-json-shard",
+]
+
+[[package]]
+name = "aeris-proto-json-shard"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "aeris",
+]
+
+[[package]]
 name = "aeris-std"
 version = "0.0.0-prenext.1"
 dependencies = [
@@ -56,28 +78,6 @@ dependencies = [
 
 [[package]]
 name = "aeris-std-ui-shard"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
-]
-
-[[package]]
-name = "aeris-test-ui-proto-json"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris-test-ui-proto-json-shard",
-]
-
-[[package]]
-name = "aeris-test-ui-proto-json-preprocessor"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
- "aeris-test-ui-proto-json-shard",
-]
-
-[[package]]
-name = "aeris-test-ui-proto-json-shard"
 version = "0.0.0-prenext.1"
 dependencies = [
  "aeris",

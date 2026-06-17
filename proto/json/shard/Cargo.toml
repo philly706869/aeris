@@ -1,5 +1,5 @@
 [package]
-name    = "aeris-test-ui-proto-json-shard"
+name    = "aeris-proto-json-shard"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
