@@ -1,6 +1,7 @@
 use aeris::ui::cluster;
 
 cluster! {
+    #[derive(Debug)]
     pub struct JSONNumber
     trait JSONNumberImpl {
         sign: '-'?
@@ -9,12 +10,14 @@ cluster! {
         exponent: JSONExponent?
     }
 
+    #[derive(Debug)]
     pub struct JSONFraction
     trait JSONFractionImpl {
         point: '.'
         digits: Digits
     }
 
+    #[derive(Debug)]
     pub struct JSONExponent
     trait JSONExponentImpl {
         e: {'E' 'e'}
@@ -22,6 +25,7 @@ cluster! {
         digits: Digits
     }
 
+    #[derive(Debug)]
     pub enum JSONSign
     trait JSONSignImpl {
         Plus ( '+' )

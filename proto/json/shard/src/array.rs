@@ -1,6 +1,7 @@
 use aeris::ui::cluster;
 
 cluster! {
+    #[derive(Debug)]
     pub struct JSONArray
     trait JSONArrayImpl {
         (bracket): '['
@@ -8,6 +9,7 @@ cluster! {
         (bracket): ']'
     }
 
+    #[derive(Debug)]
     pub enum JSONArrayContent
     trait JSONArrayContentImpl {
         None ( WS )
@@ -17,12 +19,14 @@ cluster! {
         }
     }
 
+    #[derive(Debug)]
     pub struct JSONArrayRestEntry
     trait JSONArrayRestEntryImpl {
         rest: ','
         entry: JSONArrayEntry
     }
 
+    #[derive(Debug)]
     pub struct JSONArrayEntry
     trait JSONArrayEntryImpl {
         (ws): WS
