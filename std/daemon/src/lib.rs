@@ -71,7 +71,7 @@ impl AERISDaemon {
         }
     }
 
-    async fn handler(mut socket: UnixStream) {
+    async fn handler(mut _socket: UnixStream) {
         todo!()
     }
 }

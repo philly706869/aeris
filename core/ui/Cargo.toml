@@ -4,6 +4,9 @@ version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
+[features]
+preprocess = ["aeris-ui-macro/preprocess"]
+
 [dependencies]
 aeris-ui-lib          = { workspace = true }
 aeris-ui-macro        = { workspace = true }

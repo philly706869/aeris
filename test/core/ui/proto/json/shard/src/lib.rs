@@ -1,6 +1,6 @@
-use aeris::ui::syntax;
+use aeris::ui::cluster;
 
-syntax! {
+cluster! {
     #[derive(Debug)]
     pub struct JSON
     trait JSONImpl {
@@ -12,7 +12,7 @@ syntax! {
 
 impl JSONImpl for JSON {}
 
-syntax! {
+cluster! {
     pub enum JSONValue
     trait JSONValueImpl {
         Object ( JSONObject )
@@ -26,7 +26,7 @@ syntax! {
 
 impl JSONValueImpl for JSONValue {}
 
-syntax! {
+cluster! {
     pub struct JSONObject
     trait JSONObjectImpl {
         (brace): '{'
@@ -66,7 +66,7 @@ impl JSONObjectContentImpl for JSONObjectContent {}
 impl JSONObjectRestEntryImpl for JSONObjectRestEntry {}
 impl JSONObjectEntryImpl for JSONObjectEntry {}
 
-syntax! {
+cluster! {
     pub struct JSONArray
     trait JSONArrayImpl {
         (bracket): '['
@@ -102,7 +102,7 @@ impl JSONArrayContentImpl for JSONArrayContent {}
 impl JSONArrayRestEntryImpl for JSONArrayRestEntry {}
 impl JSONArrayEntryImpl for JSONArrayEntry {}
 
-syntax! {
+cluster! {
     pub struct JSONString
     trait JSONStringImpl {
         (quote): '"'
@@ -123,7 +123,7 @@ syntax! {
 
 impl JSONStringImpl for JSONString {}
 
-syntax! {
+cluster! {
     pub struct JSONNumber
     trait JSONNumberImpl {
         sign: '-'?
@@ -161,7 +161,7 @@ impl JSONFractionImpl for JSONFraction {}
 impl JSONExponentImpl for JSONExponent {}
 impl JSONSignImpl for JSONSign {}
 
-syntax! {
+cluster! {
     pub enum JSONBoolean
     trait JSONBooleanImpl {
         True ( "true" )
@@ -171,14 +171,14 @@ syntax! {
 
 impl JSONBooleanImpl for JSONBoolean {}
 
-syntax! {
+cluster! {
     pub struct JSONNull
     trait JSONNullImpl ( "null" )
 }
 
 impl JSONNullImpl for JSONNull {}
 
-syntax! {
+cluster! {
     pub struct WS
     trait WSImpl ( ( {' ' '\t' '\n' '\r'}* ) )
 }

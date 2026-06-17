@@ -5,15 +5,17 @@ use syn::{
 };
 
 #[derive(Debug)]
-pub struct Statements(pub Vec<Statement>);
+pub struct Cluster {
+    pub statements: Vec<Statement>,
+}
 
-impl Parse for Statements {
+impl Parse for Cluster {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut statements = Vec::new();
         while !input.is_empty() {
             statements.push(input.parse()?);
         }
-        Ok(Self(statements))
+        Ok(Self { statements })
     }
 }
 

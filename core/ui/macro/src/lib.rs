@@ -1,16 +1,17 @@
 mod ast;
 
-use proc_macro::TokenStream;
+use proc_macro::{Span, TokenStream};
 use quote::quote;
+use sha2::{Digest, Sha256};
 use syn::parse_macro_input;
 
-use crate::ast::{Statement, Statements};
+use crate::ast::{Cluster, Statement};
 
 #[proc_macro]
-pub fn syntax(input: TokenStream) -> TokenStream {
-    let statements = parse_macro_input!(input as Statements);
+pub fn cluster(input: TokenStream) -> TokenStream {
+    let cluster = parse_macro_input!(input as Cluster);
     let mut expanded = proc_macro2::TokenStream::new();
-    for statement in statements.0 {
+    for statement in &cluster.statements {
         let stream = match statement {
             Statement::Struct(s) => {
                 let attrs = &s.attrs;
@@ -45,4 +46,18 @@ pub fn syntax(input: TokenStream) -> TokenStream {
         expanded.extend(stream);
     }
     expanded.into()
+}
+
+fn hash_span() -> [u8; 32] {
+    let span = Span::call_site();
+    let file = span.file();
+    let start = span.start();
+    let end = span.end();
+    let mut hasher = Sha256::new();
+    hasher.update(&file);
+    hasher.update(&start.line().to_le_bytes());
+    hasher.update(&start.column().to_le_bytes());
+    hasher.update(&end.line().to_le_bytes());
+    hasher.update(&end.column().to_le_bytes());
+    hasher.finalize().into()
 }
