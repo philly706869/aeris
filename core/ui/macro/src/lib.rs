@@ -1,5 +1,5 @@
 mod ast;
-mod serial;
+mod schema;
 
 use std::fmt::Write;
 
