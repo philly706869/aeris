@@ -1,9 +1,11 @@
 [package]
-name    = "aeris-ui-preprocessor"
+name    = "aeris-std-ui-cluster"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
+[features]
+preprocess = ["aeris/ui-preprocess"]
+
 [dependencies]
-aeris-ui-lib = { workspace = true }
-clap         = { workspace = true }
+aeris = { workspace = true }

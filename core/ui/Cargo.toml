@@ -8,6 +8,5 @@ publish = { workspace = true }
 preprocess = ["aeris-ui-macro/preprocess"]
 
 [dependencies]
-aeris-ui-lib          = { workspace = true }
-aeris-ui-macro        = { workspace = true }
-aeris-ui-preprocessor = { workspace = true }
+aeris-ui-lib   = { workspace = true }
+aeris-ui-macro = { workspace = true }

@@ -35,19 +35,12 @@ dependencies = [
 name = "aeris-proto-json"
 version = "0.0.0-prenext.1"
 dependencies = [
- "aeris-proto-json-shard",
-]
-
-[[package]]
-name = "aeris-proto-json-preprocessor"
-version = "0.0.0-prenext.1"
-dependencies = [
  "aeris",
- "aeris-proto-json-shard",
+ "aeris-proto-json-cluster",
 ]
 
 [[package]]
-name = "aeris-proto-json-shard"
+name = "aeris-proto-json-cluster"
 version = "0.0.0-prenext.1"
 dependencies = [
  "aeris",
@@ -66,18 +59,11 @@ name = "aeris-std-ui"
 version = "0.0.0-prenext.1"
 dependencies = [
  "aeris",
+ "aeris-std-ui-cluster",
 ]
 
 [[package]]
-name = "aeris-std-ui-preprocessor"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
- "aeris-std-ui-shard",
-]
-
-[[package]]
-name = "aeris-std-ui-shard"
+name = "aeris-std-ui-cluster"
 version = "0.0.0-prenext.1"
 dependencies = [
  "aeris",
@@ -89,7 +75,6 @@ version = "0.0.0-prenext.1"
 dependencies = [
  "aeris-ui-lib",
  "aeris-ui-macro",
- "aeris-ui-preprocessor",
 ]
 
 [[package]]
@@ -106,14 +91,6 @@ dependencies = [
  "sha2",
  "syn",
  "wincode",
-]
-
-[[package]]
-name = "aeris-ui-preprocessor"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris-ui-lib",
- "clap",
 ]
 
 [[package]]

@@ -5,4 +5,8 @@ edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris-proto-json-shard = { workspace = true }
+aeris-proto-json-cluster = { workspace = true }
+
+[build-dependencies]
+aeris                    = { workspace = true }
+aeris-proto-json-cluster = { workspace = true, feature = ["preprocess"] }
