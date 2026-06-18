@@ -2,18 +2,18 @@ use wincode::{SchemaRead, SchemaWrite};
 
 #[derive(SchemaRead, SchemaWrite)]
 pub struct Cluster {
-    file: String,
-    start_line: u64,
-    start_column: u64,
-    end_line: u64,
-    end_column: u64,
-    shards: Vec<Shard>,
+    pub file: String,
+    pub start_line: u64,
+    pub start_column: u64,
+    pub end_line: u64,
+    pub end_column: u64,
+    pub shards: Vec<Shard>,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
 pub struct Shard {
-    name: String,
-    shape: Shape,
+    pub name: String,
+    pub shape: Shape,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
@@ -31,8 +31,8 @@ pub enum Sequence {
 
 #[derive(SchemaRead, SchemaWrite)]
 pub struct Entry {
-    factor: Factor,
-    quantifier: Option<Quantifier>,
+    pub factor: Factor,
+    pub quantifier: Option<Quantifier>,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
@@ -46,8 +46,8 @@ pub enum Factor {
 
 #[derive(SchemaRead, SchemaWrite)]
 pub struct Quantifier {
-    repeater: Repeater,
-    lazy: bool,
+    pub repeater: Repeater,
+    pub lazy: bool,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
