@@ -32,21 +32,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aeris-proto-json"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
- "aeris-proto-json-cluster",
-]
-
-[[package]]
-name = "aeris-proto-json-cluster"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
-]
-
-[[package]]
 name = "aeris-std"
 version = "0.0.0-prenext.1"
 dependencies = [
@@ -499,6 +484,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "proto-json"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "aeris",
+ "proto-json-cluster",
+]
+
+[[package]]
+name = "proto-json-cluster"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "aeris",
 ]
 
 [[package]]

@@ -1,12 +1,12 @@
 [package]
-name    = "aeris-proto-json"
+name    = "proto-json"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris-proto-json-cluster = { workspace = true }
+proto-json-cluster = { workspace = true }
 
 [build-dependencies]
-aeris                    = { workspace = true }
-aeris-proto-json-cluster = { workspace = true, feature = ["preprocess"] }
+aeris              = { workspace = true }
+proto-json-cluster = { workspace = true, feature = ["preprocess"] }

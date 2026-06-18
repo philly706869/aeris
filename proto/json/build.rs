@@ -1,3 +1,3 @@
 fn main() {
-    aeris::ui::preprocess::<aeris_proto_json_cluster::JSON>();
+    aeris::ui::preprocess::<proto_json_cluster::JSON>();
 }
