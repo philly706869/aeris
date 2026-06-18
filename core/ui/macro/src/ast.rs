@@ -6,27 +6,27 @@ use syn::{
 
 #[derive(Debug)]
 pub struct Cluster {
-    pub statements: Vec<Statement>,
+    pub shards: Vec<Shard>,
 }
 
 impl Parse for Cluster {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut statements = Vec::new();
+        let mut shards = Vec::new();
         while !input.is_empty() {
-            statements.push(input.parse()?);
+            shards.push(input.parse()?);
         }
-        Ok(Self { statements })
+        Ok(Self { shards })
     }
 }
 
 #[derive(Debug)]
-pub enum Statement {
+pub enum Shard {
     Struct(Struct),
     Enum(Enum),
     Lambda(Lambda),
 }
 
-impl Parse for Statement {
+impl Parse for Shard {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(Ident) {
             return Ok(Self::Lambda(input.parse()?));
@@ -54,7 +54,7 @@ pub struct Struct {
     pub name: Ident,
     pub trait_keyword: Token![trait],
     pub trait_name: Ident,
-    pub body: Body,
+    pub body: Sequence,
 }
 
 impl Parse for Struct {
@@ -108,25 +108,10 @@ impl Parse for Enum {
 #[derive(Debug)]
 pub struct Variant {
     pub name: Ident,
-    pub body: Body,
-}
-
-impl Parse for Variant {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(Self {
-            name: input.parse()?,
-            body: input.parse()?,
-        })
-    }
-}
-
-#[derive(Debug)]
-pub struct Lambda {
-    pub name: Ident,
     pub sequence: Sequence,
 }
 
-impl Parse for Lambda {
+impl Parse for Variant {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         Ok(Self {
             name: input.parse()?,
@@ -136,18 +121,33 @@ impl Parse for Lambda {
 }
 
 #[derive(Debug)]
-pub enum Body {
-    NamedBody(NamedBody),
-    TupleBody(TupleBody),
+pub struct Lambda {
+    pub name: Ident,
+    pub entry: Entry,
 }
 
-impl Parse for Body {
+impl Parse for Lambda {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            name: input.parse()?,
+            entry: input.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub enum Sequence {
+    Object(Object),
+    Tuple(Tuple),
+}
+
+impl Parse for Sequence {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Brace) {
-            Ok(Self::NamedBody(input.parse()?))
+            Ok(Self::Object(input.parse()?))
         } else if lookahead1.peek(Paren) {
-            Ok(Self::TupleBody(input.parse()?))
+            Ok(Self::Tuple(input.parse()?))
         } else {
             Err(lookahead1.error())
         }
@@ -155,12 +155,12 @@ impl Parse for Body {
 }
 
 #[derive(Debug)]
-pub struct NamedBody {
+pub struct Object {
     pub brace: Brace,
     pub entries: Vec<NamedEntry>,
 }
 
-impl Parse for NamedBody {
+impl Parse for Object {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
         Ok(Self {
@@ -177,12 +177,12 @@ impl Parse for NamedBody {
 }
 
 #[derive(Debug)]
-pub struct TupleBody {
+pub struct Tuple {
     pub paren: Paren,
-    pub entries: Vec<L1Entry>,
+    pub entries: Vec<Entry>,
 }
 
-impl Parse for TupleBody {
+impl Parse for Tuple {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
         Ok(Self {
@@ -202,7 +202,7 @@ impl Parse for TupleBody {
 pub struct NamedEntry {
     pub name: EntryName,
     _colon: Token![:],
-    pub entry: L1Entry,
+    pub entry: Entry,
 }
 
 impl Parse for NamedEntry {
@@ -237,15 +237,15 @@ impl Parse for EntryName {
 }
 
 #[derive(Debug)]
-pub struct L1Entry {
-    pub entry: L2Entry,
+pub struct Entry {
+    pub factor: Factor,
     pub quantifier: Quantifier,
 }
 
-impl Parse for L1Entry {
+impl Parse for Entry {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         Ok(Self {
-            entry: input.parse()?,
+            factor: input.parse()?,
             quantifier: input.parse()?,
         })
     }
@@ -316,15 +316,15 @@ impl Parse for Quantifier {
 }
 
 #[derive(Debug)]
-pub enum L2Entry {
+pub enum Factor {
     Ident(Ident),
     LitStr(LitStr),
     LitChar(LitChar),
     Set(Set),
-    Sequence(Sequence),
+    Term(Term),
 }
 
-impl Parse for L2Entry {
+impl Parse for Factor {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Ident) {
@@ -336,7 +336,7 @@ impl Parse for L2Entry {
         } else if lookahead1.peek(Brace) {
             Ok(Self::Set(input.parse()?))
         } else if lookahead1.peek(Paren) {
-            Ok(Self::Sequence(input.parse()?))
+            Ok(Self::Term(input.parse()?))
         } else {
             Err(lookahead1.error())
         }
@@ -344,13 +344,13 @@ impl Parse for L2Entry {
 }
 
 #[derive(Debug)]
-pub struct Sequence {
+pub struct Term {
     _paren: Paren,
     _pipe: Option<Token![|]>,
-    pub alts: Vec<Vec<L1Entry>>,
+    pub alts: Vec<Vec<Entry>>,
 }
 
-impl Parse for Sequence {
+impl Parse for Term {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
         Ok(Self {

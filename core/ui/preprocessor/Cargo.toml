@@ -7,4 +7,3 @@ publish = { workspace = true }
 [dependencies]
 aeris-ui-lib = { workspace = true }
 clap         = { workspace = true }
-rkyv         = { workspace = true }

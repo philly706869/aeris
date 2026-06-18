@@ -1,19 +1,29 @@
 mod ast;
+mod serial;
+
+use std::fmt::Write;
 
 use proc_macro::{Span, TokenStream};
 use quote::quote;
 use sha2::{Digest, Sha256};
 use syn::parse_macro_input;
 
-use crate::ast::{Cluster, Statement};
+use crate::ast::{Cluster, Shard};
 
 #[proc_macro]
 pub fn cluster(input: TokenStream) -> TokenStream {
     let cluster = parse_macro_input!(input as Cluster);
+
+    let hash = hash_cluster();
+    let mut hash_str = String::with_capacity(64);
+    for byte in &hash {
+        write!(&mut hash_str, "{:02x}", byte).unwrap();
+    }
+
     let mut expanded = proc_macro2::TokenStream::new();
-    for statement in &cluster.statements {
+    for statement in &cluster.shards {
         let stream = match statement {
-            Statement::Struct(s) => {
+            Shard::Struct(s) => {
                 let attrs = &s.attrs;
                 let vis = &s.vis;
                 let name = &s.name;
@@ -27,7 +37,7 @@ pub fn cluster(input: TokenStream) -> TokenStream {
                     impl ::aeris::ui::SyntaxShard for #name {}
                 }
             }
-            Statement::Enum(e) => {
+            Shard::Enum(e) => {
                 let attrs = &e.attrs;
                 let vis = &e.vis;
                 let name = &e.name;
@@ -48,7 +58,7 @@ pub fn cluster(input: TokenStream) -> TokenStream {
     expanded.into()
 }
 
-fn hash_span() -> [u8; 32] {
+fn hash_cluster() -> [u8; 32] {
     let span = Span::call_site();
     let file = span.file();
     let start = span.start();
