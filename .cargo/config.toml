@@ -1,7 +1,5 @@
 [alias]
-aeris      = "run --package aeris-cli"
-shard      = "run --package aeris-std-ui-preprocessor"
-proto-json = "run --package aeris-proto-json-preprocessor"
+aeris = "run --package aeris-cli"
 
 [env]
-CLUSTER_PATH = { value = "target/aeris/ui/cluster", relative = true }
+CLUSTER = { value = "target/aeris/ui/cluster", relative = true }
