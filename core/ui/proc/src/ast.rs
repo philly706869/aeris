@@ -25,25 +25,22 @@ impl Parse for Cluster {
             let attrs = Attribute::parse_outer(input)?;
             let vis = input.parse()?;
             let lookahead1 = input.lookahead1();
-            if lookahead1.peek(Token![struct]) {
-                let keyword = input.parse()?;
-                let name = input.parse()?;
-                let trait_keyword = input.parse()?;
-                let trait_name = input.parse()?;
-                let sequence = input.parse()?;
-                shards.push(Shard {
-                    attrs,
-                    vis,
-                    name,
-                    trait_keyword,
-                    trait_name,
-                    shape: Shape::Struct { keyword, sequence },
-                });
+            let is_struct = if lookahead1.peek(Token![struct]) {
+                input.parse::<Token![struct]>()?;
+                true
             } else if lookahead1.peek(Token![enum]) {
-                let keyword = input.parse()?;
-                let name = input.parse()?;
-                let trait_keyword = input.parse()?;
-                let trait_name = input.parse()?;
+                input.parse::<Token![enum]>()?;
+                false
+            } else {
+                return Err(lookahead1.error());
+            };
+
+            let name = input.parse()?;
+            input.parse::<Token![trait]>()?;
+            let trait_name = input.parse()?;
+            let shape = if is_struct {
+                Shape::Struct(input.parse()?)
+            } else {
                 let content;
                 braced!(content in input);
                 let mut variants = Vec::new();
@@ -52,17 +49,16 @@ impl Parse for Cluster {
                     let sequence = content.parse()?;
                     variants.push((name, sequence));
                 }
-                shards.push(Shard {
-                    attrs,
-                    vis,
-                    name,
-                    trait_keyword,
-                    trait_name,
-                    shape: Shape::Enum { keyword, variants },
-                });
-            } else {
-                return Err(lookahead1.error());
-            }
+                Shape::Enum(variants)
+            };
+
+            shards.push(Shard {
+                attrs,
+                vis,
+                name,
+                trait_name,
+                shape,
+            });
         }
         Ok(Self { shards, lambdas })
     }
@@ -73,21 +69,14 @@ pub struct Shard {
     pub attrs: Vec<Attribute>,
     pub vis: Visibility,
     pub name: Ident,
-    pub trait_keyword: Token![trait],
     pub trait_name: Ident,
     pub shape: Shape,
 }
 
 #[derive(Debug)]
 pub enum Shape {
-    Struct {
-        keyword: Token![struct],
-        sequence: Sequence,
-    },
-    Enum {
-        keyword: Token![enum],
-        variants: Vec<(Ident, Sequence)>,
-    },
+    Struct(Sequence),
+    Enum(Vec<(Ident, Sequence)>),
 }
 
 #[derive(Debug)]

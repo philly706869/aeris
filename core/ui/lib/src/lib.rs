@@ -1,6 +1,6 @@
 #[cfg(feature = "preprocess")]
-mod preproc;
+pub mod preproc;
 #[cfg(feature = "preprocess")]
-pub use preproc::*;
+pub use preproc::preprocess;
 
 pub trait Shard {}

@@ -1,23 +1,23 @@
 use std::{collections::HashSet, fmt::Write, fs, path::PathBuf};
 
-pub trait Preprocess {
-    fn data() -> &'static PreprocessData;
+pub trait Shard {
+    fn data() -> &'static Data;
 }
 
-pub struct PreprocessData {
+pub struct Data {
     pub hash: &'static [u8],
     pub serialized: &'static [u8],
-    pub dependencies: &'static [&'static PreprocessData],
+    pub dependencies: &'static [&'static Data],
 }
 
-pub fn preprocess<P>()
+pub fn preprocess<S>()
 where
-    P: Preprocess,
+    S: Shard,
 {
     let mut flattened = Vec::new();
     let mut stack = Vec::new();
     let mut set = HashSet::new();
-    let data = P::data();
+    let data = S::data();
     set.insert(data.hash);
     stack.push(data);
     while let Some(current) = stack.pop() {
