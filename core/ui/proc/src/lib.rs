@@ -5,7 +5,7 @@ use proc_macro2::{Literal, TokenStream};
 use quote::quote;
 use syn::parse2;
 
-use crate::ast::{Cluster, Enum, Sequence, Shard, Struct};
+use crate::ast::{Cluster, Sequence, Shard};
 
 #[derive(Clone, Copy)]
 pub enum Process {
