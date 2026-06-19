@@ -6,9 +6,9 @@ cluster! {
     #[derive(Debug)]
     pub struct JSONObject
     trait JSONObjectImpl {
-        (brace): '{'
+        brace: '{'
         content: JSONObjectContent
-        (brace): '}'
+        brace: '}'
     }
 
     #[derive(Debug)]
@@ -31,13 +31,13 @@ cluster! {
     #[derive(Debug)]
     pub struct JSONObjectEntry
     trait JSONObjectEntryImpl {
-        (ws): WS
+        ws: WS
         name: JSONString
-        (ws): WS
+        ws: WS
         colon: ':'
-        (ws): WS
+        ws: WS
         value: JSONValue
-        (ws): WS
+        ws: WS
     }
 }
 

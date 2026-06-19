@@ -1,32 +1,33 @@
 use wincode::{SchemaRead, SchemaWrite};
 
 #[derive(SchemaRead, SchemaWrite)]
-pub struct Cluster {
+pub struct Shard {
     pub file: String,
     pub start_line: u64,
     pub start_column: u64,
     pub end_line: u64,
     pub end_column: u64,
-    pub shards: Vec<Shard>,
-}
-
-#[derive(SchemaRead, SchemaWrite)]
-pub struct Shard {
     pub name: String,
     pub shape: Shape,
+    pub lambdas: Vec<Lambda>,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
 pub enum Shape {
     Struct(Sequence),
     Enum(Vec<(String, Sequence)>),
-    Lambda(Entry),
 }
 
 #[derive(SchemaRead, SchemaWrite)]
 pub enum Sequence {
     Object(Vec<(String, Entry)>),
     Tuple(Vec<Entry>),
+}
+
+#[derive(SchemaRead, SchemaWrite)]
+pub struct Lambda {
+    pub name: String,
+    pub entry: Entry,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
@@ -41,7 +42,6 @@ pub enum Factor {
     Set(Set),
     Term(Vec<Vec<Entry>>),
     Shard(String),
-    Extern(String),
 }
 
 #[derive(SchemaRead, SchemaWrite)]

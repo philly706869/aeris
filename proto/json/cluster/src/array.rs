@@ -6,9 +6,9 @@ cluster! {
     #[derive(Debug)]
     pub struct JSONArray
     trait JSONArrayImpl {
-        (bracket): '['
+        bracket: '['
         content: JSONArrayContent
-        (bracket): ']'
+        bracket: ']'
     }
 
     #[derive(Debug)]
@@ -31,9 +31,9 @@ cluster! {
     #[derive(Debug)]
     pub struct JSONArrayEntry
     trait JSONArrayEntryImpl {
-        (ws): WS
+        ws: WS
         value: JSONValue
-        (ws): WS
+        ws: WS
     }
 }
 

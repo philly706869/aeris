@@ -6,9 +6,9 @@ cluster! {
     #[derive(Debug)]
     pub struct JSON
     trait JSONImpl {
-        (ws): WS
+        ws: WS
         value: JSONValue
-        (ws): WS
+        ws: WS
     }
 }
 

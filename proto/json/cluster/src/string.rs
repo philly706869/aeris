@@ -4,9 +4,9 @@ cluster! {
     #[derive(Debug)]
     pub struct JSONString
     trait JSONStringImpl {
-        (quote): '"'
+        quote: '"'
         content: Content
-        (quote): '"'
+        quote: '"'
     }
     Content (
         (
