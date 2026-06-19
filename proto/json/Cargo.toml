@@ -9,4 +9,4 @@ proto-json-cluster = { workspace = true }
 
 [build-dependencies]
 aeris              = { workspace = true }
-proto-json-cluster = { workspace = true, features = ["preprocess"] }
+proto-json-cluster = { workspace = true }

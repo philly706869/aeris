@@ -10,4 +10,4 @@ aeris-std-ui-cluster = { workspace = true }
 
 [build-dependencies]
 aeris                = { workspace = true }
-aeris-std-ui-cluster = { workspace = true, features = ["preprocess"] }
+aeris-std-ui-cluster = { workspace = true }

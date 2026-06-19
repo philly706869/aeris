@@ -70,7 +70,6 @@ version = "0.0.0-prenext.1"
 name = "aeris-ui-macro"
 version = "0.0.0-prenext.1"
 dependencies = [
- "aeris-ui-lib",
  "proc-macro2",
  "quote",
  "sha2",

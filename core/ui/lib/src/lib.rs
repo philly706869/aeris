@@ -1,25 +1,47 @@
-use std::{fmt::Write, fs, path::PathBuf};
+use std::{collections::HashSet, fmt::Write, fs, path::PathBuf};
 
 pub trait Shard {}
 
 pub trait Preprocess {
-    fn hash() -> &'static [u8];
-    fn data() -> &'static [u8];
+    fn data() -> &'static PreprocessData;
+}
+
+pub struct PreprocessData {
+    pub hash: &'static [u8],
+    pub serialized: &'static [u8],
+    pub dependencies: &'static [&'static PreprocessData],
 }
 
 pub fn preprocess<P>()
 where
     P: Preprocess,
 {
-    let hash = P::hash();
+    let mut flattened = Vec::new();
+    let mut stack = Vec::new();
+    let mut set = HashSet::new();
     let data = P::data();
-    let mut hash_string = String::new();
-    for byte in hash {
-        write!(&mut hash_string, "{:02x}", byte).unwrap();
+    set.insert(data.hash);
+    stack.push(data);
+    while let Some(current) = stack.pop() {
+        flattened.push(current);
+        for dependency in current.dependencies {
+            if set.insert(dependency.hash) {
+                stack.push(*dependency);
+            }
+        }
     }
+
     let cluster_path = std::env::var("CLUSTER").unwrap();
     let mut cluster_path = PathBuf::from(cluster_path);
     fs::create_dir_all(&cluster_path).unwrap();
-    cluster_path.push(&hash_string);
-    fs::write(&cluster_path, data).unwrap();
+    let mut hash = String::with_capacity(64);
+    for data in flattened {
+        hash.clear();
+        for byte in data.hash {
+            write!(&mut hash, "{:02x}", byte).unwrap();
+        }
+        cluster_path.push(&hash);
+        fs::write(&cluster_path, data.serialized).unwrap();
+        cluster_path.pop();
+    }
 }
