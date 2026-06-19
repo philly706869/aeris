@@ -1,6 +1,7 @@
+use aeris_ui_proc as proc;
 use proc_macro::TokenStream;
 
 #[proc_macro]
 pub fn cluster(input: TokenStream) -> TokenStream {
-    TokenStream::new()
+    proc::cluster(proc::Process::Preprocess, input.into()).into()
 }
