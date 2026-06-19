@@ -1,2 +1,7 @@
 pub use aeris_ui_lib::*;
-pub use aeris_ui_macro::*;
+
+#[cfg(feature = "preprocess")]
+pub use aeris_ui_preproc::*;
+
+#[cfg(feature = "postprocess")]
+pub use aeris_ui_postproc::*;

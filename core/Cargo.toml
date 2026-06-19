@@ -4,6 +4,10 @@ version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
+[features]
+ui-preprocess  = ["aeris-ui/preprocess"]
+ui-postprocess = ["aeris-ui/postprocess"]
+
 [dependencies]
 aeris-ui = { workspace = true }
 inkwell  = { workspace = true }

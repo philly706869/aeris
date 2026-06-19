@@ -3,3 +3,6 @@ name    = "aeris-ui-lib"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
+
+[features]
+preprocess = []

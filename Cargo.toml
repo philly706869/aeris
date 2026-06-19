@@ -4,7 +4,9 @@ members = [
   "core",
   "core/ui",
   "core/ui/lib",
-  "core/ui/macro",
+  "core/ui/proc",
+  "core/ui/preproc",
+  "core/ui/postproc",
   "std/core",
   "std/core/ui",
   "std/core/ui/cluster",
@@ -23,7 +25,9 @@ publish = false
 aeris                = { path = "core" }
 aeris-ui             = { path = "core/ui" }
 aeris-ui-lib         = { path = "core/ui/lib" }
-aeris-ui-macro       = { path = "core/ui/macro" }
+aeris-ui-proc        = { path = "core/ui/proc" }
+aeris-ui-preproc     = { path = "core/ui/preproc" }
+aeris-ui-postproc    = { path = "core/ui/postproc" }
 aeris-std            = { path = "std/core" }
 aeris-std-ui         = { path = "std/core/ui" }
 aeris-std-ui-cluster = { path = "std/core/ui/cluster" }

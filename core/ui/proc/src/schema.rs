@@ -1,4 +1,4 @@
-use proc_macro::Span;
+use proc_macro2::Span;
 use sha2::{Digest, Sha256};
 use wincode::{SchemaRead, SchemaWrite};
 
@@ -33,6 +33,7 @@ impl Meta {
 
 impl From<Span> for Meta {
     fn from(span: Span) -> Self {
+        let span = span.unwrap();
         let start = span.start();
         let end = span.end();
         Self {

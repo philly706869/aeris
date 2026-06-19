@@ -1,18 +1,16 @@
 mod ast;
 mod schema;
 
-use proc_macro::TokenStream;
-use proc_macro2::{Literal, TokenStream as TokenStream2};
+use proc_macro2::{Literal, TokenStream};
 use quote::quote;
-use syn::parse_macro_input;
+use syn::parse2;
 
 use crate::ast::{Cluster, Shape};
 
-#[proc_macro]
 pub fn cluster(input: TokenStream) -> TokenStream {
-    let cluster = parse_macro_input!(input as Cluster);
+    let cluster: Cluster = parse2(input).unwrap();
 
-    let mut expanded = TokenStream2::new();
+    let mut expanded = TokenStream::new();
     for shard in &cluster.shards {
         let attrs = &shard.attrs;
         let vis = &shard.vis;
@@ -26,7 +24,7 @@ pub fn cluster(input: TokenStream) -> TokenStream {
         };
 
         let shard = schema::Shard {
-            meta: name.span().unwrap().into(),
+            meta: name.span().into(),
             name: name.to_string(),
             shape: schema::Shape::Struct(schema::Sequence::Object(Vec::new())),
             lambdas: Vec::new(),
