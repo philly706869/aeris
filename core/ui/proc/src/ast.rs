@@ -232,7 +232,7 @@ impl Parse for Term {
         let mut alts = Vec::new();
         let mut entries = Vec::new();
         while !content.is_empty() {
-            if content.peek(Token![|]) {
+            if content.parse::<Option<Token![|]>>()?.is_some() {
                 alts.push(entries);
                 entries = Vec::new();
             } else {
