@@ -230,19 +230,13 @@ impl Parse for Term {
         parenthesized!(content in input);
         content.parse::<Option<Token![|]>>()?;
         let mut alts = Vec::new();
-        'alts: loop {
-            let mut entries = Vec::new();
-            loop {
+        let mut entries = Vec::new();
+        while !content.is_empty() {
+            if content.peek(Token![|]) {
+                alts.push(entries);
+                entries = Vec::new();
+            } else {
                 entries.push(content.parse()?);
-                if content.peek(Token![|]) {
-                    alts.push(entries);
-                    content.parse::<Token![|]>()?;
-                    continue 'alts;
-                }
-                if content.is_empty() {
-                    alts.push(entries);
-                    break 'alts;
-                }
             }
         }
         Ok(Self { alts })
@@ -259,19 +253,9 @@ impl Parse for Set {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
         braced!(content in input);
-        let exclusion;
+        let exclusion = content.parse::<Option<Token![!]>>()?.is_some();
         let mut entries = Vec::new();
-        let lookahead1 = content.lookahead1();
-        if lookahead1.peek(Token![!]) {
-            content.parse::<Token![!]>()?;
-            exclusion = true;
-        } else if lookahead1.peek(LitChar) {
-            entries.push(content.parse()?);
-            exclusion = false;
-        } else {
-            return Err(lookahead1.error());
-        }
-        while content.peek(LitChar) {
+        while !content.is_empty() {
             entries.push(content.parse()?)
         }
         Ok(Self { exclusion, entries })
@@ -286,14 +270,12 @@ pub enum SetEntry {
 
 impl Parse for SetEntry {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        if input.peek2(Token![..]) {
-            let start: LitChar = input.parse()?;
-            input.parse::<Token![..]>()?;
-            let end: LitChar = input.parse()?;
+        let start = input.parse()?;
+        if input.parse::<Option<Token![..]>>()?.is_some() {
+            let end = input.parse()?;
             Ok(Self::Range(start, end))
         } else {
-            let char: LitChar = input.parse()?;
-            Ok(Self::Single(char))
+            Ok(Self::Single(start))
         }
     }
 }

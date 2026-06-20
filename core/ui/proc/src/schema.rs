@@ -97,9 +97,9 @@ pub enum Repeater {
 }
 
 #[derive(SchemaRead, SchemaWrite)]
-pub enum Set {
-    Positive(Vec<SetEntry>),
-    Negative(Vec<SetEntry>),
+pub struct Set {
+    pub exclusion: bool,
+    pub entries: Vec<SetEntry>,
 }
 
 #[derive(SchemaRead, SchemaWrite)]
