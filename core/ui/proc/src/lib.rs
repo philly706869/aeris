@@ -1,33 +1,52 @@
 mod ast;
+mod hir;
+mod mir;
 mod schema;
 
 use proc_macro2::{Literal, TokenStream};
 use quote::quote;
-use syn::parse2;
+use rustc_hash::{FxHashMap, FxHashSet};
+use syn::{Ident, parse2};
 
-use crate::ast::{Cluster, Sequence, Shape, Shard};
+use crate::ast::{Cluster, Entry, Factor, Repeater, Sequence, Shape, Shard};
 
-#[derive(Clone, Copy)]
-pub enum Process {
-    Preprocess,
-    Postprocess,
+pub fn preprocess(input: TokenStream) -> TokenStream {
+    let cluster = match parse2(input) {
+        Ok(cluster) => cluster,
+        Err(err) => return err.to_compile_error(),
+    };
+    let base = gen_cluster(&cluster);
+    let names = get_names(&cluster);
+    let impls = gen_preprocess(&cluster, &names);
+    quote! { #base #impls }
 }
 
-pub fn cluster(process: Process, input: TokenStream) -> TokenStream {
-    match parse2::<Cluster>(input) {
-        Ok(cluster) => {
-            let expandeds = cluster.shards.iter().map(|shard| {
-                let preprocess_impl = match process {
-                    Process::Preprocess => Some(gen_preprocess(shard)),
-                    Process::Postprocess => None,
-                };
-                let base = gen_shard(shard);
-                quote! { #base #preprocess_impl }
-            });
-            quote! { #(#expandeds)* }
-        }
-        Err(err) => err.into_compile_error(),
+pub fn postprocess(input: TokenStream) -> TokenStream {
+    match parse2(input) {
+        Ok(cluster) => gen_cluster(&cluster),
+        Err(err) => return err.to_compile_error(),
     }
+}
+
+fn gen_cluster(cluster: &Cluster) -> TokenStream {
+    let shards = cluster.shards.iter().map(gen_shard);
+    quote! { #(#shards)* }
+}
+
+fn gen_preprocess(cluster: &Cluster, names: &FxHashSet<String>) -> TokenStream {
+    let impls = cluster
+        .shards
+        .iter()
+        .map(|shard| gen_preprocess_impl(shard, names));
+    quote! { #(#impls)* }
+}
+
+fn get_names(cluster: &Cluster) -> FxHashSet<String> {
+    cluster
+        .lambdas
+        .iter()
+        .map(|labmda| labmda.name.to_string())
+        .collect()
 }
 
 fn gen_shard(shard: &Shard) -> TokenStream {
@@ -42,7 +61,33 @@ fn gen_shard(shard: &Shard) -> TokenStream {
             keyword = quote! { struct };
             def = match sequence {
                 Sequence::Object(entries) => {
-                    quote! { where Self: #trait_name {} }
+                    let mut grouped_entries: FxHashMap<_, Vec<_>> = FxHashMap::default();
+                    for (name, entry) in entries.iter() {
+                        let type_ = match &entry.factor {
+                            Factor::Shard(ident) => quote! { #ident },
+                            Factor::LitStr(str) => quote! { () },
+                            Factor::LitChar(char) => quote! { () },
+                            Factor::Set(set) => quote! { () },
+                            Factor::Term(term) => quote! { () },
+                        };
+                        let type_ = match &entry.quantifier {
+                            Some(quantifier) => match &quantifier.repeater {
+                                Repeater::Plus => quote! { Vec<#type_> },
+                                Repeater::Star => quote! { Vec<#type_> },
+                                Repeater::Option => quote! { Option<#type_> },
+                                Repeater::Val(val) => quote! { [#type_; #val] },
+                                Repeater::Min(_) => quote! { Vec<#type_> },
+                                Repeater::Max(_) => quote! { Vec<#type_> },
+                                Repeater::Range(_, _) => quote! { Vec<#type_> },
+                            },
+                            None => type_,
+                        };
+                        grouped_entries.entry(name).or_default().push(type_);
+                    }
+                    let entries = grouped_entries.iter().map(|(name, types)| {
+                        quote! { #name: (#(#types),*) }
+                    });
+                    quote! { where Self: #trait_name { #(#entries),* } }
                 }
                 Sequence::Tuple(entries) => {
                     quote! { () where Self: #trait_name; }
@@ -70,7 +115,63 @@ fn gen_shard(shard: &Shard) -> TokenStream {
     }
 }
 
-fn gen_preprocess(shard: &Shard) -> TokenStream {
+fn calculate_dependencies(shard: &Shard, lambda_names: &FxHashSet<String>) -> Vec<Ident> {
+    let mut dependencies = Vec::new();
+    let mut visited_names = FxHashSet::default();
+    let mut entry_stack: Vec<&Entry> = Vec::new();
+
+    match &shard.shape {
+        Shape::Struct(sequence) => {
+            push_sequence_entries(sequence, &mut entry_stack);
+        }
+        Shape::Enum(variants) => {
+            for (_, sequence) in variants {
+                push_sequence_entries(sequence, &mut entry_stack);
+            }
+        }
+    }
+
+    while let Some(entry) = entry_stack.pop() {
+        match &entry.factor {
+            Factor::Shard(ident) => {
+                let name_str = ident.to_string();
+                if !lambda_names.contains(&name_str)
+                    && name_str != shard.name.to_string()
+                    && visited_names.insert(name_str)
+                {
+                    dependencies.push(ident.clone());
+                }
+            }
+            Factor::Term(term) => {
+                for alt in &term.alts {
+                    for entry in alt {
+                        entry_stack.push(entry);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    dependencies
+}
+
+fn push_sequence_entries<'a>(sequence: &'a Sequence, stack: &mut Vec<&'a Entry>) {
+    match sequence {
+        Sequence::Object(entries) => {
+            for (_, entry) in entries {
+                stack.push(entry);
+            }
+        }
+        Sequence::Tuple(entries) => {
+            for entry in entries {
+                stack.push(entry);
+            }
+        }
+    }
+}
+
+fn gen_preprocess_impl(shard: &Shard, names: &FxHashSet<String>) -> TokenStream {
     let name = &shard.name;
     let shard = schema::Shard {
         meta: name.span().into(),
@@ -83,18 +184,34 @@ fn gen_preprocess(shard: &Shard) -> TokenStream {
     let serialized = wincode::serialize(&shard).unwrap();
     let serialized = Literal::byte_string(&serialized);
 
-    let dependencies: Vec<syn::Ident> = Vec::new();
+    let mut deps: Vec<Ident> = Vec::new();
 
     quote! {
         const _: () = {
-            use ::aeris::ui::preproc::{Data, Shard};
-            fn d<S>() -> &'static Data where S: Shard { S::data() }
-            static DATA: Data = Data {
-                hash: #hash,
-                serialized: #serialized,
-                dependencies: &[#(d::<#dependencies>()),*],
-            };
-            impl Shard for #name { fn data() -> &'static Data { &DATA } }
+            use ::aeris::ui::preproc::{Meta, Shard};
+            impl Shard for #name {
+                fn meta() -> &'static dyn Meta {
+                    &META
+                }
+            }
+            struct META;
+            impl Meta for META {
+                fn hash(&self) -> &'static [u8] {
+                    #hash
+                }
+                fn data(&self) -> &'static [u8] {
+                    #serialized
+                }
+                fn deps(&self) -> &'static [&'static dyn Meta] {
+                    &[#(s::<#deps>()),*]
+                }
+            }
+            fn s<S>() -> &'static dyn Meta
+            where
+                S: Shard,
+            {
+                S::meta()
+            }
         };
     }
 }

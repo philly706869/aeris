@@ -176,7 +176,7 @@ impl Parse for Entry {
 
 #[derive(Debug)]
 pub enum Factor {
-    Ident(Ident),
+    Shard(Ident),
     LitStr(LitStr),
     LitChar(LitChar),
     Set(Set),
@@ -187,7 +187,7 @@ impl Parse for Factor {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Ident) {
-            Ok(Self::Ident(input.parse()?))
+            Ok(Self::Shard(input.parse()?))
         } else if lookahead1.peek(LitStr) {
             Ok(Self::LitStr(input.parse()?))
         } else if lookahead1.peek(LitChar) {
@@ -204,8 +204,8 @@ impl Parse for Factor {
 
 #[derive(Debug)]
 pub struct Quantifier {
-    repeater: Repeater,
-    lazy: bool,
+    pub repeater: Repeater,
+    pub lazy: bool,
 }
 
 #[derive(Debug)]

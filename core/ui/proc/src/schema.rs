@@ -73,10 +73,10 @@ pub struct Entry {
 
 #[derive(SchemaRead, SchemaWrite)]
 pub enum Factor {
+    Shard(String),
     Literal(String),
     Set(Set),
     Term(Vec<Vec<Entry>>),
-    Shard(String),
 }
 
 #[derive(SchemaRead, SchemaWrite)]
