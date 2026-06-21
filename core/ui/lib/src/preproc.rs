@@ -37,8 +37,8 @@ where
     }
 
     let mut cluster_path = PathBuf::from(path.as_ref());
-    fs::create_dir_all(&cluster_path).unwrap();
     let mut hash = String::with_capacity(64);
+    fs::create_dir_all(&cluster_path).unwrap();
     for meta in flattened {
         hash.clear();
         for byte in meta.hash() {
