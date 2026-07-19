@@ -1,49 +1,20 @@
 mod ast;
-mod hir;
-mod mir;
-mod schema;
 
-use proc_macro2::{Literal, TokenStream};
+use proc_macro2::TokenStream;
 use quote::quote;
-use rustc_hash::{FxHashMap, FxHashSet};
-use syn::{Ident, parse2};
+use rustc_hash::FxHashMap;
+use syn::parse;
 
 use crate::ast::{Cluster, Factor, Repeater, Sequence, Shape, Shard};
 
-pub fn preprocess(input: TokenStream) -> TokenStream {
-    let cluster = match parse2(input) {
+#[proc_macro]
+pub fn cluster(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let cluster: Cluster = match parse(input) {
         Ok(cluster) => cluster,
-        Err(err) => return err.to_compile_error(),
+        Err(err) => return err.to_compile_error().into(),
     };
-    let base = gen_cluster(&cluster);
-    let impls = gen_preprocess(&cluster);
-    quote! { #base #impls }
-}
-
-pub fn postprocess(input: TokenStream) -> TokenStream {
-    let cluster = match parse2(input) {
-        Ok(cluster) => cluster,
-        Err(err) => return err.to_compile_error(),
-    };
-    gen_cluster(&cluster)
-}
-
-fn gen_cluster(cluster: &Cluster) -> TokenStream {
     let shards = cluster.shards.iter().map(gen_shard);
-    quote! { #(#shards)* }
-}
-
-fn gen_preprocess(cluster: &Cluster) -> TokenStream {
-    let names: FxHashSet<String> = cluster
-        .lambdas
-        .iter()
-        .map(|labmda| labmda.name.to_string())
-        .collect();
-    let impls = cluster
-        .shards
-        .iter()
-        .map(|shard| gen_preprocess_impl(shard, &names));
-    quote! { #(#impls)* }
+    quote! { #(#shards)* }.into()
 }
 
 fn gen_shard(shard: &Shard) -> TokenStream {
@@ -109,50 +80,5 @@ fn gen_shard(shard: &Shard) -> TokenStream {
         #vis #keyword #name #def
         trait #trait_name {}
         impl ::aeris::ui::Shard for #name {}
-    }
-}
-
-fn gen_preprocess_impl(shard: &Shard, names: &FxHashSet<String>) -> TokenStream {
-    let name = &shard.name;
-    let shard = schema::Shard {
-        meta: name.span().into(),
-        name: name.to_string(),
-        shape: schema::Shape::Struct(schema::Sequence::Object(Vec::new())),
-        lambdas: Vec::new(),
-    };
-
-    let hash = Literal::byte_string(&shard.meta.hash());
-    let serialized = wincode::serialize(&shard).unwrap();
-    let serialized = Literal::byte_string(&serialized);
-
-    let mut deps: Vec<Ident> = Vec::new();
-
-    quote! {
-        const _: () = {
-            use ::aeris::ui::preproc::{Meta, Shard};
-            impl Shard for #name {
-                fn meta() -> &'static dyn Meta {
-                    &META
-                }
-            }
-            struct META;
-            impl Meta for META {
-                fn hash(&self) -> &'static [u8] {
-                    #hash
-                }
-                fn data(&self) -> &'static [u8] {
-                    #serialized
-                }
-                fn deps(&self) -> &'static [&'static dyn Meta] {
-                    &[#(meta::<#deps>()),*]
-                }
-            }
-            fn meta<S>() -> &'static dyn Meta
-            where
-                S: Shard,
-            {
-                S::meta()
-            }
-        };
     }
 }
