@@ -1,6 +1,6 @@
 use aeris::ui::cluster;
 
-use crate::{JSONString, JSONValue, WS};
+use crate::cluster::{JSONString, JSONValue, WS};
 
 cluster! {
     #[derive(Debug)]

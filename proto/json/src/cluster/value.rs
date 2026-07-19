@@ -1,6 +1,6 @@
 use aeris::ui::cluster;
 
-use crate::{JSONArray, JSONBoolean, JSONNull, JSONNumber, JSONObject, JSONString};
+use crate::cluster::{JSONArray, JSONBoolean, JSONNull, JSONNumber, JSONObject, JSONString};
 
 cluster! {
     #[derive(Debug)]
