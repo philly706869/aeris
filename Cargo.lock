@@ -381,22 +381,7 @@ dependencies = [
 name = "proto-json"
 version = "0.0.0-prenext.1"
 dependencies = [
- "proto-json-cluster",
-]
-
-[[package]]
-name = "proto-json-cluster"
-version = "0.0.0-prenext.1"
-dependencies = [
  "aeris",
-]
-
-[[package]]
-name = "proto-json-cluster-postproc"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
- "proto-json-cluster",
 ]
 
 [[package]]
