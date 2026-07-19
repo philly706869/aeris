@@ -1,0 +1,13 @@
+[package]
+name    = "proto-json-cluster"
+version = { workspace = true }
+edition = { workspace = true }
+publish = { workspace = true }
+
+[features]
+preproc  = ["dep:aeris"]
+postproc = ["dep:proto-json-cluster-postproc"]
+
+[dependencies]
+aeris                       = { workspace = true, optional = true }
+proto-json-cluster-postproc = { workspace = true, optional = true }

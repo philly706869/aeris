@@ -5,11 +5,14 @@ members = [
   "core/ui",
   "core/ui/lib",
   "core/ui/proc",
+  "core/ui/preproc",
   "std/core",
   "std/core/ui",
   "std/cli",
   "std/daemon",
   "proto/json",
+  "proto/json/cluster",
+  "proto/json/cluster/postproc",
 ]
 
 [workspace.package]
@@ -18,22 +21,25 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris         = { path = "core" }
-aeris-ui      = { path = "core/ui" }
-aeris-ui-lib  = { path = "core/ui/lib" }
-aeris-ui-proc = { path = "core/ui/proc" }
-aeris-std     = { path = "std/core" }
-aeris-std-ui  = { path = "std/core/ui" }
-aeris-cli     = { path = "std/cli" }
-aeris-daemon  = { path = "std/daemon" }
-proto-json    = { path = "proto/json" }
-clap          = { version = "4", features = ["derive"] }
-fnv           = { version = "1" }
-inkwell       = { version = "0.9", features = ["llvm22-1-force-static"] }
-proc-macro2   = { version = "1" }
-quote         = { version = "1" }
-rayon         = { version = "1" }
-rustc-hash    = { version = "2" }
-syn           = { version = "3" }
-tokio         = { version = "1", features = ["full"] }
-tracing       = { version = "0.1" }
+aeris                       = { path = "core" }
+aeris-ui                    = { path = "core/ui" }
+aeris-ui-lib                = { path = "core/ui/lib" }
+aeris-ui-proc               = { path = "core/ui/proc" }
+aeris-ui-preproc            = { path = "core/ui/preproc" }
+aeris-std                   = { path = "std/core" }
+aeris-std-ui                = { path = "std/core/ui" }
+aeris-cli                   = { path = "std/cli" }
+aeris-daemon                = { path = "std/daemon" }
+proto-json                  = { path = "proto/json" }
+proto-json-cluster          = { path = "proto/json/cluster" }
+proto-json-cluster-postproc = { path = "proto/json/cluster/postproc" }
+clap                        = { version = "4", features = ["derive"] }
+fnv                         = { version = "1" }
+inkwell                     = { version = "0.9", features = ["llvm22-1-force-static"] }
+proc-macro2                 = { version = "1" }
+quote                       = { version = "1" }
+rayon                       = { version = "1" }
+rustc-hash                  = { version = "2" }
+syn                         = { version = "3" }
+tokio                       = { version = "1", features = ["full"] }
+tracing                     = { version = "0.1" }
