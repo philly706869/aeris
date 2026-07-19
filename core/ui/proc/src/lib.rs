@@ -8,7 +8,7 @@ use quote::quote;
 use rustc_hash::{FxHashMap, FxHashSet};
 use syn::{Ident, parse2};
 
-use crate::ast::{Cluster, Entry, Factor, Repeater, Sequence, Shape, Shard};
+use crate::ast::{Cluster, Factor, Repeater, Sequence, Shape, Shard};
 
 pub fn preprocess(input: TokenStream) -> TokenStream {
     let cluster = match parse2(input) {
@@ -16,16 +16,16 @@ pub fn preprocess(input: TokenStream) -> TokenStream {
         Err(err) => return err.to_compile_error(),
     };
     let base = gen_cluster(&cluster);
-    let names = get_names(&cluster);
-    let impls = gen_preprocess(&cluster, &names);
+    let impls = gen_preprocess(&cluster);
     quote! { #base #impls }
 }
 
 pub fn postprocess(input: TokenStream) -> TokenStream {
-    match parse2(input) {
-        Ok(cluster) => gen_cluster(&cluster),
+    let cluster = match parse2(input) {
+        Ok(cluster) => cluster,
         Err(err) => return err.to_compile_error(),
-    }
+    };
+    gen_cluster(&cluster)
 }
 
 fn gen_cluster(cluster: &Cluster) -> TokenStream {
@@ -33,20 +33,17 @@ fn gen_cluster(cluster: &Cluster) -> TokenStream {
     quote! { #(#shards)* }
 }
 
-fn gen_preprocess(cluster: &Cluster, names: &FxHashSet<String>) -> TokenStream {
-    let impls = cluster
-        .shards
-        .iter()
-        .map(|shard| gen_preprocess_impl(shard, names));
-    quote! { #(#impls)* }
-}
-
-fn get_names(cluster: &Cluster) -> FxHashSet<String> {
-    cluster
+fn gen_preprocess(cluster: &Cluster) -> TokenStream {
+    let names: FxHashSet<String> = cluster
         .lambdas
         .iter()
         .map(|labmda| labmda.name.to_string())
-        .collect()
+        .collect();
+    let impls = cluster
+        .shards
+        .iter()
+        .map(|shard| gen_preprocess_impl(shard, &names));
+    quote! { #(#impls)* }
 }
 
 fn gen_shard(shard: &Shard) -> TokenStream {
@@ -115,62 +112,6 @@ fn gen_shard(shard: &Shard) -> TokenStream {
     }
 }
 
-fn calculate_dependencies(shard: &Shard, lambda_names: &FxHashSet<String>) -> Vec<Ident> {
-    let mut dependencies = Vec::new();
-    let mut visited_names = FxHashSet::default();
-    let mut entry_stack: Vec<&Entry> = Vec::new();
-
-    match &shard.shape {
-        Shape::Struct(sequence) => {
-            push_sequence_entries(sequence, &mut entry_stack);
-        }
-        Shape::Enum(variants) => {
-            for (_, sequence) in variants {
-                push_sequence_entries(sequence, &mut entry_stack);
-            }
-        }
-    }
-
-    while let Some(entry) = entry_stack.pop() {
-        match &entry.factor {
-            Factor::Shard(ident) => {
-                let name_str = ident.to_string();
-                if !lambda_names.contains(&name_str)
-                    && name_str != shard.name.to_string()
-                    && visited_names.insert(name_str)
-                {
-                    dependencies.push(ident.clone());
-                }
-            }
-            Factor::Term(term) => {
-                for alt in &term.alts {
-                    for entry in alt {
-                        entry_stack.push(entry);
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-
-    dependencies
-}
-
-fn push_sequence_entries<'a>(sequence: &'a Sequence, stack: &mut Vec<&'a Entry>) {
-    match sequence {
-        Sequence::Object(entries) => {
-            for (_, entry) in entries {
-                stack.push(entry);
-            }
-        }
-        Sequence::Tuple(entries) => {
-            for entry in entries {
-                stack.push(entry);
-            }
-        }
-    }
-}
-
 fn gen_preprocess_impl(shard: &Shard, names: &FxHashSet<String>) -> TokenStream {
     let name = &shard.name;
     let shard = schema::Shard {
@@ -203,10 +144,10 @@ fn gen_preprocess_impl(shard: &Shard, names: &FxHashSet<String>) -> TokenStream 
                     #serialized
                 }
                 fn deps(&self) -> &'static [&'static dyn Meta] {
-                    &[#(s::<#deps>()),*]
+                    &[#(meta::<#deps>()),*]
                 }
             }
-            fn s<S>() -> &'static dyn Meta
+            fn meta<S>() -> &'static dyn Meta
             where
                 S: Shard,
             {

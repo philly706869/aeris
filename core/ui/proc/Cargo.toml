@@ -4,10 +4,11 @@ version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
+[lib]
+proc-macro = true
+
 [dependencies]
 proc-macro2 = { workspace = true }
 quote       = { workspace = true }
 rustc-hash  = { workspace = true }
-sha2        = { workspace = true }
 syn         = { workspace = true, features = ["extra-traits"] }
-wincode     = { workspace = true, features = ["derive"] }

@@ -5,8 +5,6 @@ members = [
   "core/ui",
   "core/ui/lib",
   "core/ui/proc",
-  "core/ui/preproc",
-  "core/ui/postproc",
   "std/core",
   "std/core/ui",
   "std/core/ui/cluster",
@@ -26,8 +24,6 @@ aeris                = { path = "core" }
 aeris-ui             = { path = "core/ui" }
 aeris-ui-lib         = { path = "core/ui/lib" }
 aeris-ui-proc        = { path = "core/ui/proc" }
-aeris-ui-preproc     = { path = "core/ui/preproc" }
-aeris-ui-postproc    = { path = "core/ui/postproc" }
 aeris-std            = { path = "std/core" }
 aeris-std-ui         = { path = "std/core/ui" }
 aeris-std-ui-cluster = { path = "std/core/ui/cluster" }
@@ -42,8 +38,6 @@ proc-macro2          = { version = "1" }
 quote                = { version = "1" }
 rayon                = { version = "1" }
 rustc-hash           = { version = "2" }
-sha2                 = { version = "0.11" }
-syn                  = { version = "2" }
+syn                  = { version = "3" }
 tokio                = { version = "1", features = ["full"] }
 tracing              = { version = "0.1" }
-wincode              = { version = "0.5" }

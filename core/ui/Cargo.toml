@@ -4,11 +4,6 @@ version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
-[features]
-preprocess  = ["aeris-ui-lib/preprocess", "dep:aeris-ui-preproc"]
-postprocess = ["dep:aeris-ui-postproc"]
-
 [dependencies]
-aeris-ui-lib      = { workspace = true }
-aeris-ui-preproc  = { workspace = true, optional = true }
-aeris-ui-postproc = { workspace = true, optional = true }
+aeris-ui-lib  = { workspace = true }
+aeris-ui-proc = { workspace = true }

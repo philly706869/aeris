@@ -1,5 +1,2 @@
 [alias]
 aeris = "run --package aeris-cli"
-
-[env]
-CLUSTER = { value = "target/aeris/ui/cluster", relative = true }
