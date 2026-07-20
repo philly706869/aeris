@@ -10,6 +10,7 @@ members = [
   "std/cli",
   "std/daemon",
   "proto/json",
+  "bench",
 ]
 
 [workspace.package]
@@ -27,7 +28,9 @@ aeris-std-ui  = { path = "std/core/ui" }
 aeris-cli     = { path = "std/cli" }
 aeris-daemon  = { path = "std/daemon" }
 proto-json    = { path = "proto/json" }
+benchmark     = { path = "bench" }
 clap          = { version = "4", features = ["derive"] }
+criterion     = { version = "0.8" }
 fnv           = { version = "1" }
 inkwell       = { version = "0.9", features = ["llvm22-1-force-static"] }
 proc-macro2   = { version = "1" }
