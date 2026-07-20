@@ -7,4 +7,4 @@ publish = { workspace = true }
 [dependencies]
 aeris-std = { workspace = true }
 rayon     = { workspace = true }
-tokio     = { workspace = true }
+tokio     = { workspace = true, features = ["full"] }

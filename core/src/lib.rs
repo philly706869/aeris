@@ -6,8 +6,4 @@ impl Context {
     pub fn new() -> Self {
         Self {}
     }
-
-    pub fn sync(&self) {}
-
-    pub fn cache(&self) {}
 }
