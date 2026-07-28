@@ -19,26 +19,27 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris         = { path = "core" }
-aeris-ui      = { path = "core/ui" }
-aeris-ui-lib  = { path = "core/ui/lib" }
-aeris-ui-proc = { path = "core/ui/proc" }
-aeris-std     = { path = "std/core" }
-aeris-std-ui  = { path = "std/core/ui" }
-aeris-cli     = { path = "std/cli" }
-aeris-daemon  = { path = "std/daemon" }
-benchmark     = { path = "bench" }
-proto-json    = { path = "proto/json" }
-clap          = { version = "4" }
-criterion     = { version = "0.8" }
-fnv           = { version = "1" }
-inkwell       = { version = "0.9", features = ["llvm22-1-force-static"] }
-postcard      = { version = "1" }
-proc-macro2   = { version = "1" }
-quote         = { version = "1" }
-rayon         = { version = "1" }
-rustc-hash    = { version = "2" }
-serde         = { version = "1" }
-syn           = { version = "3" }
-tokio         = { version = "1" }
-tracing       = { version = "0.1" }
+aeris              = { path = "core" }
+aeris-ui           = { path = "core/ui" }
+aeris-ui-lib       = { path = "core/ui/lib" }
+aeris-ui-proc      = { path = "core/ui/proc" }
+aeris-std          = { path = "std/core" }
+aeris-std-ui       = { path = "std/core/ui" }
+aeris-cli          = { path = "std/cli" }
+aeris-daemon       = { path = "std/daemon" }
+benchmark          = { path = "bench" }
+proto-json         = { path = "proto/json" }
+clap               = { version = "4" }
+criterion          = { version = "0.8" }
+fnv                = { version = "1" }
+inkwell            = { version = "0.9", features = ["llvm22-1-force-static"] }
+postcard           = { version = "1" }
+proc-macro2        = { version = "1" }
+quote              = { version = "1" }
+rayon              = { version = "1" }
+rustc-hash         = { version = "2" }
+serde              = { version = "1" }
+syn                = { version = "3" }
+tokio              = { version = "1" }
+tracing            = { version = "0.1" }
+tracing-subscriber = { version = "0.3" }

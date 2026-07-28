@@ -5,12 +5,12 @@ use syn::{
 };
 
 #[derive(Debug)]
-pub struct Cluster {
-    pub shards: Vec<Shard>,
-    pub lambdas: Vec<Lambda>,
+pub struct ClusterAST {
+    pub shards: Vec<ShardAST>,
+    pub lambdas: Vec<LambdaAST>,
 }
 
-impl Parse for Cluster {
+impl Parse for ClusterAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut shards = Vec::new();
         let mut lambdas = Vec::new();
@@ -18,7 +18,7 @@ impl Parse for Cluster {
             if input.peek(Ident) {
                 let name = input.parse()?;
                 let entry = input.parse()?;
-                lambdas.push(Lambda { name, entry });
+                lambdas.push(LambdaAST { name, entry });
                 continue;
             }
 
@@ -39,7 +39,7 @@ impl Parse for Cluster {
             input.parse::<Token![trait]>()?;
             let trait_name = input.parse()?;
             let shape = if is_struct {
-                Shape::Struct(input.parse()?)
+                ShapeAST::Struct(input.parse()?)
             } else {
                 let content;
                 braced!(content in input);
@@ -49,10 +49,10 @@ impl Parse for Cluster {
                     let sequence = content.parse()?;
                     variants.push((name, sequence));
                 }
-                Shape::Enum(variants)
+                ShapeAST::Enum(variants)
             };
 
-            shards.push(Shard {
+            shards.push(ShardAST {
                 attrs,
                 vis,
                 name,
@@ -65,33 +65,33 @@ impl Parse for Cluster {
 }
 
 #[derive(Debug)]
-pub struct Shard {
+pub struct ShardAST {
     pub attrs: Vec<Attribute>,
     pub vis: Visibility,
     pub name: Ident,
     pub trait_name: Ident,
-    pub shape: Shape,
+    pub shape: ShapeAST,
 }
 
 #[derive(Debug)]
-pub enum Shape {
-    Struct(Sequence),
-    Enum(Vec<(Ident, Sequence)>),
+pub enum ShapeAST {
+    Struct(SequenceAST),
+    Enum(Vec<(Ident, SequenceAST)>),
 }
 
 #[derive(Debug)]
-pub struct Lambda {
+pub struct LambdaAST {
     pub name: Ident,
-    pub entry: Entry,
+    pub entry: EntryAST,
 }
 
 #[derive(Debug)]
-pub enum Sequence {
-    Object(Vec<(Ident, Entry)>),
-    Tuple(Vec<Entry>),
+pub enum SequenceAST {
+    Object(Vec<(Ident, EntryAST)>),
+    Tuple(Vec<EntryAST>),
 }
 
-impl Parse for Sequence {
+impl Parse for SequenceAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Brace) {
@@ -121,21 +121,21 @@ impl Parse for Sequence {
 }
 
 #[derive(Debug)]
-pub struct Entry {
-    pub factor: Factor,
-    pub quantifier: Option<Quantifier>,
+pub struct EntryAST {
+    pub factor: FactorAST,
+    pub quantifier: Option<QuantifierAST>,
 }
 
-impl Parse for Entry {
+impl Parse for EntryAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let factor = input.parse()?;
         let quantifier = 'quant: {
             let repeater = if input.parse::<Option<Token![+]>>()?.is_some() {
-                Repeater::Plus
+                RepeaterAST::Plus
             } else if input.parse::<Option<Token![*]>>()?.is_some() {
-                Repeater::Star
+                RepeaterAST::Star
             } else if input.parse::<Option<Token![?]>>()?.is_some() {
-                Repeater::Option
+                RepeaterAST::Option
             } else if input.peek(Bracket) {
                 let content;
                 bracketed!(content in input);
@@ -146,20 +146,20 @@ impl Parse for Entry {
                             let min: LitInt = content.parse()?;
                             content.parse::<Token![,]>()?;
                             let max: LitInt = content.parse()?;
-                            Repeater::Range(min, max)
+                            RepeaterAST::Range(min, max)
                         } else {
                             let min: LitInt = content.parse()?;
                             content.parse::<Token![,]>()?;
-                            Repeater::Min(min)
+                            RepeaterAST::Min(min)
                         }
                     } else {
                         let val: LitInt = content.parse()?;
-                        Repeater::Val(val)
+                        RepeaterAST::Val(val)
                     }
                 } else if lookahead1.peek(Token![,]) {
                     content.parse::<Token![,]>()?;
                     let max: LitInt = content.parse()?;
-                    Repeater::Max(max)
+                    RepeaterAST::Max(max)
                 } else {
                     return Err(lookahead1.error());
                 }
@@ -167,7 +167,7 @@ impl Parse for Entry {
                 break 'quant None;
             };
             let lazy = input.parse::<Option<Token![?]>>()?.is_some();
-            Some(Quantifier { repeater, lazy })
+            Some(QuantifierAST { repeater, lazy })
         };
 
         Ok(Self { factor, quantifier })
@@ -175,15 +175,15 @@ impl Parse for Entry {
 }
 
 #[derive(Debug)]
-pub enum Factor {
+pub enum FactorAST {
     Shard(Ident),
     LitStr(LitStr),
     LitChar(LitChar),
-    Set(Set),
-    Term(Term),
+    Set(SetAST),
+    Term(TermAST),
 }
 
-impl Parse for Factor {
+impl Parse for FactorAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lookahead1 = input.lookahead1();
         if lookahead1.peek(Ident) {
@@ -203,13 +203,13 @@ impl Parse for Factor {
 }
 
 #[derive(Debug)]
-pub struct Quantifier {
-    pub repeater: Repeater,
+pub struct QuantifierAST {
+    pub repeater: RepeaterAST,
     pub lazy: bool,
 }
 
 #[derive(Debug)]
-pub enum Repeater {
+pub enum RepeaterAST {
     Plus,
     Star,
     Option,
@@ -220,11 +220,11 @@ pub enum Repeater {
 }
 
 #[derive(Debug)]
-pub struct Term {
-    pub alts: Vec<Vec<Entry>>,
+pub struct TermAST {
+    pub alts: Vec<Vec<EntryAST>>,
 }
 
-impl Parse for Term {
+impl Parse for TermAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
         parenthesized!(content in input);
@@ -244,12 +244,12 @@ impl Parse for Term {
 }
 
 #[derive(Debug)]
-pub struct Set {
+pub struct SetAST {
     pub exclusion: bool,
-    pub entries: Vec<SetEntry>,
+    pub entries: Vec<SetEntryAST>,
 }
 
-impl Parse for Set {
+impl Parse for SetAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
         braced!(content in input);
@@ -263,12 +263,12 @@ impl Parse for Set {
 }
 
 #[derive(Debug)]
-pub enum SetEntry {
+pub enum SetEntryAST {
     Single(LitChar),
     Range(LitChar, LitChar),
 }
 
-impl Parse for SetEntry {
+impl Parse for SetEntryAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let start = input.parse()?;
         if input.parse::<Option<Token![..]>>()?.is_some() {

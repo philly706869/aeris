@@ -5,6 +5,8 @@ edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris-std = { workspace = true }
-rayon     = { workspace = true }
-tokio     = { workspace = true, features = ["full"] }
+aeris-std          = { workspace = true }
+rayon              = { workspace = true }
+tokio              = { workspace = true, features = ["macros", "net"] }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
