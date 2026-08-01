@@ -239,6 +239,9 @@ impl Parse for TermAST {
                 entries.push(content.parse()?);
             }
         }
+        if !entries.is_empty() {
+            alts.push(entries);
+        }
         Ok(Self { alts })
     }
 }
