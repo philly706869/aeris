@@ -26,7 +26,7 @@ aeris-std          = { path = "crates/std" }
 aeris-std-ui       = { path = "crates/std/ui" }
 aeris-cli          = { path = "apps/cli" }
 aeris-daemon       = { path = "apps/daemon" }
-proto-json         = { path = "examples/proto/json" }
+example-json       = { path = "examples/json" }
 clap               = { version = "4" }
 criterion          = { version = "0.8" }
 fnv                = { version = "1" }
