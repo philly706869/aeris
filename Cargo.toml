@@ -1,16 +1,15 @@
 [workspace]
 resolver = "3"
 members = [
-  "core",
-  "core/ui",
-  "core/ui/lib",
-  "core/ui/proc",
-  "std/core",
-  "std/core/ui",
-  "std/cli",
-  "std/daemon",
-  "bench",
-  "proto/json",
+  "crates/core",
+  "crates/core/ui",
+  "crates/core/ui/lib",
+  "crates/core/ui/proc",
+  "crates/std",
+  "crates/std/ui",
+  "apps/cli",
+  "apps/daemon",
+  "examples/proto/json",
 ]
 
 [workspace.package]
@@ -19,16 +18,15 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris              = { path = "core" }
-aeris-ui           = { path = "core/ui" }
-aeris-ui-lib       = { path = "core/ui/lib" }
-aeris-ui-proc      = { path = "core/ui/proc" }
-aeris-std          = { path = "std/core" }
-aeris-std-ui       = { path = "std/core/ui" }
-aeris-cli          = { path = "std/cli" }
-aeris-daemon       = { path = "std/daemon" }
-benchmark          = { path = "bench" }
-proto-json         = { path = "proto/json" }
+aeris              = { path = "crates/core" }
+aeris-ui           = { path = "crates/core/ui" }
+aeris-ui-lib       = { path = "crates/core/ui/lib" }
+aeris-ui-proc      = { path = "crates/core/ui/proc" }
+aeris-std          = { path = "crates/std" }
+aeris-std-ui       = { path = "crates/std/ui" }
+aeris-cli          = { path = "apps/cli" }
+aeris-daemon       = { path = "apps/daemon" }
+proto-json         = { path = "examples/proto/json" }
 clap               = { version = "4" }
 criterion          = { version = "0.8" }
 fnv                = { version = "1" }
