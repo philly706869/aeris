@@ -1,2 +1,3 @@
 [alias]
-aeris = "run --package aeris-cli"
+aeris  = "run --package aeris-cli"
+aerisd = "run --package aeris-daemon"
