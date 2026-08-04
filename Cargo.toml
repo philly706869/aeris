@@ -9,7 +9,7 @@ members = [
   "crates/std/ui",
   "apps/cli",
   "apps/daemon",
-  "examples/proto/json",
+  "examples/json",
 ]
 
 [workspace.package]
