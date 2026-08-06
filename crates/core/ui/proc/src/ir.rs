@@ -3,13 +3,13 @@ use proc_macro2::TokenStream;
 use crate::ast::{ClusterAST, ShardAST};
 
 #[derive(Debug)]
-pub struct ClusterHIR {
-    struct_shards: Vec<StructShardHIR>,
-    enum_shards: Vec<EnumShardHIR>,
-    lambda_shards: Vec<LambdaShardHIR>,
+pub struct ClusterIR {
+    struct_shards: Vec<StructShardIR>,
+    enum_shards: Vec<EnumShardIR>,
+    lambda_shards: Vec<LambdaShardIR>,
 }
 
-impl ClusterHIR {
+impl ClusterIR {
     pub fn lower(ast: &ClusterAST) -> Self {
         let mut struct_shards = Vec::new();
         let mut enum_shards = Vec::new();
@@ -34,10 +34,10 @@ impl ClusterHIR {
 }
 
 #[derive(Debug)]
-pub struct StructShardHIR {}
+pub struct StructShardIR {}
 
 #[derive(Debug)]
-pub struct EnumShardHIR {}
+pub struct EnumShardIR {}
 
 #[derive(Debug)]
-pub struct LambdaShardHIR {}
+pub struct LambdaShardIR {}

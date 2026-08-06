@@ -1,15 +1,15 @@
 mod ast;
-mod hir;
+mod ir;
 
 use proc_macro::TokenStream;
 use syn::parse;
 
-use crate::hir::ClusterHIR;
+use crate::ir::ClusterIR;
 
 #[proc_macro]
 pub fn cluster(input: TokenStream) -> TokenStream {
     match parse(input) {
-        Ok(ast) => ClusterHIR::lower(&ast).expand(),
+        Ok(ast) => ClusterIR::lower(&ast).expand(),
         Err(err) => err.to_compile_error(),
     }
     .into()
