@@ -1,16 +1,16 @@
 mod ast;
 mod hir;
 
-use quote::quote;
+use proc_macro::TokenStream;
 use syn::parse;
 
-use crate::ast::ClusterAST;
+use crate::hir::ClusterHIR;
 
 #[proc_macro]
-pub fn cluster(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let cluster: ClusterAST = match parse(input) {
-        Ok(cluster) => cluster,
-        Err(err) => return err.to_compile_error().into(),
-    };
-    quote! {}.into()
+pub fn cluster(input: TokenStream) -> TokenStream {
+    match parse(input) {
+        Ok(ast) => ClusterHIR::lower(&ast).emit(),
+        Err(err) => err.to_compile_error(),
+    }
+    .into()
 }

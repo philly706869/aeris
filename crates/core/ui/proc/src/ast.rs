@@ -29,19 +29,19 @@ pub enum ShardAST {
 impl Parse for ShardAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let fork = input.fork();
-        if let Ok(struct_shard) = fork.parse::<StructShardAST>() {
+        if let Ok(shard) = fork.parse::<StructShardAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Struct(struct_shard));
+            return Ok(Self::Struct(shard));
         }
         let fork = input.fork();
-        if let Ok(enum_shard) = fork.parse::<EnumShardAST>() {
+        if let Ok(shard) = fork.parse::<EnumShardAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Enum(enum_shard));
+            return Ok(Self::Enum(shard));
         }
         let fork = input.fork();
-        if let Ok(lambda_shard) = fork.parse::<LambdaShardAST>() {
+        if let Ok(shard) = fork.parse::<LambdaShardAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Lambda(lambda_shard));
+            return Ok(Self::Lambda(shard));
         }
         Err(input.error("expected struct, enum, or lambda"))
     }
@@ -145,14 +145,14 @@ pub enum SequenceAST {
 impl Parse for SequenceAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let fork = input.fork();
-        if let Ok(object) = fork.parse::<ObjectSequenceAST>() {
+        if let Ok(sequence) = fork.parse::<ObjectSequenceAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Object(object));
+            return Ok(Self::Object(sequence));
         }
         let fork = input.fork();
-        if let Ok(tuple) = fork.parse::<TupleSequenceAST>() {
+        if let Ok(sequence) = fork.parse::<TupleSequenceAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Tuple(tuple));
+            return Ok(Self::Tuple(sequence));
         }
         Err(input.error("expected object or tuple sequence"))
     }
