@@ -21,34 +21,34 @@ impl Parse for ClusterAST {
 
 #[derive(Debug)]
 pub enum ShardAST {
-    Struct(StructAST),
-    Enum(EnumAST),
-    Lambda(LambdaAST),
+    Struct(StructShardAST),
+    Enum(EnumShardAST),
+    Lambda(LambdaShardAST),
 }
 
 impl Parse for ShardAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let fork = input.fork();
-        if let Ok(struct_) = fork.parse::<StructAST>() {
+        if let Ok(struct_shard) = fork.parse::<StructShardAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Struct(struct_));
+            return Ok(Self::Struct(struct_shard));
         }
         let fork = input.fork();
-        if let Ok(enum_) = fork.parse::<EnumAST>() {
+        if let Ok(enum_shard) = fork.parse::<EnumShardAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Enum(enum_));
+            return Ok(Self::Enum(enum_shard));
         }
         let fork = input.fork();
-        if let Ok(lambda) = fork.parse::<LambdaAST>() {
+        if let Ok(lambda_shard) = fork.parse::<LambdaShardAST>() {
             input.advance_to(&fork);
-            return Ok(Self::Lambda(lambda));
+            return Ok(Self::Lambda(lambda_shard));
         }
         Err(input.error("expected struct, enum, or lambda"))
     }
 }
 
 #[derive(Debug)]
-pub struct StructAST {
+pub struct StructShardAST {
     pub attrs: Vec<Attribute>,
     pub vis: Visibility,
     pub name: Ident,
@@ -56,7 +56,7 @@ pub struct StructAST {
     pub sequence: SequenceAST,
 }
 
-impl Parse for StructAST {
+impl Parse for StructShardAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let attrs = Attribute::parse_outer(input)?;
         let vis = input.parse()?;
@@ -76,15 +76,15 @@ impl Parse for StructAST {
 }
 
 #[derive(Debug)]
-pub struct EnumAST {
+pub struct EnumShardAST {
     pub attrs: Vec<Attribute>,
     pub vis: Visibility,
     pub name: Ident,
     pub trait_name: Ident,
-    pub variants: Vec<VariantAST>,
+    pub variants: Vec<EnumShardVariantAST>,
 }
 
-impl Parse for EnumAST {
+impl Parse for EnumShardAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let attrs = Attribute::parse_outer(input)?;
         let vis = input.parse()?;
@@ -109,12 +109,12 @@ impl Parse for EnumAST {
 }
 
 #[derive(Debug)]
-pub struct VariantAST {
+pub struct EnumShardVariantAST {
     pub name: Ident,
     pub sequence: SequenceAST,
 }
 
-impl Parse for VariantAST {
+impl Parse for EnumShardVariantAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let name = input.parse()?;
         let sequence = input.parse()?;
@@ -123,12 +123,12 @@ impl Parse for VariantAST {
 }
 
 #[derive(Debug)]
-pub struct LambdaAST {
+pub struct LambdaShardAST {
     pub name: Ident,
     pub entry: EntryAST,
 }
 
-impl Parse for LambdaAST {
+impl Parse for LambdaShardAST {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let name = input.parse()?;
         let entry = input.parse()?;
