@@ -28,7 +28,7 @@ impl ClusterHIR {
         }
     }
 
-    pub fn emit(&self) -> TokenStream {
+    pub fn expand(&self) -> TokenStream {
         todo!()
     }
 }
