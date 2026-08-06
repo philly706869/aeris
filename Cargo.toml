@@ -30,7 +30,7 @@ example-json       = { path = "examples/json" }
 clap               = { version = "4" }
 criterion          = { version = "0.8" }
 fnv                = { version = "1" }
-inkwell            = { version = "0.9", features = ["llvm22-1-force-static"] }
+inkwell            = { version = "0.10", features = ["llvm22-1-force-static"] }
 postcard           = { version = "1" }
 proc-macro2        = { version = "1" }
 quote              = { version = "1" }
