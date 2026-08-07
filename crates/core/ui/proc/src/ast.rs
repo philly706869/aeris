@@ -1,8 +1,58 @@
+use proc_macro2::{TokenStream, TokenTree};
 use syn::{
     Attribute, Ident, LitChar, LitInt, LitStr, Token, Visibility, braced, bracketed, parenthesized,
     parse::{Parse, ParseStream, discouraged::Speculative},
     token::Bracket,
 };
+
+pub struct Cluster;
+
+enum Action {
+    Shift(State),
+    Accept,
+    Error,
+}
+
+enum State {
+    Shard,
+    Attribute,
+    BindShard,
+    LambdaShard,
+}
+
+impl Parse for Cluster {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let stream = TokenStream::new();
+        let mut iter = stream.into_iter();
+        match iter.next().unwrap() {
+            TokenTree::Ident(ident) => {}
+            _ => {}
+        }
+        let mut state = State::Shard;
+        let mut stack = Vec::new();
+        stack.push(input);
+
+        loop {
+            let input = stack.pop().unwrap();
+            let action = match state {
+                State::Shard if input.peek(Ident) => {
+                    input.parse::<Ident>().unwrap();
+                    Action::Shift(State::LambdaShard)
+                }
+                State::Shard if input.peek(Token![#]) => {
+                    input.parse::<Token![#]>().unwrap();
+                    Action::Shift(State::Attribute)
+                }
+                State::Shard => Action::Error,
+                State::Attribute => {}
+                State::BindShard => {}
+                State::LambdaShard => {}
+            };
+            match action {}
+        }
+        Ok(Self {})
+    }
+}
 
 #[derive(Debug)]
 pub struct ClusterAST {

@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use rustc_hash::FxHashSet;
+use rustc_hash::FxHashMap;
 
 use crate::ast::{ClusterAST, ShardAST};
 
@@ -12,38 +12,55 @@ pub struct ClusterIR {
 }
 
 impl ClusterIR {
-    pub fn lower(ast: &ClusterAST) -> Self {
+    pub fn lower(ast: &ClusterAST) -> syn::Result<Self> {
         let mut struct_shards = Vec::new();
         let mut enum_shards = Vec::new();
         let mut lambda_shards = Vec::new();
-        let mut names = FxHashSet::default();
+        let mut name_table = FxHashMap::default();
+        let mut name_collisions = Vec::new();
         for shard in &ast.shards {
-            match shard {
+            let name_ident = match shard {
                 ShardAST::Struct(shard) => {
                     let node = StructShardIR {};
                     struct_shards.push(node);
-                    let name = shard.name.to_string();
-                    names.insert(name);
+                    &shard.name
                 }
                 ShardAST::Enum(shard) => {
                     let node = EnumShardIR {};
                     enum_shards.push(node);
-                    let name = shard.name.to_string();
-                    names.insert(name);
+                    &shard.name
                 }
                 ShardAST::Lambda(shard) => {
                     let node = LambdaShardIR {};
                     lambda_shards.push(node);
-                    let name = shard.name.to_string();
-                    names.insert(name);
+                    &shard.name
                 }
+            };
+            let name_str = name_ident.to_string();
+            let collision = name_table.insert(name_str, name_ident);
+            if let Some(collision) = collision {
+                name_collisions.push(collision);
+                name_collisions.push(name_ident);
             }
         }
-        Self {
+        if let Some(err) = name_collisions
+            .into_iter()
+            .map(|name| {
+                let msg = format!("duplicate shard name {}", name.to_string());
+                syn::Error::new_spanned(name, msg)
+            })
+            .reduce(|mut acc, curr| {
+                acc.combine(curr);
+                acc
+            })
+        {
+            return Err(err);
+        }
+        Ok(Self {
             struct_shards,
             enum_shards,
             lambda_shards,
-        }
+        })
     }
 
     pub fn expand(&self) -> TokenStream {

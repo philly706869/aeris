@@ -8,9 +8,9 @@ use crate::ir::ClusterIR;
 
 #[proc_macro]
 pub fn cluster(input: TokenStream) -> TokenStream {
-    match parse(input) {
-        Ok(ast) => ClusterIR::lower(&ast).expand(),
-        Err(err) => err.into_compile_error(),
-    }
-    .into()
+    parse(input)
+        .and_then(|ast| ClusterIR::lower(&ast))
+        .map(|ir| ir.expand())
+        .unwrap_or_else(|err| err.into_compile_error())
+        .into()
 }
