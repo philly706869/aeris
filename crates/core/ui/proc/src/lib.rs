@@ -10,7 +10,7 @@ use crate::ir::ClusterIR;
 pub fn cluster(input: TokenStream) -> TokenStream {
     match parse(input) {
         Ok(ast) => ClusterIR::lower(&ast).expand(),
-        Err(err) => err.to_compile_error(),
+        Err(err) => err.into_compile_error(),
     }
     .into()
 }
