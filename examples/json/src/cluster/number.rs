@@ -41,14 +41,14 @@ pub mod JSONSign {
 
 #[shard]
 mod Digits {
-    x! {
+    Shard! {
         | Digit+
     }
 }
 
 #[shard]
 mod Digit {
-    x! {
+    Shard! {
         | '0'
         | One2Nine
     }
@@ -56,7 +56,7 @@ mod Digit {
 
 #[shard]
 mod One2Nine {
-    x! {
+    Shard! {
         | {'1'..'9'}
     }
 }

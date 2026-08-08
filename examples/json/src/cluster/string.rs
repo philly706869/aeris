@@ -12,7 +12,7 @@ pub mod JSONString {
 
 #[shard]
 mod Content {
-    x! {
+    Shard! {
         (
             | {! '"' '\\' '\u{0000}'..'\u{001F}'}
             | '\\' Escape
@@ -22,7 +22,7 @@ mod Content {
 
 #[shard]
 mod Escape {
-    x! {
+    Shard! {
         | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
         | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}[4]
     }
