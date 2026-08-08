@@ -1,12 +1,10 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-cluster! {
+#[shard]
+pub mod JSONBoolean {
     #[derive(Debug)]
-    pub enum JSONBoolean
-    trait JSONBooleanImpl {
-        True ( "true" )
-        False ( "false" )
+    enum Shard {
+        True(x!["true"]),
+        False(x!["false"]),
     }
 }
-
-impl JSONBooleanImpl for JSONBoolean {}

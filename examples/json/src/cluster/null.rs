@@ -1,9 +1,7 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-cluster! {
+#[shard]
+pub mod JSONNull {
     #[derive(Debug)]
-    pub struct JSONNull
-    trait JSONNullImpl ( "null" )
+    struct Shard(x!["null"]);
 }
-
-impl JSONNullImpl for JSONNull {}

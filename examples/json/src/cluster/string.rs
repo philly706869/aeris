@@ -1,23 +1,29 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-cluster! {
+#[shard]
+pub mod JSONString {
     #[derive(Debug)]
-    pub struct JSONString
-    trait JSONStringImpl {
-        quote: '"'
-        content: Content
-        quote: '"'
+    struct Shard {
+        quote: x!["\""],
+        content: Content,
+        quote: x!["\""],
     }
-    Content (
+}
+
+#[shard]
+mod Content {
+    x! {
         (
             | {! '"' '\\' '\u{0000}'..'\u{001F}'}
             | '\\' Escape
         )*
-    )
-    Escape (
-        | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
-        | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}[4]
-    )
+    }
 }
 
-impl JSONStringImpl for JSONString {}
+#[shard]
+mod Escape {
+    x! {
+        | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
+        | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}[4]
+    }
+}

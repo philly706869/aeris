@@ -1,43 +1,44 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-use crate::cluster::{JSONValue, WS};
+// use crate::cluster::{JSONValue, WS};
 
-cluster! {
+#[shard]
+pub mod JSONArray {
     #[derive(Debug)]
-    pub struct JSONArray
-    trait JSONArrayImpl {
-        bracket: '['
-        content: JSONArrayContent
-        bracket: ']'
-    }
-
-    #[derive(Debug)]
-    pub enum JSONArrayContent
-    trait JSONArrayContentImpl {
-        None ( WS )
-        Some {
-            first: JSONArrayEntry
-            rest: JSONArrayRestEntry*
-        }
-    }
-
-    #[derive(Debug)]
-    pub struct JSONArrayRestEntry
-    trait JSONArrayRestEntryImpl {
-        rest: ','
-        entry: JSONArrayEntry
-    }
-
-    #[derive(Debug)]
-    pub struct JSONArrayEntry
-    trait JSONArrayEntryImpl {
-        ws: WS
-        value: JSONValue
-        ws: WS
+    struct Shard {
+        bracket: x!["["],
+        content: JSONArrayContent,
+        bracket: x!["["],
     }
 }
 
-impl JSONArrayImpl for JSONArray {}
-impl JSONArrayContentImpl for JSONArrayContent {}
-impl JSONArrayRestEntryImpl for JSONArrayRestEntry {}
-impl JSONArrayEntryImpl for JSONArrayEntry {}
+#[shard]
+pub mod JSONArrayContent {
+    #[derive(Debug)]
+    enum Shard {
+        None(WS),
+        Some {
+            first: JSONArrayEntry,
+            rest: JSONArrayRestEntry<V0>,
+        },
+    }
+}
+
+#[shard]
+pub mod JSONArrayRestEntry {
+    #[derive(Debug)]
+    struct Shard {
+        rest: x![","],
+        entry: JSONArrayEntry,
+    }
+}
+
+#[shard]
+pub mod JSONArrayEntry {
+    #[derive(Debug)]
+    struct Shard {
+        ws: WS,
+        value: JSONValue,
+        ws: WS,
+    }
+}

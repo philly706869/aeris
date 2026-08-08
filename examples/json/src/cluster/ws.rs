@@ -1,9 +1,7 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-cluster! {
+#[shard]
+pub mod WS {
     #[derive(Debug)]
-    pub struct WS
-    trait WSImpl ( ( {' ' '\t' '\n' '\r'}* ) )
+    struct Shard(x![{' ' '\t' '\n' '\r'}*]);
 }
-
-impl WSImpl for WS {}

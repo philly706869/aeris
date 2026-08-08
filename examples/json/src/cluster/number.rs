@@ -1,43 +1,62 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-cluster! {
+#[shard]
+pub mod JSONNumber {
     #[derive(Debug)]
-    pub struct JSONNumber
-    trait JSONNumberImpl {
-        sign: '-'?
-        integer: ( Digit | One2Nine Digits )
-        fraction: JSONFraction?
-        exponent: JSONExponent?
+    struct Shard {
+        sign: x!["-"?],
+        integer: x![| Digit | One2Nine Digits],
+        fraction: JSONFraction<O>,
+        exponent: JSONExponent<O>,
     }
-
-    #[derive(Debug)]
-    pub struct JSONFraction
-    trait JSONFractionImpl {
-        point: '.'
-        digits: Digits
-    }
-
-    #[derive(Debug)]
-    pub struct JSONExponent
-    trait JSONExponentImpl {
-        e: {'E' 'e'}
-        sign: JSONSign?
-        digits: Digits
-    }
-
-    #[derive(Debug)]
-    pub enum JSONSign
-    trait JSONSignImpl {
-        Plus ( '+' )
-        Minus ( '-' )
-    }
-
-    Digits ( Digit+ )
-    Digit ( '0' | One2Nine )
-    One2Nine ( {'1'..'9'} )
 }
 
-impl JSONNumberImpl for JSONNumber {}
-impl JSONFractionImpl for JSONFraction {}
-impl JSONExponentImpl for JSONExponent {}
-impl JSONSignImpl for JSONSign {}
+#[shard]
+pub mod JSONFraction {
+    #[derive(Debug)]
+    struct Shard {
+        point: x!["."],
+        digits: Digits,
+    }
+}
+
+#[shard]
+pub mod JSONExponent {
+    #[derive(Debug)]
+    struct Shard {
+        e: x![{'E' 'e'}],
+        sign: JSONSign<O>,
+        digits: Digits,
+    }
+}
+
+#[shard]
+pub mod JSONSign {
+    #[derive(Debug)]
+    enum Shard {
+        Plus(x!["+"]),
+        Minus(x!["-"]),
+    }
+}
+
+#[shard]
+mod Digits {
+    x! {
+        | Digit+
+    }
+}
+
+#[shard]
+mod Digit {
+    x! {
+        | '0'
+        | One2Nine
+    }
+}
+
+#[shard]
+mod One2Nine {
+    x! {
+        | {'1'..'9'}
+    }
+}

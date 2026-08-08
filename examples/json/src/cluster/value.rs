@@ -1,18 +1,16 @@
-use aeris::ui::cluster;
+use aeris::ui::shard;
 
-use crate::cluster::{JSONArray, JSONBoolean, JSONNull, JSONNumber, JSONObject, JSONString};
+// use crate::cluster::{JSONArray, JSONBoolean, JSONNull, JSONNumber, JSONObject, JSONString};
 
-cluster! {
+#[shard]
+pub mod JSONValue {
     #[derive(Debug)]
-    pub enum JSONValue
-    trait JSONValueImpl {
-        Object ( JSONObject )
-        Array ( JSONArray )
-        String ( JSONString )
-        Number ( JSONNumber )
-        Boolean ( JSONBoolean )
-        Null ( JSONNull )
+    enum Shard {
+        Object(JSONObject),
+        Array(JSONArray),
+        String(JSONString),
+        Number(JSONNumber),
+        Boolean(JSONBoolean),
+        Null(JSONNull),
     }
 }
-
-impl JSONValueImpl for JSONValue {}
