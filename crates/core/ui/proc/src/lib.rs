@@ -3,7 +3,7 @@ mod ir;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Item, ItemMod, Type, Visibility, parse};
+use syn::{Item, ItemMod, MacroDelimiter, Type, Visibility, parse, spanned::Spanned};
 
 #[proc_macro_attribute]
 pub fn shard(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -115,7 +115,29 @@ pub fn shard(attr: TokenStream, item: TokenStream) -> TokenStream {
                                     errs.push(syn::Error::new_spanned(item, "impl declaration except with name Shard is not supported in shard"));
                                 }
                             },
-                            Item::Macro(item) => {}
+                            Item::Macro(item) => {
+                                if let Some(ident) = item.ident {
+                                    errs.push(syn::Error::new_spanned(
+                                        ident,
+                                        "ident is not supported in shard",
+                                    ));
+                                }
+                                match item.mac.delimiter {
+                                    MacroDelimiter::Brace(_) => {}
+                                    MacroDelimiter::Bracket(bracket) => {
+                                        errs.push(syn::Error::new(
+                                            bracket.span.span(),
+                                            "", // TODO
+                                        ));
+                                    }
+                                    MacroDelimiter::Paren(paren) => {
+                                        errs.push(syn::Error::new(
+                                            paren.span.span(),
+                                            "", // TODO
+                                        ));
+                                    }
+                                }
+                            }
                             Item::Const(item) => errs.push(syn::Error::new_spanned(
                                 item,
                                 "const declaration is not supported in shard",
