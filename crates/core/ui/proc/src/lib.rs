@@ -1,5 +1,3 @@
-mod ast;
-mod ir;
 mod shard;
 
 use proc_macro::TokenStream;

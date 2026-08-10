@@ -1,7 +1,7 @@
+mod ast;
+
 use proc_macro2::TokenStream;
 use syn::parse2;
-
-use crate::ast;
 
 pub fn shard(attr: TokenStream, item: TokenStream) -> TokenStream {
     let attr_err = (!attr.is_empty()).then_some(syn::Error::new_spanned(
