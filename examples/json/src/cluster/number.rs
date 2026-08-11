@@ -6,8 +6,8 @@ pub mod JSONNumber {
     struct Shard {
         sign: x!["-"?],
         integer: x![| Digit | One2Nine Digits],
-        fraction: JSONFraction<O>,
-        exponent: JSONExponent<O>,
+        fraction: Option<JSONFraction>,
+        exponent: Option<JSONExponent>,
     }
 }
 
@@ -25,7 +25,7 @@ pub mod JSONExponent {
     #[derive(Debug)]
     struct Shard {
         e: x![{'E' 'e'}],
-        sign: JSONSign<O>,
+        sign: Option<JSONSign>,
         digits: Digits,
     }
 }

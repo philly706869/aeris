@@ -6,8 +6,15 @@ use syn::{
 };
 
 mod keyword {
-    syn::custom_keyword!(Shard);
+    mod private {
+        syn::custom_keyword!(Shard);
+        syn::custom_keyword!(x);
+    }
+    pub use private::Shard as ShardToken;
+    pub use private::x as XToken;
 }
+
+use keyword::{ShardToken, XToken};
 
 #[derive(Debug)]
 pub struct Shard {
@@ -58,7 +65,7 @@ impl Parse for Binding {
 #[derive(Debug)]
 pub struct StructBinding {
     pub keyword: Token![struct],
-    pub ident: keyword::Shard,
+    pub ident: ShardToken,
     pub body: StructBody,
 }
 
@@ -111,6 +118,7 @@ impl Parse for NamedStructBody {
 pub struct NamedStructField {
     pub ident: Ident,
     pub colon: Token![:],
+    pub field_type: FieldType,
 }
 
 impl Parse for NamedStructField {
@@ -118,6 +126,7 @@ impl Parse for NamedStructField {
         Ok(Self {
             ident: input.parse()?,
             colon: input.parse()?,
+            field_type: input.parse()?,
         })
     }
 }
@@ -125,6 +134,7 @@ impl Parse for NamedStructField {
 #[derive(Debug)]
 pub struct UnnamedStructBody {
     pub paren: Paren,
+    pub fields: Punctuated<UnnamedStructField, Token![,]>,
 }
 
 impl Parse for UnnamedStructBody {
@@ -132,22 +142,52 @@ impl Parse for UnnamedStructBody {
         let content;
         Ok(Self {
             paren: parenthesized!(content in input),
+            fields: Punctuated::parse_terminated(&content)?,
         })
     }
 }
 
-pub struct UnnamedStructField {}
+#[derive(Debug)]
+pub struct UnnamedStructField {
+    pub field_type: FieldType,
+}
+
+impl Parse for UnnamedStructField {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            field_type: input.parse()?,
+        })
+    }
+}
 
 #[derive(Debug)]
 pub struct EnumBinding {
-    pub keyword: Token![struct],
-    pub ident: keyword::Shard,
+    pub keyword: Token![enum],
+    pub ident: ShardToken,
+    pub brace: Brace,
+    pub variants: Punctuated<EnumVariant, Token![,]>,
 }
 
 impl Parse for EnumBinding {
     fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
         Ok(Self {
             keyword: input.parse()?,
+            ident: input.parse()?,
+            brace: braced!(content in input),
+            variants: Punctuated::parse_terminated(&content)?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct EnumVariant {
+    ident: Ident,
+}
+
+impl Parse for EnumVariant {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
             ident: input.parse()?,
         })
     }
@@ -155,7 +195,7 @@ impl Parse for EnumBinding {
 
 #[derive(Debug)]
 pub struct ForwardBinding {
-    pub keyword: keyword::Shard,
+    pub keyword: ShardToken,
     pub bang: Token![!],
     pub brace: Brace,
 }
@@ -168,5 +208,14 @@ impl Parse for ForwardBinding {
             bang: input.parse()?,
             brace: braced!(content in input),
         })
+    }
+}
+
+#[derive(Debug)]
+pub struct FieldType {}
+
+impl Parse for FieldType {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {})
     }
 }

@@ -19,7 +19,7 @@ pub mod JSONArrayContent {
         None(WS),
         Some {
             first: JSONArrayEntry,
-            rest: JSONArrayRestEntry<V0>,
+            rest: Vec<JSONArrayRestEntry>,
         },
     }
 }

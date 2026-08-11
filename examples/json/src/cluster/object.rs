@@ -19,7 +19,7 @@ pub mod JSONObjectContent {
         None(WS),
         Some {
             first: JSONObjectEntry,
-            rest: JSONObjectRestEntry<V0>,
+            rest: Vec<JSONObjectRestEntry>,
         },
     }
 }
