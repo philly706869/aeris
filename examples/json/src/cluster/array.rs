@@ -7,29 +7,9 @@ pub mod JSONArray {
     #[derive(Debug)]
     struct Shard {
         bracket: x!["["],
-        content: JSONArrayContent,
+        ws: WS,
+        entries: Punctuated<JSONArrayEntry, (x![","], WS)>,
         bracket: x!["["],
-    }
-}
-
-#[shard]
-pub mod JSONArrayContent {
-    #[derive(Debug)]
-    enum Shard {
-        None(WS),
-        Some {
-            first: JSONArrayEntry,
-            rest: Vec<JSONArrayRestEntry>,
-        },
-    }
-}
-
-#[shard]
-pub mod JSONArrayRestEntry {
-    #[derive(Debug)]
-    struct Shard {
-        rest: x![","],
-        entry: JSONArrayEntry,
     }
 }
 
@@ -37,7 +17,6 @@ pub mod JSONArrayRestEntry {
 pub mod JSONArrayEntry {
     #[derive(Debug)]
     struct Shard {
-        ws: WS,
         value: JSONValue,
         ws: WS,
     }

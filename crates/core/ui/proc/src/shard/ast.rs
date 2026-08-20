@@ -118,7 +118,7 @@ impl Parse for NamedStructBody {
 pub struct NamedStructField {
     pub ident: Ident,
     pub colon: Token![:],
-    pub field_type: FieldType,
+    pub entry: Entry,
 }
 
 impl Parse for NamedStructField {
@@ -126,7 +126,7 @@ impl Parse for NamedStructField {
         Ok(Self {
             ident: input.parse()?,
             colon: input.parse()?,
-            field_type: input.parse()?,
+            entry: input.parse()?,
         })
     }
 }
@@ -149,13 +149,13 @@ impl Parse for UnnamedStructBody {
 
 #[derive(Debug)]
 pub struct UnnamedStructField {
-    pub field_type: FieldType,
+    pub entry: Entry,
 }
 
 impl Parse for UnnamedStructField {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         Ok(Self {
-            field_type: input.parse()?,
+            entry: input.parse()?,
         })
     }
 }
@@ -182,13 +182,96 @@ impl Parse for EnumBinding {
 
 #[derive(Debug)]
 pub struct EnumVariant {
-    ident: Ident,
+    pub ident: Ident,
+    pub body: EnumVariantBody,
 }
 
 impl Parse for EnumVariant {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         Ok(Self {
             ident: input.parse()?,
+            body: input.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub enum EnumVariantBody {
+    Named(NamedEnumVariantBody),
+    Unnamed(UnnamedEnumVariantBody),
+}
+
+impl Parse for EnumVariantBody {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let lookahead = input.lookahead1();
+        Ok(if lookahead.peek(Brace) {
+            Self::Named(input.parse()?)
+        } else if lookahead.peek(Paren) {
+            Self::Unnamed(input.parse()?)
+        } else {
+            return Err(lookahead.error());
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct NamedEnumVariantBody {
+    pub brace: Brace,
+    pub fields: Punctuated<NamedEnumVariantField, Token![,]>,
+}
+
+impl Parse for NamedEnumVariantBody {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            brace: braced!(content in input),
+            fields: Punctuated::parse_terminated(&content)?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct NamedEnumVariantField {
+    pub ident: Ident,
+    pub colon: Token![:],
+    pub entry: Entry,
+}
+
+impl Parse for NamedEnumVariantField {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            ident: input.parse()?,
+            colon: input.parse()?,
+            entry: input.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct UnnamedEnumVariantBody {
+    pub paren: Paren,
+    pub fields: Punctuated<UnnamedEnumVariantField, Token![,]>,
+}
+
+impl Parse for UnnamedEnumVariantBody {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            paren: parenthesized!(content in input),
+            fields: Punctuated::parse_terminated(&content)?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct UnnamedEnumVariantField {
+    pub entry: Entry,
+}
+
+impl Parse for UnnamedEnumVariantField {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            entry: input.parse()?,
         })
     }
 }
@@ -212,10 +295,23 @@ impl Parse for ForwardBinding {
 }
 
 #[derive(Debug)]
-pub struct FieldType {}
+pub enum Entry {
+    VecN(),
+    VecNN(),
+    Option(),
+    Shard(),
+    Terminal(),
+}
 
-impl Parse for FieldType {
+impl Parse for Entry {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(Self {})
+        let lookahead = input.lookahead1();
+        Ok(if lookahead.peek(Ident) {
+            Self::Shard()
+        } else {
+            return Err(lookahead.error());
+        })
     }
 }
+
+pub struct ShardEntry {}
