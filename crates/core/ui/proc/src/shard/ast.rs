@@ -1,8 +1,8 @@
 use syn::{
-    Attribute, Ident, Token, Visibility, braced, parenthesized,
+    Attribute, Ident, Token, Visibility, braced, bracketed, parenthesized,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token::{Brace, Paren},
+    token::{Brace, Bracket, Paren},
 };
 
 mod keyword {
@@ -296,19 +296,72 @@ impl Parse for ForwardBinding {
 
 #[derive(Debug)]
 pub enum Entry {
-    Shard(),
-    Terminal(),
+    Shard(ShardEntry),
+    Terminal(TerminalEntry),
 }
 
 impl Parse for Entry {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let lookahead = input.lookahead1();
-        Ok(if lookahead.peek(Ident) {
-            Self::Shard()
+        Ok(if input.peek(XToken) && input.peek2(Token![!]) {
+            Self::Terminal(input.parse()?)
+        } else if input.peek(Ident) {
+            Self::Shard(input.parse()?)
         } else {
-            return Err(lookahead.error());
+            return Err(input.error("expected Shard Entry"));
         })
     }
 }
 
-pub struct ShardEntry {}
+#[derive(Debug)]
+pub struct ShardEntry {
+    pub ident: Ident,
+    pub generic: Option<ShardEntryGeneric>,
+}
+
+impl Parse for ShardEntry {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            ident: input.parse()?,
+            generic: if input.peek(Token![<]) {
+                Some(input.parse()?)
+            } else {
+                None
+            },
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct ShardEntryGeneric {
+    pub lt: Token![<],
+    pub entries: Punctuated<Entry, Token![,]>,
+    pub gt: Token![>],
+}
+
+impl Parse for ShardEntryGeneric {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            lt: input.parse()?,
+            entries: Punctuated::parse_separated_nonempty(input)?,
+            gt: input.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct TerminalEntry {
+    pub x: XToken,
+    pub bang: Token![!],
+    pub bracket: Bracket,
+}
+
+impl Parse for TerminalEntry {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            x: input.parse()?,
+            bang: input.parse()?,
+            bracket: bracketed!(content in input),
+        })
+    }
+}
