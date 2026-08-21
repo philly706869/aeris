@@ -352,16 +352,88 @@ impl Parse for ShardEntryGeneric {
 pub struct TerminalEntry {
     pub x: XToken,
     pub bang: Token![!],
-    pub bracket: Bracket,
+    pub expression: TerminalExpression,
 }
 
 impl Parse for TerminalEntry {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let content;
         Ok(Self {
             x: input.parse()?,
             bang: input.parse()?,
+            expression: input.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub enum TerminalExpression {
+    Single(SingleExpression),
+    Multi(MultiExpression),
+}
+
+impl Parse for TerminalExpression {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let lookahead = input.lookahead1();
+        Ok(if lookahead.peek(Bracket) {
+            Self::Single(input.parse()?)
+        } else if lookahead.peek(Brace) {
+            Self::Single(input.parse()?)
+        } else {
+            return Err(lookahead.error());
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct SingleExpression {
+    pub bracket: Bracket,
+}
+
+impl Parse for SingleExpression {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
             bracket: bracketed!(content in input),
         })
+    }
+}
+
+#[derive(Debug)]
+pub struct MultiExpression {
+    pub brace: Brace,
+    pub items: Vec<MultiExpressionItem>,
+}
+
+impl Parse for MultiExpression {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            brace: braced!(content in input),
+            items: todo!(),
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct MultiExpressionItem {
+    pub pipe: Token![|],
+    pub sequence: Sequence,
+}
+
+impl Parse for MultiExpressionItem {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            pipe: input.parse()?,
+            sequence: input.parse()?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Sequence {}
+
+impl Parse for Sequence {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {})
     }
 }

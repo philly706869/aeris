@@ -5,7 +5,10 @@ pub mod JSONNumber {
     #[derive(Debug)]
     struct Shard {
         sign: Option<x!["-"]>,
-        integer: x![| Digit | One2Nine Digits],
+        integer: x! {
+            | Digit
+            | One2Nine Digits
+        },
         fraction: Option<JSONFraction>,
         exponent: Option<JSONExponent>,
     }
