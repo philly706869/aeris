@@ -8,16 +8,7 @@ pub mod JSONArray {
     struct Shard {
         bracket: x!["["],
         ws: WS,
-        entries: Punctuated<JSONArrayEntry, (x![","], WS)>,
+        entries: Punctuated<Spanned<JSONValue>, Spanned<x![","]>>,
         bracket: x!["["],
-    }
-}
-
-#[shard]
-pub mod JSONArrayEntry {
-    #[derive(Debug)]
-    struct Shard {
-        value: JSONValue,
-        ws: WS,
     }
 }

@@ -296,9 +296,6 @@ impl Parse for ForwardBinding {
 
 #[derive(Debug)]
 pub enum Entry {
-    VecN(),
-    VecNN(),
-    Option(),
     Shard(),
     Terminal(),
 }

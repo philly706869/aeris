@@ -4,7 +4,7 @@ use aeris::ui::shard;
 pub mod JSONNumber {
     #[derive(Debug)]
     struct Shard {
-        sign: x!["-"?],
+        sign: Option<x!["-"]>,
         integer: x![| Digit | One2Nine Digits],
         fraction: Option<JSONFraction>,
         exponent: Option<JSONExponent>,
