@@ -5,8 +5,8 @@ use aeris::ui::shard;
 #[shard]
 pub mod Spanned {
     #[derive(Debug)]
-    struct Shard<Child> {
-        child: Child,
+    struct Shard<T> {
+        inner: T,
         ws: WS,
     }
 }

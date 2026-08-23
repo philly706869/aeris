@@ -10,6 +10,7 @@ members = [
   "apps/cli",
   "apps/daemon",
   "examples/json",
+  "crates/synx",
 ]
 
 [workspace.package]
@@ -27,6 +28,7 @@ aeris-std-ui       = { path = "crates/std/ui" }
 aeris-cli          = { path = "apps/cli" }
 aeris-daemon       = { path = "apps/daemon" }
 example-json       = { path = "examples/json" }
+synx               = { path = "crates/synx" }
 clap               = { version = "4" }
 criterion          = { version = "0.8" }
 fnv                = { version = "1" }

@@ -4,7 +4,23 @@ use aeris::ui::shard;
 pub mod JSONBoolean {
     #[derive(Debug)]
     enum Shard {
-        True(x!["true"]),
-        False(x!["false"]),
+        True(JSONTrue),
+        False(JSONFalse),
+    }
+}
+
+#[shard]
+pub mod JSONTrue {
+    #[derive(Debug)]
+    struct Shard {
+        text: x!["true"],
+    }
+}
+
+#[shard]
+pub mod JSONFalse {
+    #[derive(Debug)]
+    struct Shard {
+        text: x!["false"],
     }
 }

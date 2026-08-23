@@ -67,6 +67,7 @@ dependencies = [
  "quote",
  "rustc-hash",
  "syn 3.0.3",
+ "synx",
 ]
 
 [[package]]
@@ -529,6 +530,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "synx"
+version = "0.0.0-prenext.1"
+dependencies = [
+ "proc-macro2",
 ]
 
 [[package]]
