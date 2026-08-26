@@ -1,65 +1,41 @@
 use aeris::ui::shard;
 
 #[shard]
-pub mod JSONNumber {
-    #[derive(Debug)]
-    struct Shard {
-        sign: Option<x!["-"]>,
-        integer: x! {
-            | Digit
-            | One2Nine Digits
-        },
-        fraction: Option<JSONFraction>,
-        exponent: Option<JSONExponent>,
-    }
+pub struct JSONNumber {
+    sign: Option<x!["-"]>,
+    integer: x! {
+        | Digit
+        | One2Nine Digits
+    },
+    fraction: Option<JSONFraction>,
+    exponent: Option<JSONExponent>,
 }
 
 #[shard]
-pub mod JSONFraction {
-    #[derive(Debug)]
-    struct Shard {
-        point: x!["."],
-        digits: Digits,
-    }
+pub struct JSONFraction {
+    point: x!["."],
+    digits: Digits,
 }
 
 #[shard]
-pub mod JSONExponent {
-    #[derive(Debug)]
-    struct Shard {
-        e: x![{'E' 'e'}],
-        sign: Option<JSONSign>,
-        digits: Digits,
-    }
+pub struct JSONExponent {
+    e: x![{'E' 'e'}],
+    sign: Option<x![{'+' '-'}]>,
+    digits: Digits,
 }
 
 #[shard]
-pub mod JSONSign {
-    #[derive(Debug)]
-    enum Shard {
-        Plus(x!["+"]),
-        Minus(x!["-"]),
-    }
-}
+type Digits = x! {
+    | Digit+
+};
 
 #[shard]
-mod Digits {
-    Shard! {
-        | Digit+
-    }
-}
+type Digit = x! {
+    | '0'
+    | One2Nine
+};
 
 #[shard]
-mod Digit {
-    Shard! {
-        | '0'
-        | One2Nine
-    }
-}
-
-#[shard]
-mod One2Nine {
-    Shard! {
-        | {'1'..'9'}
-    }
-}
+type One2Nine = x! {
+    | {'1'..'9'}
+};

@@ -1,36 +1,38 @@
-use std::ops::RangeInclusive;
+pub trait Shard {}
 
-pub trait Shard {
-    fn table() -> &'static [Rule];
-}
+// use std::ops::RangeInclusive;
 
-#[derive(Debug)]
-pub struct Rule {
-    literal: Literal,
-    action: Action,
-}
+// pub trait Shard {
+//     fn table() -> &'static [Rule];
+// }
 
-#[derive(Debug)]
-pub enum Literal {
-    Sequence(&'static str),
-    Set(&'static [RangeInclusive<char>]),
-}
+// #[derive(Debug)]
+// pub struct Rule {
+//     literal: Literal,
+//     action: Action,
+// }
 
-#[derive(Debug, Clone, Copy)]
-pub enum Action {
-    Shift(usize),
-    Reduce(usize),
-    Accept,
-    Error,
-}
+// #[derive(Debug)]
+// pub enum Literal {
+//     Sequence(&'static str),
+//     Set(&'static [RangeInclusive<char>]),
+// }
 
-pub struct Resolver {}
+// #[derive(Debug, Clone, Copy)]
+// pub enum Action {
+//     Shift(usize),
+//     Reduce(usize),
+//     Accept,
+//     Error,
+// }
 
-impl Resolver {
-    fn new<S>(shard: S) -> Self
-    where
-        S: Shard,
-    {
-        Self {}
-    }
-}
+// pub struct Resolver {}
+
+// impl Resolver {
+//     fn new<S>(shard: S) -> Self
+//     where
+//         S: Shard,
+//     {
+//         Self {}
+//     }
+// }

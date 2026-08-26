@@ -20,10 +20,10 @@ fn expand_attr(attr: TokenStream) -> TokenStream {
 }
 
 fn expand_item(item: TokenStream) -> TokenStream {
-    let shard: ast::Shard = match parse2(item) {
-        Ok(module) => module,
-        Err(err) => return err.into_compile_error(),
-    };
+    // let shard: ast::Shard = match parse2(item) {
+    //     Ok(module) => module,
+    //     Err(err) => return err.into_compile_error(),
+    // };
 
     TokenStream::new()
 }

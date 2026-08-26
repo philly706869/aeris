@@ -3,22 +3,16 @@ use aeris::ui::shard;
 // use crate::cluster::{JSONValue, WS};
 
 #[shard]
-pub mod JSONArray {
-    #[derive(Debug)]
-    struct Shard {
-        bracket: x!["["],
-        ws: WS,
-        entries: Punctuated<Spanned<JSONValue>, Spanned<x![","]>>,
-        bracket: x!["["],
-    }
+pub struct JSONArray {
+    bracket: x!["["],
+    ws: WS,
+    entries: Punctuated<Spanned<JSONValue>, Spanned<x![","]>>,
+    bracket: x!["["],
 }
 
 #[shard]
-pub mod Punctuated {
-    #[derive(Debug)]
-    struct Shard<T, P> {
-        inner: Option<(T, Vec<(P, T)>)>,
-    }
+pub struct Punctuated<T, P> {
+    inner: Option<(T, Vec<(P, T)>)>,
 }
 
 mod mapping {
