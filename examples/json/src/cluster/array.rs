@@ -19,10 +19,16 @@ mod mapping {
     use std::marker::PhantomData;
 
     #[derive(Debug)]
-    pub struct WS<'i>(PhantomData<&'i Self>, &'i str);
+    pub struct WS<'i> {
+        _i: PhantomData<&'i Self>,
+        space: &'i str,
+    }
 
     #[derive(Debug)]
-    pub struct Punctuated<'i, T, P>(PhantomData<&'i Self>, Option<(T, Vec<(P, T)>)>);
+    pub struct Punctuated<'i, T, P> {
+        _i: PhantomData<&'i Self>,
+        inner: Option<(T, Vec<(P, T)>)>,
+    }
 
     #[derive(Debug)]
     pub struct Spanned<'i, T> {
