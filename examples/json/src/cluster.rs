@@ -9,6 +9,8 @@ mod string;
 mod value;
 mod ws;
 
+mod mapping;
+
 // pub use array::{JSONArray, JSONArrayContent, JSONArrayEntry, JSONArrayRestEntry};
 // pub use boolean::JSONBoolean;
 // pub use json::JSON;
