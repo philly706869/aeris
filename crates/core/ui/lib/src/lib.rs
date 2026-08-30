@@ -2,7 +2,16 @@ use std::{any::TypeId, ops::RangeInclusive};
 
 pub trait Shard {
     const TUID: TypeId;
-    const DATA: &'static ShardData;
+    const DATA: &'static ShardData<'static>;
+}
+
+pub enum ShardData<'a> {
+    Literal(&'a str),
+    Set(bool, &'a [RangeInclusive<char>]),
+    Sequence(&'a [ShardData<'a>]),
+    Alternative(&'a [ShardData<'a>]),
+    Vector(&'a ShardData<'a>, usize, usize),
+    Option(&'a ShardData<'a>),
 }
 
 mod sealed {
@@ -17,17 +26,14 @@ where
 {
 }
 
-fn test<S>()
-where
-    S: ShardEntry,
-{
-}
+impl<'t> Sealed for &'t str {}
+impl<'t> ShardEntry for &'t str {}
 
 impl<T> Sealed for T where T: Shard {}
 impl<T> ShardEntry for T where T: Shard {}
 
-impl<'t> Sealed for &'t str {}
-impl<'t> ShardEntry for &'t str {}
+impl<T> Sealed for Box<T> where T: ShardEntry {}
+impl<T> ShardEntry for Box<T> where T: ShardEntry {}
 
 macro_rules! impl_shard_entry_for_tuple {
     { $($generic:ident),* } => {
@@ -63,13 +69,6 @@ impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q,
 impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X }
 impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y }
 impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z }
-
-pub enum ShardData {
-    Literal(&'static str),
-    Set(bool, Vec<RangeInclusive<char>>),
-    Sequence(Vec<ShardData>),
-    Alternative(Vec<ShardData>),
-}
 
 pub const fn build<S>()
 where

@@ -4,6 +4,7 @@ mod json;
 mod null;
 mod number;
 mod object;
+mod punctuated;
 mod span;
 mod string;
 mod value;
