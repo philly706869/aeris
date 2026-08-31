@@ -1,17 +1,53 @@
-use std::{any::TypeId, ops::RangeInclusive};
+use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
+
+pub struct Cluster<'i, S>
+where
+    S: StaticShard<'i>,
+{
+    _input: PhantomData<&'i ()>,
+    _shard: PhantomData<S>,
+}
+
+impl<'i, S> Cluster<'i, S>
+where
+    S: StaticShard<'i>,
+{
+    pub const fn build() -> Self {
+        Self {
+            _input: PhantomData,
+            _shard: PhantomData,
+        }
+    }
+
+    pub fn parse(&self, input: &'i str) -> S {
+        todo!()
+    }
+}
 
 pub trait Shard {
     const TUID: TypeId;
-    const DATA: &'static ShardData<'static>;
 }
 
-pub enum ShardData<'a> {
-    Literal(&'a str),
-    Set(bool, &'a [RangeInclusive<char>]),
-    Sequence(&'a [ShardData<'a>]),
-    Alternative(&'a [ShardData<'a>]),
-    Vector(&'a ShardData<'a>, usize, usize),
-    Option(&'a ShardData<'a>),
+pub trait StaticShard<'i>
+where
+    Self: Shard,
+{
+    const DATA: &'static ShardData;
+}
+
+pub trait DynamicShard
+where
+    Self: Shard,
+{
+}
+
+pub enum ShardData {
+    Literal(&'static str),
+    Set(bool, &'static [RangeInclusive<char>]),
+    Sequence(&'static [ShardData]),
+    Alternative(&'static [ShardData]),
+    Vector(&'static ShardData, usize, usize),
+    Option(&'static ShardData),
 }
 
 mod sealed {
@@ -26,52 +62,36 @@ where
 {
 }
 
-impl<'t> Sealed for &'t str {}
-impl<'t> ShardEntry for &'t str {}
+impl<'i> Sealed for &'i str {}
+impl<'i> ShardEntry for &'i str {}
 
 impl<T> Sealed for T where T: Shard {}
 impl<T> ShardEntry for T where T: Shard {}
 
-impl<T> Sealed for Box<T> where T: ShardEntry {}
-impl<T> ShardEntry for Box<T> where T: ShardEntry {}
+// impl<T> Sealed for Box<T> where T: ShardEntry {}
+// impl<T> ShardEntry for Box<T> where T: ShardEntry {}
 
 macro_rules! impl_shard_entry_for_tuple {
-    { $($generic:ident),* } => {
-        impl<$($generic),*> Sealed for ($($generic,)*) where $($generic: ShardEntry),* {}
-        impl<$($generic),*> ShardEntry for ($($generic,)*) where $($generic: ShardEntry),* {}
+    () => {
+        impl_shard_entry_for_tuple![@for A B C D E F G H I J K L M N O P Q R S T U V W X Y Z];
     };
+    [@for $first_t:ident $($t:ident)*] => {
+        impl_shard_entry_for_tuple![@for $($t)*];
+        impl_shard_entry_for_tuple![@impl $first_t $($t)*];
+    };
+    [@for] => {
+        impl_shard_entry_for_tuple![@impl];
+    };
+    [@impl $($t:ident)*] => {
+        impl<$($t),*> Sealed for ($($t,)*)
+        where
+            $($t: ShardEntry),*
+        {}
+        impl<$($t),*> ShardEntry for ($($t,)*)
+        where
+            $($t: ShardEntry),*
+        {}
+    }
 }
 
-impl_shard_entry_for_tuple! {}
-impl_shard_entry_for_tuple! { A }
-impl_shard_entry_for_tuple! { A, B }
-impl_shard_entry_for_tuple! { A, B, C }
-impl_shard_entry_for_tuple! { A, B, C, D }
-impl_shard_entry_for_tuple! { A, B, C, D, E }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y }
-impl_shard_entry_for_tuple! { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z }
-
-pub const fn build<S>()
-where
-    S: Shard,
-{
-}
+impl_shard_entry_for_tuple!();
