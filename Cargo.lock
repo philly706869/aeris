@@ -249,22 +249,6 @@ name = "example-json"
 version = "0.0.0-prenext.1"
 dependencies = [
  "aeris",
- "example-json-cluster",
-]
-
-[[package]]
-name = "example-json-cluster"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
- "example-json-cluster-postproc",
-]
-
-[[package]]
-name = "example-json-cluster-postproc"
-version = "0.0.0-prenext.1"
-dependencies = [
- "aeris",
 ]
 
 [[package]]
