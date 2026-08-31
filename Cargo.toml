@@ -5,12 +5,12 @@ members = [
   "crates/core/ui",
   "crates/core/ui/lib",
   "crates/core/ui/proc",
+  "crates/synx",
   "crates/std",
   "crates/std/ui",
   "apps/cli",
   "apps/daemon",
   "examples/json",
-  "crates/synx",
 ]
 
 [workspace.package]
@@ -23,12 +23,12 @@ aeris              = { path = "crates/core" }
 aeris-ui           = { path = "crates/core/ui" }
 aeris-ui-lib       = { path = "crates/core/ui/lib" }
 aeris-ui-proc      = { path = "crates/core/ui/proc" }
+synx               = { path = "crates/synx" }
 aeris-std          = { path = "crates/std" }
 aeris-std-ui       = { path = "crates/std/ui" }
 aeris-cli          = { path = "apps/cli" }
 aeris-daemon       = { path = "apps/daemon" }
 example-json       = { path = "examples/json" }
-synx               = { path = "crates/synx" }
 clap               = { version = "4" }
 criterion          = { version = "0.8" }
 fnv                = { version = "1" }
