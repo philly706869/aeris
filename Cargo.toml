@@ -7,10 +7,12 @@ members = [
   "crates/core/ui/proc",
   "crates/std",
   "crates/std/ui",
+  "crates/synx",
   "apps/cli",
   "apps/daemon",
   "examples/json",
-  "crates/synx",
+  "examples/json/cluster",
+  "examples/json/cluster/postproc",
 ]
 
 [workspace.package]
@@ -19,27 +21,29 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris              = { path = "crates/core" }
-aeris-ui           = { path = "crates/core/ui" }
-aeris-ui-lib       = { path = "crates/core/ui/lib" }
-aeris-ui-proc      = { path = "crates/core/ui/proc" }
-aeris-std          = { path = "crates/std" }
-aeris-std-ui       = { path = "crates/std/ui" }
-aeris-cli          = { path = "apps/cli" }
-aeris-daemon       = { path = "apps/daemon" }
-example-json       = { path = "examples/json" }
-synx               = { path = "crates/synx" }
-clap               = { version = "4" }
-criterion          = { version = "0.8" }
-fnv                = { version = "1" }
-inkwell            = { version = "0.10", features = ["llvm22-1-force-static"] }
-postcard           = { version = "1" }
-proc-macro2        = { version = "1" }
-quote              = { version = "1" }
-rayon              = { version = "1" }
-rustc-hash         = { version = "2" }
-serde              = { version = "1" }
-syn                = { version = "3" }
-tokio              = { version = "1" }
-tracing            = { version = "0.1" }
-tracing-subscriber = { version = "0.3" }
+aeris                         = { path = "crates/core" }
+aeris-ui                      = { path = "crates/core/ui" }
+aeris-ui-lib                  = { path = "crates/core/ui/lib" }
+aeris-ui-proc                 = { path = "crates/core/ui/proc" }
+aeris-std                     = { path = "crates/std" }
+aeris-std-ui                  = { path = "crates/std/ui" }
+synx                          = { path = "crates/synx" }
+aeris-cli                     = { path = "apps/cli" }
+aeris-daemon                  = { path = "apps/daemon" }
+example-json                  = { path = "examples/json" }
+example-json-cluster          = { path = "examples/json/cluster" }
+example-json-cluster-postproc = { path = "examples/json/cluster/postproc" }
+clap                          = { version = "4" }
+criterion                     = { version = "0.8" }
+fnv                           = { version = "1" }
+inkwell                       = { version = "0.10", features = ["llvm22-1-force-static"] }
+postcard                      = { version = "1" }
+proc-macro2                   = { version = "1" }
+quote                         = { version = "1" }
+rayon                         = { version = "1" }
+rustc-hash                    = { version = "2" }
+serde                         = { version = "1" }
+syn                           = { version = "3" }
+tokio                         = { version = "1" }
+tracing                       = { version = "0.1" }
+tracing-subscriber            = { version = "0.3" }

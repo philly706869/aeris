@@ -1,3 +1,8 @@
+#[cfg(feature = "preprocess")]
+use aeris::ui::shard;
+#[cfg(not(feature = "preprocess"))]
+use example_json_cluster_postproc::shard;
+
 mod array;
 mod boolean;
 mod json;

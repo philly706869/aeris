@@ -50,6 +50,7 @@ pub enum ShardData {
     Alternative(&'static [ShardData]),
     Vector(&'static ShardData, usize, usize),
     Option(&'static ShardData),
+    Extern(),
 }
 
 mod sealed {

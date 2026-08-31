@@ -5,4 +5,5 @@ edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris = { workspace = true }
+aeris                = { workspace = true }
+example-json-cluster = { workspace = true }
