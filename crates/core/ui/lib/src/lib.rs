@@ -1,25 +1,34 @@
 use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
-pub struct Cluster<'i, S>
+///
+#[macro_export]
+macro_rules! x {
+    () => {};
+}
+
+#[macro_export]
+macro_rules! cluster {
+    () => {};
+}
+
+pub struct Cluster<S>
 where
-    S: StaticShard<'i>,
+    S: StaticShard,
 {
-    _input: PhantomData<&'i ()>,
     _shard: PhantomData<S>,
 }
 
-impl<'i, S> Cluster<'i, S>
+impl<S> Cluster<S>
 where
-    S: StaticShard<'i>,
+    S: StaticShard,
 {
     pub const fn build() -> Self {
         Self {
-            _input: PhantomData,
             _shard: PhantomData,
         }
     }
 
-    pub fn parse(&self, input: &'i str) -> S {
+    pub fn parse<'i>(&self, input: &'i str) -> S {
         todo!()
     }
 }
@@ -28,18 +37,11 @@ pub trait Shard {
     const TUID: TypeId;
 }
 
-pub trait StaticShard<'i>
-where
-    Self: Shard,
-{
+pub trait StaticShard: Shard {
     const DATA: &'static ShardData;
 }
 
-pub trait DynamicShard
-where
-    Self: Shard,
-{
-}
+pub trait DynamicShard: Shard {}
 
 pub enum ShardData {
     Literal(&'static str),

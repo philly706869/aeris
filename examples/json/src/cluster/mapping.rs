@@ -1,10 +1,4 @@
-use aeris::ui::Cluster;
-
-static JSON_CLUSTER: Cluster<JSON<'_>> = Cluster::build();
-
-fn test<'i>(input: &'i str) -> JSON<'i> {
-    JSON_CLUSTER.parse(input)
-}
+use aeris::ui::{Cluster, Shard};
 
 #[derive(Debug)]
 pub struct JSON<'i> {
@@ -20,7 +14,7 @@ const _: () = {
     impl<'i> ::aeris::ui::Shard for JSON<'i> {
         const TUID: TypeId = TypeId::of::<STATIC>();
     }
-    impl<'i> ::aeris::ui::StaticShard<'i> for JSON<'i> {
+    impl<'i> ::aeris::ui::StaticShard for JSON<'i> {
         const DATA: &'static ShardData = &ShardData::Sequence(&[]);
     }
 };
@@ -39,7 +33,7 @@ const _: () = {
     impl<'i> ::aeris::ui::Shard for JSONValue<'i> {
         const TUID: TypeId = TypeId::of::<STATIC>();
     }
-    impl<'i> ::aeris::ui::StaticShard<'i> for JSONValue<'i> {
+    impl<'i> ::aeris::ui::StaticShard for JSONValue<'i> {
         const DATA: &'static ShardData = &ShardData::Literal("");
     }
 };
@@ -60,7 +54,7 @@ const _: () = {
     impl<'i> ::aeris::ui::Shard for JSONArray<'i> {
         const TUID: TypeId = TypeId::of::<STATIC>();
     }
-    impl<'i> ::aeris::ui::StaticShard<'i> for JSONArray<'i> {
+    impl<'i> ::aeris::ui::StaticShard for JSONArray<'i> {
         const DATA: &'static ShardData = &ShardData::Literal("");
     }
 };
@@ -79,7 +73,7 @@ const _: () = {
     impl<'i> ::aeris::ui::Shard for JSONNull<'i> {
         const TUID: TypeId = TypeId::of::<STATIC>();
     }
-    impl<'i> ::aeris::ui::StaticShard<'i> for JSONNull<'i> {
+    impl<'i> ::aeris::ui::StaticShard for JSONNull<'i> {
         const DATA: &'static ShardData = &ShardData::Literal("null");
     }
 };
@@ -98,7 +92,7 @@ const _: () = {
     impl<'i> ::aeris::ui::Shard for WS<'i> {
         const TUID: TypeId = TypeId::of::<STATIC>();
     }
-    impl<'i> ::aeris::ui::StaticShard<'i> for WS<'i> {
+    impl<'i> ::aeris::ui::StaticShard for WS<'i> {
         const DATA: &'static ShardData = &ShardData::Vector(
             &ShardData::Set(false, &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r']),
             0,
