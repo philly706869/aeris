@@ -43,7 +43,7 @@ pub struct JSONArray<'i> {
     _i: ::std::marker::PhantomData<&'i Self>,
     bracket: (&'i str, &'i str),
     ws: WS<'i>,
-    entries: Punctuated<'i, Spanned<'i, &'i str /* JSONValue<'i> */>, Spanned<'i, &'i str>>,
+    entries: BoxPunctuated<'i, Spanned<'i, JSONValue<'i>>, Spanned<'i, &'i str>>,
 }
 
 const _: () = {
@@ -102,13 +102,13 @@ const _: () = {
 };
 
 #[derive(Debug)]
-pub struct Punctuated<'i, T, P>
+pub struct BoxPunctuated<'i, T, P>
 where
     T: ::aeris::ui::ShardEntry,
     P: ::aeris::ui::ShardEntry,
 {
     _i: ::std::marker::PhantomData<&'i Self>,
-    inner: Option<(T, Vec<(P, T)>)>,
+    inner: Option<(Box<T>, Vec<(P, T)>)>,
 }
 
 const _: () = {
@@ -116,14 +116,14 @@ const _: () = {
     use ::std::any::TypeId;
     #[allow(dead_code)]
     struct STATIC;
-    impl<'i, T, P> ::aeris::ui::Shard for Punctuated<'i, T, P>
+    impl<'i, T, P> ::aeris::ui::Shard for BoxPunctuated<'i, T, P>
     where
         T: ShardEntry,
         P: ShardEntry,
     {
         const TUID: TypeId = TypeId::of::<STATIC>();
     }
-    impl<'i, T, P> ::aeris::ui::DynamicShard for Punctuated<'i, T, P>
+    impl<'i, T, P> ::aeris::ui::DynamicShard for BoxPunctuated<'i, T, P>
     where
         T: ShardEntry,
         P: ShardEntry,
