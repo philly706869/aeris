@@ -270,11 +270,14 @@ const _: () = {
 
     impl<'i> Shard for WS<'i> {
         type TUID = TUID;
-        const DATA: &'static ShardData = &ShardData::Vector(
-            &ShardData::Set(false, &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r']),
-            0,
-            0,
-        );
+        const DATA: &'static ShardData = &ShardData::Vector {
+            item: &ShardData::Set {
+                negated: false,
+                range: &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'],
+            },
+            min: 0,
+            max: 0,
+        };
     }
 
     impl<'i> StaticShard for WS<'i> {}
@@ -331,14 +334,14 @@ const _: () = {
         type TUID = TUID<T::TUID, P::TUID>;
         const DATA: &'static ShardData = &ShardData::Option(&ShardData::Sequence(&[
             &ShardData::Extern(tuid::<T>(), || T::DATA),
-            &ShardData::Vector(
-                &ShardData::Sequence(&[
+            &ShardData::Vector {
+                item: &ShardData::Sequence(&[
                     &ShardData::Extern(tuid::<P>(), || P::DATA),
                     &ShardData::Extern(tuid::<T>(), || T::DATA),
                 ]),
-                0,
-                0,
-            ),
+                min: 0,
+                max: 0,
+            },
         ]));
     }
 };

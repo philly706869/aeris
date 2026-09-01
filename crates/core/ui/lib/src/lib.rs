@@ -41,10 +41,17 @@ pub trait StaticShard: Shard {}
 
 pub enum ShardData {
     Literal(&'static str),
-    Set(bool, &'static [RangeInclusive<char>]),
+    Set {
+        negated: bool,
+        range: &'static [RangeInclusive<char>],
+    },
     Sequence(&'static [&'static ShardData]),
     Alternative(&'static [&'static ShardData]),
     Option(&'static ShardData),
-    Vector(&'static ShardData, usize, usize),
+    Vector {
+        item: &'static ShardData,
+        min: usize,
+        max: usize,
+    },
     Extern(TypeId, fn() -> &'static ShardData),
 }
