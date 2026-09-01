@@ -19,20 +19,11 @@ pub struct JSON<'i> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct TUID {}
-
-    impl<'i> Shard for JSON<'i> {
-        type TUID = TUID;
-    }
 
     #[allow(dead_code)]
     const fn tuid<S>() -> TypeId
@@ -42,13 +33,20 @@ const _: () = {
         TypeId::of::<S::TUID>()
     }
 
-    impl<'i> StaticShard for JSON<'i> {
+    #[allow(dead_code)]
+    #[allow(non_snake_case)]
+    pub struct TUID {}
+
+    impl<'i> Shard for JSON<'i> {
+        type TUID = TUID;
         const DATA: &'static ShardData = &ShardData::Sequence(&[
             &ShardData::Extern(tuid::<WS>(), || WS::DATA),
             &ShardData::Extern(tuid::<JSONValue>(), || JSONValue::DATA),
             &ShardData::Extern(tuid::<WS>(), || WS::DATA),
         ]);
     }
+
+    impl<'i> StaticShard for JSON<'i> {}
 };
 
 // ////////////////
@@ -78,20 +76,11 @@ pub enum JSONValue<'i> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct TUID {}
-
-    impl<'i> Shard for JSONValue<'i> {
-        type TUID = TUID;
-    }
 
     #[allow(dead_code)]
     const fn tuid<S>() -> TypeId
@@ -101,12 +90,19 @@ const _: () = {
         TypeId::of::<S::TUID>()
     }
 
-    impl<'i> StaticShard for JSONValue<'i> {
+    #[allow(dead_code)]
+    #[allow(non_snake_case)]
+    pub struct TUID {}
+
+    impl<'i> Shard for JSONValue<'i> {
+        type TUID = TUID;
         const DATA: &'static ShardData = &ShardData::Alternative(&[
             &ShardData::Extern(tuid::<JSONArray>(), || JSONArray::DATA),
             &ShardData::Extern(tuid::<JSONNull>(), || JSONNull::DATA),
         ]);
     }
+
+    impl<'i> StaticShard for JSONValue<'i> {}
 };
 
 // ////////////////
@@ -136,20 +132,11 @@ pub struct JSONArray<'i> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct TUID {}
-
-    impl<'i> Shard for JSONArray<'i> {
-        type TUID = TUID;
-    }
 
     #[allow(dead_code)]
     const fn tuid<S>() -> TypeId
@@ -159,18 +146,25 @@ const _: () = {
         TypeId::of::<S::TUID>()
     }
 
-    impl<'i> StaticShard for JSONArray<'i> {
+    #[allow(dead_code)]
+    #[allow(non_snake_case)]
+    pub struct TUID {}
+
+    impl<'i> Shard for JSONArray<'i> {
+        type TUID = TUID;
         const DATA: &'static ShardData = &ShardData::Sequence(&[
             &ShardData::Literal("["),
             &ShardData::Extern(tuid::<WS>(), || WS::DATA),
             &ShardData::Extern(
                 tuid::<Punctuated<Spanned<JSONValue>, Spanned<LambdaShard0>>>(),
-                || todo!(), /* Punctuated::<Spanned<JSONValue>, Spanned<LambdaShard0>>::DATA */
+                || Punctuated::<Spanned<JSONValue>, Spanned<LambdaShard0>>::DATA,
             ),
             &ShardData::Extern(tuid::<WS>(), || WS::DATA),
             &ShardData::Literal("]"),
         ]);
     }
+
+    impl<'i> StaticShard for JSONArray<'i> {}
 
     struct LambdaShard0<'i>(PhantomData<&'i ()>);
 
@@ -180,11 +174,10 @@ const _: () = {
 
     impl<'i> Shard for LambdaShard0<'i> {
         type TUID = LambdaShard0TUID;
-    }
-
-    impl<'i> StaticShard for LambdaShard0<'i> {
         const DATA: &'static ShardData = &ShardData::Literal(",");
     }
+
+    impl<'i> StaticShard for LambdaShard0<'i> {}
 };
 
 // ////////////////
@@ -209,20 +202,11 @@ pub struct JSONNull<'i> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct TUID {}
-
-    impl<'i> Shard for JSONNull<'i> {
-        type TUID = TUID;
-    }
 
     #[allow(dead_code)]
     const fn tuid<S>() -> TypeId
@@ -232,9 +216,16 @@ const _: () = {
         TypeId::of::<S::TUID>()
     }
 
-    impl<'i> StaticShard for JSONNull<'i> {
+    #[allow(dead_code)]
+    #[allow(non_snake_case)]
+    pub struct TUID {}
+
+    impl<'i> Shard for JSONNull<'i> {
+        type TUID = TUID;
         const DATA: &'static ShardData = &ShardData::Literal("null");
     }
+
+    impl<'i> StaticShard for JSONNull<'i> {}
 };
 
 // ////////////////
@@ -259,20 +250,11 @@ pub struct WS<'i> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct TUID {}
-
-    impl<'i> Shard for WS<'i> {
-        type TUID = TUID;
-    }
 
     #[allow(dead_code)]
     const fn tuid<S>() -> TypeId
@@ -282,13 +264,20 @@ const _: () = {
         TypeId::of::<S::TUID>()
     }
 
-    impl<'i> StaticShard for WS<'i> {
+    #[allow(dead_code)]
+    #[allow(non_snake_case)]
+    pub struct TUID {}
+
+    impl<'i> Shard for WS<'i> {
+        type TUID = TUID;
         const DATA: &'static ShardData = &ShardData::Vector(
             &ShardData::Set(false, &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r']),
             0,
             0,
         );
     }
+
+    impl<'i> StaticShard for WS<'i> {}
 };
 
 // ////////////////
@@ -313,12 +302,19 @@ pub struct Punctuated<'i, T, P> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
+
+    #[allow(dead_code)]
+    const fn tuid<S>() -> TypeId
+    where
+        S: Shard,
+    {
+        TypeId::of::<S::TUID>()
+    }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
@@ -333,21 +329,17 @@ const _: () = {
         P: Shard,
     {
         type TUID = TUID<T::TUID, P::TUID>;
-    }
-
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
-    }
-
-    impl<'i, T, P> DynamicShard for Punctuated<'i, T, P>
-    where
-        T: Shard,
-        P: Shard,
-    {
+        const DATA: &'static ShardData = &ShardData::Option(&ShardData::Sequence(&[
+            &ShardData::Extern(tuid::<T>(), || T::DATA),
+            &ShardData::Vector(
+                &ShardData::Sequence(&[
+                    &ShardData::Extern(tuid::<P>(), || P::DATA),
+                    &ShardData::Extern(tuid::<T>(), || T::DATA),
+                ]),
+                0,
+                0,
+            ),
+        ]));
     }
 };
 
@@ -375,12 +367,19 @@ pub struct Spanned<'i, T> {
 
 #[allow(unused_imports)]
 const _: () = {
-    use ::aeris::ui::DynamicShard;
     use ::aeris::ui::Shard;
     use ::aeris::ui::ShardData;
     use ::aeris::ui::StaticShard;
     use ::std::any::TypeId;
     use ::std::marker::PhantomData;
+
+    #[allow(dead_code)]
+    const fn tuid<S>() -> TypeId
+    where
+        S: Shard,
+    {
+        TypeId::of::<S::TUID>()
+    }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
@@ -393,17 +392,11 @@ const _: () = {
         T: Shard,
     {
         type TUID = TUID<T::TUID>;
+        const DATA: &'static ShardData = &ShardData::Sequence(&[
+            &ShardData::Extern(tuid::<T>(), || T::DATA),
+            &ShardData::Extern(tuid::<WS>(), || WS::DATA),
+        ]);
     }
-
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
-    }
-
-    impl<'i, T> ::aeris::ui::DynamicShard for Spanned<'i, T> where T: Shard {}
 };
 
 // ////////////////

@@ -1,6 +1,5 @@
 use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
-///
 #[macro_export]
 macro_rules! x {
     () => {};
@@ -15,7 +14,7 @@ pub struct Cluster<S>
 where
     S: StaticShard,
 {
-    _shard: PhantomData<S>,
+    _shard: PhantomData<fn() -> S>,
 }
 
 impl<S> Cluster<S>
@@ -35,20 +34,17 @@ where
 
 pub trait Shard {
     type TUID: 'static;
-}
-
-pub trait StaticShard: Shard {
     const DATA: &'static ShardData;
 }
 
-pub trait DynamicShard: Shard {}
+pub trait StaticShard: Shard {}
 
 pub enum ShardData {
     Literal(&'static str),
     Set(bool, &'static [RangeInclusive<char>]),
     Sequence(&'static [&'static ShardData]),
     Alternative(&'static [&'static ShardData]),
-    Vector(&'static ShardData, usize, usize),
     Option(&'static ShardData),
+    Vector(&'static ShardData, usize, usize),
     Extern(TypeId, fn() -> &'static ShardData),
 }
