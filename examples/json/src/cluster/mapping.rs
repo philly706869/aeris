@@ -28,15 +28,11 @@ const _: () = {
 
     impl ::aeris::ui::internal::ShardStatic for Static {
         type Data = ::aeris::ui::internal::Alternative<(
+            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
             ::aeris::ui::internal::Extern<
-                <self::WS<'static> as ::aeris::ui::internal::Shard>::Static,
+                <JSONValue<'static> as ::aeris::ui::internal::Shard>::Static,
             >,
-            ::aeris::ui::internal::Extern<
-                <self::JSONValue<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
-            ::aeris::ui::internal::Extern<
-                <self::WS<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
+            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
         )>;
     }
 
@@ -80,10 +76,10 @@ const _: () = {
     impl ::aeris::ui::internal::ShardStatic for Static {
         type Data = ::aeris::ui::internal::Alternative<(
             ::aeris::ui::internal::Extern<
-                <self::JSONArray<'static> as ::aeris::ui::internal::Shard>::Static,
+                <JSONArray<'static> as ::aeris::ui::internal::Shard>::Static,
             >,
             ::aeris::ui::internal::Extern<
-                <self::JSONNull<'static> as ::aeris::ui::internal::Shard>::Static,
+                <JSONNull<'static> as ::aeris::ui::internal::Shard>::Static,
             >,
         )>;
     }
@@ -135,14 +131,12 @@ const _: () = {
     impl ::aeris::ui::internal::ShardStatic for Static {
         type Data = ::aeris::ui::internal::Sequence<(
             ::aeris::ui::internal::Literal<Literal0>,
+            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
             ::aeris::ui::internal::Extern<
-                <self::WS<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
-            ::aeris::ui::internal::Extern<
-                <self::Punctuated<
+                <Punctuated<
                     'static,
-                    self::Spanned<'static, self::JSONValue<'static>>,
-                    self::Spanned<'static, ::aeris::ui::internal::Literal<Literal1>>,
+                    Spanned<'static, JSONValue<'static>>,
+                    Spanned<'static, ::aeris::ui::internal::Literal<Literal1>>,
                 > as ::aeris::ui::internal::Shard>::Static,
             >,
             ::aeris::ui::internal::Literal<Literal2>,
@@ -360,9 +354,7 @@ const _: () = {
     {
         type Data = ::aeris::ui::internal::Sequence<(
             ::aeris::ui::internal::Extern<T>,
-            ::aeris::ui::internal::Extern<
-                <self::WS<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
+            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
         )>;
     }
 };
