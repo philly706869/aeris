@@ -11,6 +11,7 @@ pub(crate) trait ShardDataType: 'static {
     const DATA: &'static ShardData;
 }
 
+#[allow(private_bounds)]
 pub trait ShardParam: ShardDataType {}
 
 impl<T> ShardParam for T where T: ShardDataType {}
@@ -36,10 +37,10 @@ impl<T, const NEGATED: bool> ShardDataType for Set<T, NEGATED>
 where
     T: ShardSet,
 {
-    const DATA: &'static ShardData = &ShardData::Set {
+    const DATA: &'static ShardData = &ShardData::Set(SetData {
         negated: NEGATED,
         range: T::SET,
-    };
+    });
 }
 
 pub trait ShardSet: 'static {
@@ -61,11 +62,11 @@ impl<T, const MIN: usize, const MAX: usize> ShardDataType for Vec<T, MIN, MAX>
 where
     T: ShardDataType,
 {
-    const DATA: &'static ShardData = &ShardData::Vector {
+    const DATA: &'static ShardData = &ShardData::Vector(VectorData {
         item: <T as ShardDataType>::DATA,
         min: MIN,
         max: MAX,
-    };
+    });
 }
 
 pub struct Sequence<T>(PhantomData<fn() -> T>);
@@ -125,23 +126,52 @@ where
     T: Shard + 'static,
 {
     const DATA: &'static ShardData =
-        &ShardData::Extern(TypeId::of::<T::DATA>(), <T::DATA as ShardDataType>::DATA);
+        &ShardData::Extern(TypeId::of::<T::DATA>(), || <T::DATA as ShardDataType>::DATA);
 }
 
 #[derive(Debug)]
 pub(crate) enum ShardData {
     Literal(&'static str),
-    Set {
-        negated: bool,
-        range: &'static [RangeInclusive<char>],
-    },
+    Set(SetData),
     Option(&'static ShardData),
-    Vector {
-        item: &'static ShardData,
-        min: usize,
-        max: usize,
-    },
+    Vector(VectorData),
     Sequence(&'static [&'static ShardData]),
     Alternative(&'static [&'static ShardData]),
-    Extern(TypeId, &'static ShardData),
+    Extern(TypeId, fn() -> &'static ShardData),
+}
+
+#[derive(Debug)]
+pub(crate) struct SetData {
+    pub negated: bool,
+    pub range: &'static [RangeInclusive<char>],
+}
+
+#[derive(Debug)]
+pub(crate) struct VectorData {
+    pub item: &'static ShardData,
+    pub min: usize,
+    pub max: usize,
+}
+
+fn normalize_set(set: &SetData) -> std::vec::Vec<RangeInclusive<char>> {
+    use std::vec::Vec;
+    let mut ranges = Vec::from(set.range);
+    ranges.sort_unstable_by_key(|r| (*r.start(), *r.end()));
+    let mut normalized: Vec<RangeInclusive<char>> = Vec::with_capacity(ranges.len());
+    for range in ranges {
+        let start = *range.start();
+        let end = *range.end();
+        match normalized.last_mut() {
+            Some(last) => {
+                let last_end = *last.end();
+                if start as u32 <= last_end as u32 + 1 && end > last_end {
+                    *last = *last.start()..=end;
+                } else {
+                    normalized.push(range);
+                }
+            }
+            None => normalized.push(range),
+        }
+    }
+    normalized
 }

@@ -1,3 +1,19 @@
+#[cfg(test)]
+mod test {
+    use std::sync::LazyLock;
+
+    use aeris::ui::Cluster;
+
+    use super::JSON;
+
+    static CLUSTER: LazyLock<Cluster<JSON>> = LazyLock::new(|| Cluster::build());
+
+    #[test]
+    fn test() {
+        CLUSTER.call();
+    }
+}
+
 // ////////////////
 // JSON
 // ////////////////
@@ -78,7 +94,7 @@ const _: () = {
 pub struct JSONArray {
     bracket: x!["["],
     ws: WS,
-    entries: Punctuated<Spanned<JSONValue!(box)>, Spanned<x![","]>>,
+    entries: Punctuated<Spanned<[JSONValue; boxed]>, Spanned<x![","]>>,
     bracket: x!["["],
 }
 
@@ -223,7 +239,7 @@ const _: () = {
 #[cfg(false)]
 #[shard]
 pub struct Punctuated<T, P> {
-    inner: Option<(Box<T>, Vec<(P, T)>)>,
+    inner: [([T; boxed], [(P, T); ..]); option],
 }
 
 #[derive(Debug)]
