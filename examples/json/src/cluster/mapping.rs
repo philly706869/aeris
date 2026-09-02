@@ -111,9 +111,16 @@ pub struct JSONArray {
 #[derive(Debug)]
 pub struct JSONArray<'i> {
     _i: ::std::marker::PhantomData<&'i ()>,
-    bracket: (&'i str, &'i str),
+    bracket: (
+        &'i ::aeris::ui::internal::Str,
+        &'i ::aeris::ui::internal::Str,
+    ),
     ws: WS<'i>,
-    entries: Punctuated<'i, Spanned<'i, Box<JSONValue<'i>>>, Spanned<'i, &'i str>>,
+    entries: Punctuated<
+        'i,
+        Spanned<'i, Box<JSONValue<'i>>>,
+        Spanned<'i, &'i ::aeris::ui::internal::Str>,
+    >,
 }
 
 const _: () = {
@@ -146,21 +153,21 @@ const _: () = {
     struct Literal0;
 
     impl ::aeris::ui::internal::ShardLiteral for Literal0 {
-        const LITERAL: &'static str = "[";
+        const LITERAL: &'static ::aeris::ui::internal::Str = "[";
     }
 
     #[allow(dead_code)]
     struct Literal1;
 
     impl ::aeris::ui::internal::ShardLiteral for Literal1 {
-        const LITERAL: &'static str = ",";
+        const LITERAL: &'static ::aeris::ui::internal::Str = ",";
     }
 
     #[allow(dead_code)]
     struct Literal2;
 
     impl ::aeris::ui::internal::ShardLiteral for Literal2 {
-        const LITERAL: &'static str = "]";
+        const LITERAL: &'static ::aeris::ui::internal::Str = "]";
     }
 
     impl<'i> ::aeris::ui::internal::StaticShard for JSONArray<'i> {}
@@ -183,7 +190,7 @@ pub struct JSONNull {
 #[derive(Debug)]
 pub struct JSONNull<'i> {
     _i: ::std::marker::PhantomData<&'i ()>,
-    text: &'i str,
+    text: &'i ::aeris::ui::internal::Str,
 }
 
 const _: () = {
@@ -202,7 +209,7 @@ const _: () = {
     struct Literal0;
 
     impl ::aeris::ui::internal::ShardLiteral for Literal0 {
-        const LITERAL: &'static str = "null";
+        const LITERAL: &'static ::aeris::ui::internal::Str = "null";
     }
 
     impl<'i> ::aeris::ui::internal::StaticShard for JSONNull<'i> {}
@@ -225,7 +232,7 @@ pub struct WS {
 #[derive(Debug)]
 pub struct WS<'i> {
     _i: ::std::marker::PhantomData<&'i ()>,
-    space: &'i str,
+    space: &'i ::aeris::ui::internal::Str,
 }
 
 const _: () = {

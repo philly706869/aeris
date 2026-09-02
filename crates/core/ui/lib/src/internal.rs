@@ -1,5 +1,7 @@
 use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
+pub type Str = str;
+
 pub trait Shard {
     type Static: ShardStatic;
 }
@@ -15,14 +17,6 @@ pub(crate) trait ShardDataType {
     const DATA: &'static ShardData;
 }
 
-pub trait ShardLiteral {
-    const LITERAL: &'static str;
-}
-
-pub trait ShardSet {
-    const SET: &'static [RangeInclusive<char>];
-}
-
 pub struct Literal<T>(PhantomData<fn() -> T>);
 
 impl<T> ShardDataType for Literal<T>
@@ -30,6 +24,10 @@ where
     T: ShardLiteral,
 {
     const DATA: &'static ShardData = &ShardData::Literal(T::LITERAL);
+}
+
+pub trait ShardLiteral {
+    const LITERAL: &'static str;
 }
 
 pub struct Set<T, const NEGATED: bool>(PhantomData<fn() -> T>);
@@ -42,6 +40,10 @@ where
         negated: NEGATED,
         range: T::SET,
     };
+}
+
+pub trait ShardSet {
+    const SET: &'static [RangeInclusive<char>];
 }
 
 pub struct Option<T>(PhantomData<fn() -> T>);
