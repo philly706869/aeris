@@ -20,34 +20,38 @@ pub struct JSON<'i> {
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
+    impl<'i> Shard for JSON<'i> {
+        type Static = Static;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID {}
+    pub struct Static {}
 
-    impl<'i> Shard for JSON<'i> {
-        type TUID = TUID;
-        const DATA: &'static ShardData = &ShardData::Sequence(&[
-            &ShardData::Extern(tuid::<WS>(), || WS::DATA),
-            &ShardData::Extern(tuid::<JSONValue>(), || JSONValue::DATA),
-            &ShardData::Extern(tuid::<WS>(), || WS::DATA),
-        ]);
+    impl ShardStatic for Static {
+        type Data = shards::Alternative<(
+            shards::Extern<<WS<'static> as Shard>::Static>,
+            shards::Extern<<JSONValue<'static> as Shard>::Static>,
+            shards::Extern<<WS<'static> as Shard>::Static>,
+        )>;
     }
 
     impl<'i> StaticShard for JSON<'i> {}
 };
+
+#[allow(non_snake_case)]
+mod ___private_shard_JSON {
+    #[warn(non_snake_case)]
+    mod internal {}
+}
 
 // ////////////////
 // JSON
@@ -77,29 +81,27 @@ pub enum JSONValue<'i> {
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
+    impl<'i> Shard for JSONValue<'i> {
+        type Static = Static;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID {}
+    pub struct Static {}
 
-    impl<'i> Shard for JSONValue<'i> {
-        type TUID = TUID;
-        const DATA: &'static ShardData = &ShardData::Alternative(&[
-            &ShardData::Extern(tuid::<JSONArray>(), || JSONArray::DATA),
-            &ShardData::Extern(tuid::<JSONNull>(), || JSONNull::DATA),
-        ]);
+    impl ShardStatic for Static {
+        type Data = shards::Alternative<(
+            shards::Extern<<JSONArray<'static> as Shard>::Static>,
+            shards::Extern<<JSONNull<'static> as Shard>::Static>,
+        )>;
     }
 
     impl<'i> StaticShard for JSONValue<'i> {}
@@ -127,57 +129,64 @@ pub struct JSONArray<'i> {
     _i: ::std::marker::PhantomData<&'i ()>,
     bracket: (&'i str, &'i str),
     ws: WS<'i>,
-    entries: Punctuated<'i, Spanned<'i, JSONValue<'i>>, Spanned<'i, &'i str>>,
+    entries: Punctuated<'i, Spanned<'i, Box<JSONValue<'i>>>, Spanned<'i, &'i str>>,
 }
 
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
+    impl<'i> Shard for JSONArray<'i> {
+        type Static = Static;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID {}
+    pub struct Static {}
 
-    impl<'i> Shard for JSONArray<'i> {
-        type TUID = TUID;
-        const DATA: &'static ShardData = &ShardData::Sequence(&[
-            &ShardData::Literal("["),
-            &ShardData::Extern(tuid::<WS>(), || WS::DATA),
-            &ShardData::Extern(
-                tuid::<Punctuated<Spanned<JSONValue>, Spanned<LambdaShard0>>>(),
-                || Punctuated::<Spanned<JSONValue>, Spanned<LambdaShard0>>::DATA,
-            ),
-            &ShardData::Extern(tuid::<WS>(), || WS::DATA),
-            &ShardData::Literal("]"),
-        ]);
+    impl ShardStatic for Static {
+        type Data = shards::Sequence<(
+            shards::Literal<ShardLiteral0>,
+            shards::Extern<<WS<'static> as Shard>::Static>,
+            shards::Extern<
+                <Punctuated<
+                    'static,
+                    Spanned<'static, JSONValue<'static>>,
+                    Spanned<'static, ShardLiteral1>,
+                > as Shard>::Static,
+            >,
+        )>;
+    }
+
+    #[allow(dead_code)]
+    struct ShardLiteral0;
+
+    impl ShardLiteral for ShardLiteral0 {
+        const LITERAL: &'static str = "[";
+    }
+
+    #[allow(dead_code)]
+    struct ShardLiteral1;
+
+    impl ShardLiteral for ShardLiteral1 {
+        const LITERAL: &'static str = ",";
+    }
+
+    #[allow(dead_code)]
+    struct ShardLiteral2;
+
+    impl ShardLiteral for ShardLiteral2 {
+        const LITERAL: &'static str = "]";
     }
 
     impl<'i> StaticShard for JSONArray<'i> {}
-
-    struct LambdaShard0<'i>(PhantomData<&'i ()>);
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    struct LambdaShard0TUID {}
-
-    impl<'i> Shard for LambdaShard0<'i> {
-        type TUID = LambdaShard0TUID;
-        const DATA: &'static ShardData = &ShardData::Literal(",");
-    }
-
-    impl<'i> StaticShard for LambdaShard0<'i> {}
 };
 
 // ////////////////
@@ -203,26 +212,30 @@ pub struct JSONNull<'i> {
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
+    impl<'i> Shard for JSONNull<'i> {
+        type Static = Static;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID {}
+    pub struct Static {}
 
-    impl<'i> Shard for JSONNull<'i> {
-        type TUID = TUID;
-        const DATA: &'static ShardData = &ShardData::Literal("null");
+    impl ShardStatic for Static {
+        type Data = shards::Literal<ShardLiteral0>;
+    }
+
+    struct ShardLiteral0;
+
+    impl ShardLiteral for ShardLiteral0 {
+        const LITERAL: &'static str = "null";
     }
 
     impl<'i> StaticShard for JSONNull<'i> {}
@@ -251,33 +264,31 @@ pub struct WS<'i> {
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
-    where
-        S: Shard,
-    {
-        TypeId::of::<S::TUID>()
+    impl<'i> Shard for WS<'i> {
+        type Static = Static;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID {}
+    pub struct Static {}
 
-    impl<'i> Shard for WS<'i> {
-        type TUID = TUID;
-        const DATA: &'static ShardData = &ShardData::Vector {
-            item: &ShardData::Set {
-                negated: false,
-                range: &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'],
-            },
-            min: 0,
-            max: 0,
-        };
+    impl ShardStatic for Static {
+        type Data = shards::Vec<shards::Set<ShardSet0, false>, 0, 0>;
+    }
+
+    struct ShardSet0;
+
+    impl ShardSet for ShardSet0 {
+        const SET: &'static [RangeInclusive<char>] =
+            &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'];
     }
 
     impl<'i> StaticShard for WS<'i> {}
@@ -306,43 +317,40 @@ pub struct Punctuated<'i, T, P> {
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
+    impl<'i, T, P> Shard for Punctuated<'i, T, P>
     where
-        S: Shard,
+        T: Shard + 'static,
+        P: Shard + 'static,
     {
-        TypeId::of::<S::TUID>()
+        type Static = Static<<T as Shard>::Static, <P as Shard>::Static>;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID<T, P> {
+    pub struct Static<T, P> {
         T: PhantomData<T>,
         P: PhantomData<P>,
     }
 
-    impl<'i, T, P> Shard for Punctuated<'i, T, P>
+    impl<T, P> ShardStatic for Static<T, P>
     where
-        T: Shard,
-        P: Shard,
+        T: ShardStatic,
+        P: ShardStatic,
     {
-        type TUID = TUID<T::TUID, P::TUID>;
-        const DATA: &'static ShardData = &ShardData::Option(&ShardData::Sequence(&[
-            &ShardData::Extern(tuid::<T>(), || T::DATA),
-            &ShardData::Vector {
-                item: &ShardData::Sequence(&[
-                    &ShardData::Extern(tuid::<P>(), || P::DATA),
-                    &ShardData::Extern(tuid::<T>(), || T::DATA),
-                ]),
-                min: 0,
-                max: 0,
-            },
-        ]));
+        type Data = shards::Option<
+            shards::Sequence<(
+                shards::Extern<T>,
+                shards::Vec<shards::Sequence<(shards::Extern<P>, shards::Extern<T>)>, 0, 0>,
+            )>,
+        >;
     }
 };
 
@@ -371,34 +379,35 @@ pub struct Spanned<'i, T> {
 #[allow(unused_imports)]
 const _: () = {
     use ::aeris::ui::Shard;
-    use ::aeris::ui::ShardData;
+    use ::aeris::ui::ShardLiteral;
+    use ::aeris::ui::ShardSet;
+    use ::aeris::ui::ShardStatic;
     use ::aeris::ui::StaticShard;
-    use ::std::any::TypeId;
+    use ::aeris::ui::shards;
     use ::std::marker::PhantomData;
+    use ::std::ops::RangeInclusive;
 
-    #[allow(dead_code)]
-    const fn tuid<S>() -> TypeId
+    impl<'i, T> Shard for Spanned<'i, T>
     where
-        S: Shard,
+        T: Shard + 'static,
     {
-        TypeId::of::<S::TUID>()
+        type Static = Static<<T as Shard>::Static>;
     }
 
     #[allow(dead_code)]
     #[allow(non_snake_case)]
-    pub struct TUID<T> {
+    pub struct Static<T> {
         T: PhantomData<T>,
     }
 
-    impl<'i, T> Shard for Spanned<'i, T>
+    impl<T> ShardStatic for Static<T>
     where
-        T: Shard,
+        T: ShardStatic,
     {
-        type TUID = TUID<T::TUID>;
-        const DATA: &'static ShardData = &ShardData::Sequence(&[
-            &ShardData::Extern(tuid::<T>(), || T::DATA),
-            &ShardData::Extern(tuid::<WS>(), || WS::DATA),
-        ]);
+        type Data = shards::Sequence<(
+            shards::Extern<T>,
+            shards::Extern<<WS<'static> as Shard>::Static>,
+        )>;
     }
 };
 
