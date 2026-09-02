@@ -2,6 +2,8 @@
 // JSON
 // ////////////////
 
+use std::marker::PhantomData;
+
 #[cfg(false)]
 #[shard]
 pub struct JSON {
@@ -18,21 +20,15 @@ pub struct JSON<'i> {
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSON<'i> {
-        type Static = Static;
-    }
-
     #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static {}
+    pub struct TUID();
 
-    impl ::aeris::ui::internal::ShardStatic for Static {
-        type Data = ::aeris::ui::internal::Alternative<(
-            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
-            ::aeris::ui::internal::Extern<
-                <JSONValue<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
-            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
+    impl<'i> ::aeris::ui::internal::Shard for JSON<'i> {
+        type TUID = TUID;
+        type DATA = ::aeris::ui::internal::Alternative<(
+            ::aeris::ui::internal::Extern<WS<'static>>,
+            ::aeris::ui::internal::Extern<JSONValue<'static>>,
+            ::aeris::ui::internal::Extern<WS<'static>>,
         )>;
     }
 
@@ -65,22 +61,14 @@ pub enum JSONValue<'i> {
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSONValue<'i> {
-        type Static = Static;
-    }
-
     #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static {}
+    pub struct TUID();
 
-    impl ::aeris::ui::internal::ShardStatic for Static {
-        type Data = ::aeris::ui::internal::Alternative<(
-            ::aeris::ui::internal::Extern<
-                <JSONArray<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
-            ::aeris::ui::internal::Extern<
-                <JSONNull<'static> as ::aeris::ui::internal::Shard>::Static,
-            >,
+    impl<'i> ::aeris::ui::internal::Shard for JSONValue<'i> {
+        type TUID = TUID;
+        type DATA = ::aeris::ui::internal::Alternative<(
+            ::aeris::ui::internal::Extern<JSONArray<'static>>,
+            ::aeris::ui::internal::Extern<JSONNull<'static>>,
         )>;
     }
 
@@ -120,24 +108,24 @@ pub struct JSONArray<'i> {
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSONArray<'i> {
-        type Static = Static;
-    }
-
     #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static {}
+    pub struct TUID();
 
-    impl ::aeris::ui::internal::ShardStatic for Static {
-        type Data = ::aeris::ui::internal::Sequence<(
+    impl<'i> ::aeris::ui::internal::Shard for JSONArray<'i> {
+        type TUID = TUID;
+        type DATA = ::aeris::ui::internal::Sequence<(
             ::aeris::ui::internal::Literal<Literal0>,
-            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
+            ::aeris::ui::internal::Extern<WS<'static>>,
             ::aeris::ui::internal::Extern<
-                <Punctuated<
+                Punctuated<
                     'static,
-                    Spanned<'static, JSONValue<'static>>,
-                    Spanned<'static, ::aeris::ui::internal::Literal<Literal1>>,
-                > as ::aeris::ui::internal::Shard>::Static,
+                    ::aeris::ui::internal::Extern<
+                        Spanned<'static, ::aeris::ui::internal::Extern<JSONValue<'static>>>,
+                    >,
+                    ::aeris::ui::internal::Extern<
+                        Spanned<'static, ::aeris::ui::internal::Literal<Literal1>>,
+                    >,
+                >,
             >,
             ::aeris::ui::internal::Literal<Literal2>,
         )>;
@@ -188,18 +176,15 @@ pub struct JSONNull<'i> {
 }
 
 const _: () = {
+    #[allow(dead_code)]
+    pub struct TUID();
+
     impl<'i> ::aeris::ui::internal::Shard for JSONNull<'i> {
-        type Static = Static;
+        type TUID = TUID;
+        type DATA = ::aeris::ui::internal::Literal<Literal0>;
     }
 
     #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static {}
-
-    impl ::aeris::ui::internal::ShardStatic for Static {
-        type Data = ::aeris::ui::internal::Literal<Literal0>;
-    }
-
     struct Literal0;
 
     impl ::aeris::ui::internal::ShardLiteral for Literal0 {
@@ -230,18 +215,15 @@ pub struct WS<'i> {
 }
 
 const _: () = {
+    #[allow(dead_code)]
+    pub struct TUID();
+
     impl<'i> ::aeris::ui::internal::Shard for WS<'i> {
-        type Static = Static;
+        type TUID = TUID;
+        type DATA = ::aeris::ui::internal::Vec<::aeris::ui::internal::Set<Set0, false>, 0, 0>;
     }
 
     #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static {}
-
-    impl ::aeris::ui::internal::ShardStatic for Static {
-        type Data = ::aeris::ui::internal::Vec<::aeris::ui::internal::Set<Set0, false>, 0, 0>;
-    }
-
     struct Set0;
 
     impl ::aeris::ui::internal::ShardSet for Set0 {
@@ -273,40 +255,19 @@ pub struct Punctuated<'i, T, P> {
 }
 
 const _: () = {
+    #[allow(dead_code)]
+    pub struct TUID<T, P>(PhantomData<T>, PhantomData<P>);
+
     impl<'i, T, P> ::aeris::ui::internal::Shard for Punctuated<'i, T, P>
     where
-        T: ::aeris::ui::internal::Shard + 'static,
-        P: ::aeris::ui::internal::Shard + 'static,
+        T: ::aeris::ui::internal::ShardParam,
+        P: ::aeris::ui::internal::ShardParam,
     {
-        type Static = Static<
-            <T as ::aeris::ui::internal::Shard>::Static,
-            <P as ::aeris::ui::internal::Shard>::Static,
-        >;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static<T, P> {
-        T: ::std::marker::PhantomData<T>,
-        P: ::std::marker::PhantomData<P>,
-    }
-
-    impl<T, P> ::aeris::ui::internal::ShardStatic for Static<T, P>
-    where
-        T: ::aeris::ui::internal::ShardStatic,
-        P: ::aeris::ui::internal::ShardStatic,
-    {
-        type Data = ::aeris::ui::internal::Option<
+        type TUID = TUID<T, P>;
+        type DATA = ::aeris::ui::internal::Option<
             ::aeris::ui::internal::Sequence<(
-                ::aeris::ui::internal::Extern<T>,
-                ::aeris::ui::internal::Vec<
-                    ::aeris::ui::internal::Sequence<(
-                        ::aeris::ui::internal::Extern<P>,
-                        ::aeris::ui::internal::Extern<T>,
-                    )>,
-                    0,
-                    0,
-                >,
+                T,
+                ::aeris::ui::internal::Vec<::aeris::ui::internal::Sequence<(P, T)>, 0, 0>,
             )>,
         >;
     }
@@ -335,27 +296,16 @@ pub struct Spanned<'i, T> {
 }
 
 const _: () = {
+    #[allow(dead_code)]
+    pub struct TUID<T>(PhantomData<T>);
+
     impl<'i, T> ::aeris::ui::internal::Shard for Spanned<'i, T>
     where
-        T: ::aeris::ui::internal::Shard + 'static,
+        T: ::aeris::ui::internal::ShardParam,
     {
-        type Static = Static<<T as ::aeris::ui::internal::Shard>::Static>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_snake_case)]
-    pub struct Static<T> {
-        T: ::std::marker::PhantomData<T>,
-    }
-
-    impl<T> ::aeris::ui::internal::ShardStatic for Static<T>
-    where
-        T: ::aeris::ui::internal::ShardStatic,
-    {
-        type Data = ::aeris::ui::internal::Sequence<(
-            ::aeris::ui::internal::Extern<T>,
-            ::aeris::ui::internal::Extern<<WS<'static> as ::aeris::ui::internal::Shard>::Static>,
-        )>;
+        type TUID = TUID<T>;
+        type DATA =
+            ::aeris::ui::internal::Sequence<(T, ::aeris::ui::internal::Extern<WS<'static>>)>;
     }
 };
 

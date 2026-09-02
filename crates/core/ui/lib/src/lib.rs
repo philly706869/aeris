@@ -2,7 +2,7 @@ pub mod internal;
 
 use std::marker::PhantomData;
 
-use crate::internal::{ShardDataType, ShardStatic, StaticShard};
+use crate::internal::{ShardDataType, StaticShard};
 
 #[macro_export]
 macro_rules! x {
@@ -26,7 +26,7 @@ where
     S: StaticShard,
 {
     pub const fn build() -> Self {
-        let data = <<S::Static as ShardStatic>::Data as ShardDataType>::DATA;
+        let data = <S::DATA as ShardDataType>::DATA;
         Self {
             _shard: PhantomData,
         }

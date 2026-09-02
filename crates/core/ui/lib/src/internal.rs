@@ -3,12 +3,9 @@ use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 pub type Str = str;
 
 pub trait Shard {
-    type Static: ShardStatic;
-}
-
-pub trait ShardStatic: 'static {
+    type TUID: 'static;
     #[allow(private_bounds)]
-    type Data: ShardDataType;
+    type DATA: ShardDataType;
 }
 
 pub trait StaticShard: Shard {}
@@ -16,6 +13,10 @@ pub trait StaticShard: Shard {}
 pub(crate) trait ShardDataType {
     const DATA: &'static ShardData;
 }
+
+pub trait ShardParam: ShardDataType {}
+
+impl<T> ShardParam for T where T: ShardDataType {}
 
 pub struct Literal<T>(PhantomData<fn() -> T>);
 
@@ -26,7 +27,7 @@ where
     const DATA: &'static ShardData = &ShardData::Literal(T::LITERAL);
 }
 
-pub trait ShardLiteral {
+pub trait ShardLiteral: 'static {
     const LITERAL: &'static str;
 }
 
@@ -42,7 +43,7 @@ where
     };
 }
 
-pub trait ShardSet {
+pub trait ShardSet: 'static {
     const SET: &'static [RangeInclusive<char>];
 }
 
@@ -122,10 +123,10 @@ pub struct Extern<T>(PhantomData<fn() -> T>);
 
 impl<T> ShardDataType for Extern<T>
 where
-    T: ShardStatic,
+    T: Shard,
 {
     const DATA: &'static ShardData =
-        &ShardData::Extern(TypeId::of::<T>(), <T::Data as ShardDataType>::DATA);
+        &ShardData::Extern(TypeId::of::<T::TUID>(), <T::DATA as ShardDataType>::DATA);
 }
 
 #[derive(Debug)]
