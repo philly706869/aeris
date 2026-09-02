@@ -3,20 +3,19 @@ use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 pub type Str = str;
 
 pub trait Shard {
-    type TUID: 'static;
     #[allow(private_bounds)]
     type DATA: ShardDataType;
 }
 
-pub trait StaticShard: Shard {}
-
-pub(crate) trait ShardDataType {
+pub(crate) trait ShardDataType: 'static {
     const DATA: &'static ShardData;
 }
 
 pub trait ShardParam: ShardDataType {}
 
 impl<T> ShardParam for T where T: ShardDataType {}
+
+pub trait StaticShard: Shard {}
 
 pub struct Literal<T>(PhantomData<fn() -> T>);
 
@@ -123,10 +122,10 @@ pub struct Extern<T>(PhantomData<fn() -> T>);
 
 impl<T> ShardDataType for Extern<T>
 where
-    T: Shard,
+    T: Shard + 'static,
 {
     const DATA: &'static ShardData =
-        &ShardData::Extern(TypeId::of::<T::TUID>(), <T::DATA as ShardDataType>::DATA);
+        &ShardData::Extern(TypeId::of::<T::DATA>(), <T::DATA as ShardDataType>::DATA);
 }
 
 #[derive(Debug)]
