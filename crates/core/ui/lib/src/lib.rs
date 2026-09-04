@@ -28,12 +28,12 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        let data = <S::DATA as ShardDataType>::DATA;
+        let data = <S::Data as ShardDataType>::DATA;
 
         let mut stack = vec![data];
         let mut table: FxHashMap<TypeId, &ShardData> = FxHashMap::default();
 
-        table.insert(TypeId::of::<S::DATA>(), data);
+        table.insert(TypeId::of::<S::Data>(), data);
 
         while let Some(data) = stack.pop() {
             match data {
@@ -53,15 +53,9 @@ where
             }
         }
 
-        dbg!(table);
-
         Self {
             _shard: PhantomData,
         }
-    }
-
-    pub fn call(&self) {
-        println!();
     }
 
     pub fn parse<'i>(&self, input: &'i str) -> S {

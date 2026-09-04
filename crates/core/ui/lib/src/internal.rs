@@ -4,11 +4,12 @@ pub type Str = str;
 
 pub trait Shard {
     #[allow(private_bounds)]
-    type DATA: ShardDataType;
+    type Data: ShardDataType;
 }
 
 pub(crate) trait ShardDataType: 'static {
-    const DATA: &'static ShardData;
+    type Data: Into<ShardData>;
+    const DATA: &'static Self::Data;
 }
 
 #[allow(private_bounds)]
@@ -24,23 +25,25 @@ impl<T> ShardDataType for Literal<T>
 where
     T: ShardLiteral,
 {
-    const DATA: &'static ShardData = &ShardData::Literal(T::LITERAL);
+    type Data = LiteralData;
+    const DATA: &'static LiteralData = &LiteralData { text: T::LITERAL };
 }
 
 pub trait ShardLiteral: 'static {
     const LITERAL: &'static str;
 }
 
-pub struct Set<T, const NEGATED: bool>(PhantomData<fn() -> T>);
+pub struct Set<const NEGATED: bool, T>(PhantomData<fn() -> T>);
 
-impl<T, const NEGATED: bool> ShardDataType for Set<T, NEGATED>
+impl<const NEGATED: bool, T> ShardDataType for Set<NEGATED, T>
 where
     T: ShardSet,
 {
-    const DATA: &'static ShardData = &ShardData::Set(SetData {
+    type Data = SetData;
+    const DATA: &'static SetData = &SetData {
         negated: NEGATED,
         range: T::SET,
-    });
+    };
 }
 
 pub trait ShardSet: 'static {
@@ -53,7 +56,10 @@ impl<T> ShardDataType for Option<T>
 where
     T: ShardDataType,
 {
-    const DATA: &'static ShardData = &ShardData::Option(T::DATA);
+    type Data = OptionData;
+    const DATA: &'static OptionData = &OptionData {
+        item: T::DATA.into(),
+    };
 }
 
 pub struct Vec<T, const MIN: usize, const MAX: usize>(PhantomData<fn() -> T>);
@@ -126,18 +132,45 @@ where
     T: Shard + 'static,
 {
     const DATA: &'static ShardData =
-        &ShardData::Extern(TypeId::of::<T::DATA>(), || <T::DATA as ShardDataType>::DATA);
+        &ShardData::Extern(TypeId::of::<T::Data>(), || <T::Data as ShardDataType>::DATA);
 }
 
 #[derive(Debug)]
 pub(crate) enum ShardData {
-    Literal(&'static str),
+    Literal(LiteralData),
     Set(SetData),
-    Option(&'static ShardData),
+    Option(OptionData),
     Vector(VectorData),
-    Sequence(&'static [&'static ShardData]),
-    Alternative(&'static [&'static ShardData]),
-    Extern(TypeId, fn() -> &'static ShardData),
+    Sequence(SequenceData),
+    Alternative(AlternativeData),
+    Extern(ExternData),
+}
+
+macro_rules! impl_shard_data_from {
+    ($($ty:ty => $variant:ident,)*) => {
+        $(
+            impl From<$ty> for ShardData {
+                fn from(value: $ty) -> Self {
+                    Self::$variant(value)
+                }
+            }
+        )*
+    };
+}
+
+impl_shard_data_from! {
+    LiteralData => Literal,
+    SetData => Set,
+    OptionData => Option,
+    VectorData => Vector,
+    SequenceData => Sequence,
+    AlternativeData => Alternative,
+    ExternData => Extern,
+}
+
+#[derive(Debug)]
+pub(crate) struct LiteralData {
+    pub text: &'static str,
 }
 
 #[derive(Debug)]
@@ -147,10 +180,31 @@ pub(crate) struct SetData {
 }
 
 #[derive(Debug)]
+pub(crate) struct OptionData {
+    pub item: &'static ShardData,
+}
+
+#[derive(Debug)]
 pub(crate) struct VectorData {
     pub item: &'static ShardData,
     pub min: usize,
     pub max: usize,
+}
+
+#[derive(Debug)]
+pub(crate) struct SequenceData {
+    pub items: &'static [&'static ShardData],
+}
+
+#[derive(Debug)]
+pub(crate) struct AlternativeData {
+    pub items: &'static [&'static ShardData],
+}
+
+#[derive(Debug)]
+pub(crate) struct ExternData {
+    pub id: TypeId,
+    pub reference: fn() -> &'static ShardData,
 }
 
 fn normalize_set(set: &SetData) -> std::vec::Vec<RangeInclusive<char>> {

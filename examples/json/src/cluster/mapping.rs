@@ -1,16 +1,12 @@
 #[cfg(test)]
 mod test {
-    use std::sync::LazyLock;
-
     use aeris::ui::Cluster;
 
     use super::JSON;
 
-    static CLUSTER: LazyLock<Cluster<JSON>> = LazyLock::new(|| Cluster::build());
-
     #[test]
     fn test() {
-        CLUSTER.call();
+        let _: Cluster<JSON> = Cluster::build();
     }
 }
 
@@ -35,7 +31,7 @@ pub struct JSON<'i> {
 
 const _: () = {
     impl<'i> ::aeris::ui::internal::Shard for JSON<'i> {
-        type DATA = ::aeris::ui::internal::Alternative<(
+        type Data = ::aeris::ui::internal::Alternative<(
             ::aeris::ui::internal::Extern<WS<'static>>,
             ::aeris::ui::internal::Extern<JSONValue<'static>>,
             ::aeris::ui::internal::Extern<WS<'static>>,
@@ -72,7 +68,7 @@ pub enum JSONValue<'i> {
 
 const _: () = {
     impl<'i> ::aeris::ui::internal::Shard for JSONValue<'i> {
-        type DATA = ::aeris::ui::internal::Alternative<(
+        type Data = ::aeris::ui::internal::Alternative<(
             ::aeris::ui::internal::Extern<JSONArray<'static>>,
             ::aeris::ui::internal::Extern<JSONNull<'static>>,
         )>;
@@ -115,7 +111,7 @@ pub struct JSONArray<'i> {
 
 const _: () = {
     impl<'i> ::aeris::ui::internal::Shard for JSONArray<'i> {
-        type DATA = ::aeris::ui::internal::Sequence<(
+        type Data = ::aeris::ui::internal::Sequence<(
             ::aeris::ui::internal::Literal<Literal0>,
             ::aeris::ui::internal::Extern<WS<'static>>,
             ::aeris::ui::internal::Extern<
@@ -179,7 +175,7 @@ pub struct JSONNull<'i> {
 
 const _: () = {
     impl<'i> ::aeris::ui::internal::Shard for JSONNull<'i> {
-        type DATA = ::aeris::ui::internal::Literal<Literal0>;
+        type Data = ::aeris::ui::internal::Literal<Literal0>;
     }
 
     #[allow(dead_code)]
@@ -214,7 +210,7 @@ pub struct WS<'i> {
 
 const _: () = {
     impl<'i> ::aeris::ui::internal::Shard for WS<'i> {
-        type DATA = ::aeris::ui::internal::Vec<::aeris::ui::internal::Set<Set0, false>, 0, 0>;
+        type Data = ::aeris::ui::internal::Vec<::aeris::ui::internal::Set<false, Set0>, 0, 0>;
     }
 
     #[allow(dead_code)]
@@ -254,7 +250,7 @@ const _: () = {
         T: ::aeris::ui::internal::ShardParam,
         P: ::aeris::ui::internal::ShardParam,
     {
-        type DATA = ::aeris::ui::internal::Option<
+        type Data = ::aeris::ui::internal::Option<
             ::aeris::ui::internal::Sequence<(
                 T,
                 ::aeris::ui::internal::Vec<::aeris::ui::internal::Sequence<(P, T)>, 0, 0>,
@@ -290,7 +286,7 @@ const _: () = {
     where
         T: ::aeris::ui::internal::ShardParam,
     {
-        type DATA =
+        type Data =
             ::aeris::ui::internal::Sequence<(T, ::aeris::ui::internal::Extern<WS<'static>>)>;
     }
 };
