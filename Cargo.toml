@@ -8,8 +8,8 @@ members = [
   "crates/synx",
   "crates/std",
   "crates/std/ui",
-  "apps/cli",
-  "apps/daemon",
+  "apps/aeris",
+  "apps/aerisd",
   "examples/json",
 ]
 
@@ -26,8 +26,8 @@ aeris-ui-proc      = { path = "crates/core/ui/proc" }
 synx               = { path = "crates/synx" }
 aeris-std          = { path = "crates/std" }
 aeris-std-ui       = { path = "crates/std/ui" }
-aeris-cli          = { path = "apps/cli" }
-aeris-daemon       = { path = "apps/daemon" }
+aeris-cli          = { path = "apps/aeris" }
+aeris-daemon       = { path = "apps/aerisd" }
 example-json       = { path = "examples/json" }
 clap               = { version = "4" }
 criterion          = { version = "0.8" }
