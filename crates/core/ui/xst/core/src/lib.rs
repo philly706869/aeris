@@ -1,3 +1,4 @@
+#[doc(hidden)]
 pub mod internal;
 
 use std::{any::TypeId, collections::hash_map::Entry, marker::PhantomData};
@@ -5,11 +6,6 @@ use std::{any::TypeId, collections::hash_map::Entry, marker::PhantomData};
 use rustc_hash::FxHashMap;
 
 use crate::internal::{ShardData, ShardDataType, StaticShard};
-
-#[macro_export]
-macro_rules! x {
-    () => {};
-}
 
 #[macro_export]
 macro_rules! cluster {

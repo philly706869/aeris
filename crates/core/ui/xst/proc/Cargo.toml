@@ -1,5 +1,5 @@
 [package]
-name    = "aeris-ui-proc"
+name    = "aeris-ui-xst-proc"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }

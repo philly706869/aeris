@@ -1,8 +1,9 @@
 [package]
-name    = "aeris-ui-lib"
+name    = "aeris-ui-xst"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-rustc-hash = { workspace = true }
+aeris-ui-xst-core = { workspace = true }
+aeris-ui-xst-proc = { workspace = true }
