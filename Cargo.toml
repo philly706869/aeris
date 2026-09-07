@@ -1,14 +1,14 @@
 [workspace]
 resolver = "3"
 members = [
-  "crates/core",
-  "crates/core/ui",
-  "crates/core/ui/xst",
-  "crates/core/ui/xst/core",
-  "crates/core/ui/xst/proc",
+  "crates/aeris",
+  "crates/aeris/ui",
+  "crates/aeris/std",
+  "crates/aeris/std/ui",
+  "crates/xst",
+  "crates/xst/core",
+  "crates/xst/proc",
   "crates/synx",
-  "crates/std",
-  "crates/std/ui",
   "apps/aeris",
   "apps/aerisd",
   "examples/json",
@@ -20,14 +20,14 @@ edition = "2024"
 publish = false
 
 [workspace.dependencies]
-aeris              = { path = "crates/core" }
-aeris-ui           = { path = "crates/core/ui" }
-aeris-ui-xst       = { path = "crates/core/ui/xst" }
-aeris-ui-xst-core  = { path = "crates/core/ui/xst/core" }
-aeris-ui-xst-proc  = { path = "crates/core/ui/xst/proc" }
+aeris              = { path = "crates/aeris" }
+aeris-ui           = { path = "crates/aeris/ui" }
+aeris-std          = { path = "crates/aeris/std" }
+aeris-std-ui       = { path = "crates/aeris/std/ui" }
+xst                = { path = "crates/xst" }
+xst-core           = { path = "crates/xst/core" }
+xst-proc           = { path = "crates/xst/proc" }
 synx               = { path = "crates/synx" }
-aeris-std          = { path = "crates/std" }
-aeris-std-ui       = { path = "crates/std/ui" }
 aeris-cli          = { path = "apps/aeris" }
 aeris-daemon       = { path = "apps/aerisd" }
 example-json       = { path = "examples/json" }

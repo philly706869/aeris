@@ -1,9 +1,9 @@
 [package]
-name    = "aeris-ui-xst"
+name    = "xst"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-aeris-ui-xst-core = { workspace = true }
-aeris-ui-xst-proc = { workspace = true }
+xst-core = { workspace = true }
+xst-proc = { workspace = true }

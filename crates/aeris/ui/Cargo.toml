@@ -1,8 +1,8 @@
 [package]
-name    = "aeris-ui-xst-core"
+name    = "aeris-ui"
 version = { workspace = true }
 edition = { workspace = true }
 publish = { workspace = true }
 
 [dependencies]
-rustc-hash = { workspace = true }
+xst = { workspace = true }
