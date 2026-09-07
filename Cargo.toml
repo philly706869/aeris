@@ -3,8 +3,8 @@ resolver = "3"
 members = [
   "crates/aeris",
   "crates/aeris/ui",
-  "crates/aeris/std",
-  "crates/aeris/std/ui",
+  "crates/aeris-std",
+  "crates/aeris-std/ui",
   "crates/xst",
   "crates/xst/core",
   "crates/xst/proc",
@@ -22,8 +22,8 @@ publish = false
 [workspace.dependencies]
 aeris              = { path = "crates/aeris" }
 aeris-ui           = { path = "crates/aeris/ui" }
-aeris-std          = { path = "crates/aeris/std" }
-aeris-std-ui       = { path = "crates/aeris/std/ui" }
+aeris-std          = { path = "crates/aeris-std" }
+aeris-std-ui       = { path = "crates/aeris-std/ui" }
 xst                = { path = "crates/xst" }
 xst-core           = { path = "crates/xst/core" }
 xst-proc           = { path = "crates/xst/proc" }
