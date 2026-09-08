@@ -1,4 +1,4 @@
-use aeris::ui::shard;
+use xst::shard;
 
 #[shard]
 pub enum JSONBoolean {

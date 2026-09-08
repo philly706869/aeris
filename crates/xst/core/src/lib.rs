@@ -1,11 +1,13 @@
 #[doc(hidden)]
 pub mod internal;
 
+mod shard;
+
 use std::{any::TypeId, collections::hash_map::Entry, marker::PhantomData};
 
 use rustc_hash::FxHashMap;
 
-use crate::internal::{ShardData, ShardDataType, StaticShard};
+use crate::shard::{ShardData, ShardDataType, StaticShard};
 
 #[macro_export]
 macro_rules! cluster {
@@ -24,30 +26,30 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        let data = <S::Data as ShardDataType>::DATA;
+        // let data = <shard::ExternType<S>>::data();
 
-        let mut stack = vec![data];
-        let mut table: FxHashMap<TypeId, &ShardData> = FxHashMap::default();
+        // let mut stack = vec![data];
+        // let mut table: FxHashMap<TypeId, &ShardData> = FxHashMap::default();
 
-        table.insert(TypeId::of::<S::Data>(), data);
+        // table.insert(TypeId::of::<S::Data>(), data);
 
-        while let Some(data) = stack.pop() {
-            match data {
-                ShardData::Literal(_) => {}
-                ShardData::Set(_) => {}
-                ShardData::Option(data) => stack.push(data),
-                ShardData::Vector(data) => stack.push(data.item),
-                ShardData::Sequence(data) => stack.extend(data.iter()),
-                ShardData::Alternative(data) => stack.extend(data.iter()),
-                ShardData::Extern(type_id, data) => {
-                    if let Entry::Vacant(entry) = table.entry(type_id.to_owned()) {
-                        let data = data();
-                        entry.insert(data);
-                        stack.push(data);
-                    }
-                }
-            }
-        }
+        // while let Some(data) = stack.pop() {
+        //     match data {
+        //         ShardData::Literal(_) => {}
+        //         ShardData::Set(_) => {}
+        //         ShardData::Option(data) => stack.push(data),
+        //         ShardData::Vec(data) => stack.push(data.item),
+        //         ShardData::Sequence(data) => stack.extend(data.iter()),
+        //         ShardData::Alternative(data) => stack.extend(data.iter()),
+        //         ShardData::Extern(type_id, data) => {
+        //             if let Entry::Vacant(entry) = table.entry(type_id.to_owned()) {
+        //                 let data = data();
+        //                 entry.insert(data);
+        //                 stack.push(data);
+        //             }
+        //         }
+        //     }
+        // }
 
         Self {
             _shard: PhantomData,

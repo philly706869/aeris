@@ -6,3 +6,4 @@ publish = { workspace = true }
 
 [dependencies]
 aeris = { workspace = true }
+xst   = { workspace = true }

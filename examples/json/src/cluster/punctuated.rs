@@ -1,4 +1,4 @@
-use aeris::ui::shard;
+use xst::shard;
 
 #[shard]
 pub struct Punctuated<T, P> {

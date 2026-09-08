@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use aeris::ui::Cluster;
+    use xst::Cluster;
 
     use super::JSON;
 
@@ -24,21 +24,21 @@ pub struct JSON {
 
 #[derive(Debug)]
 pub struct JSON<'i> {
-    _i: ::std::marker::PhantomData<&'i ()>,
+    _i: ::xst::internal::PhantomData<&'i ()>,
     ws: (WS<'i>, WS<'i>),
     value: JSONValue<'i>,
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSON<'i> {
-        type Data = ::aeris::ui::internal::Alternative<(
-            ::aeris::ui::internal::Extern<WS<'static>>,
-            ::aeris::ui::internal::Extern<JSONValue<'static>>,
-            ::aeris::ui::internal::Extern<WS<'static>>,
+    impl<'i> ::xst::internal::Shard for JSON<'i> {
+        type Data = ::xst::internal::Alternative<(
+            ::xst::internal::Extern<WS<'static>>,
+            ::xst::internal::Extern<JSONValue<'static>>,
+            ::xst::internal::Extern<WS<'static>>,
         )>;
     }
 
-    impl<'i> ::aeris::ui::internal::StaticShard for JSON<'i> {}
+    impl<'i> ::xst::internal::StaticShard for JSON<'i> {}
 };
 
 // ////////////////
@@ -67,14 +67,14 @@ pub enum JSONValue<'i> {
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSONValue<'i> {
-        type Data = ::aeris::ui::internal::Alternative<(
-            ::aeris::ui::internal::Extern<JSONArray<'static>>,
-            ::aeris::ui::internal::Extern<JSONNull<'static>>,
+    impl<'i> ::xst::internal::Shard for JSONValue<'i> {
+        type Data = ::xst::internal::Alternative<(
+            ::xst::internal::Extern<JSONArray<'static>>,
+            ::xst::internal::Extern<JSONNull<'static>>,
         )>;
     }
 
-    impl<'i> ::aeris::ui::internal::StaticShard for JSONValue<'i> {}
+    impl<'i> ::xst::internal::StaticShard for JSONValue<'i> {}
 };
 
 // ////////////////
@@ -96,61 +96,52 @@ pub struct JSONArray {
 
 #[derive(Debug)]
 pub struct JSONArray<'i> {
-    _i: ::std::marker::PhantomData<&'i ()>,
-    bracket: (
-        &'i ::aeris::ui::internal::Str,
-        &'i ::aeris::ui::internal::Str,
-    ),
+    _i: ::xst::internal::PhantomData<&'i ()>,
+    bracket: (&'i ::xst::internal::Str, &'i ::xst::internal::Str),
     ws: WS<'i>,
-    entries: Punctuated<
-        'i,
-        Spanned<'i, Box<JSONValue<'i>>>,
-        Spanned<'i, &'i ::aeris::ui::internal::Str>,
-    >,
+    entries: Punctuated<'i, Spanned<'i, Box<JSONValue<'i>>>, Spanned<'i, &'i ::xst::internal::Str>>,
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSONArray<'i> {
-        type Data = ::aeris::ui::internal::Sequence<(
-            ::aeris::ui::internal::Literal<Literal0>,
-            ::aeris::ui::internal::Extern<WS<'static>>,
-            ::aeris::ui::internal::Extern<
+    impl<'i> ::xst::internal::Shard for JSONArray<'i> {
+        type Data = ::xst::internal::Sequence<(
+            ::xst::internal::Literal<Literal0>,
+            ::xst::internal::Extern<WS<'static>>,
+            ::xst::internal::Extern<
                 Punctuated<
                     'static,
-                    ::aeris::ui::internal::Extern<
-                        Spanned<'static, ::aeris::ui::internal::Extern<JSONValue<'static>>>,
+                    ::xst::internal::Extern<
+                        Spanned<'static, ::xst::internal::Extern<JSONValue<'static>>>,
                     >,
-                    ::aeris::ui::internal::Extern<
-                        Spanned<'static, ::aeris::ui::internal::Literal<Literal1>>,
-                    >,
+                    ::xst::internal::Extern<Spanned<'static, ::xst::internal::Literal<Literal1>>>,
                 >,
             >,
-            ::aeris::ui::internal::Literal<Literal2>,
+            ::xst::internal::Literal<Literal2>,
         )>;
     }
 
     #[allow(dead_code)]
     pub struct Literal0;
 
-    impl ::aeris::ui::internal::ShardLiteral for Literal0 {
-        const LITERAL: &'static ::aeris::ui::internal::Str = "[";
+    impl ::xst::internal::ShardLiteral for Literal0 {
+        const LITERAL: &'static ::xst::internal::Str = "[";
     }
 
     #[allow(dead_code)]
     pub struct Literal1;
 
-    impl ::aeris::ui::internal::ShardLiteral for Literal1 {
-        const LITERAL: &'static ::aeris::ui::internal::Str = ",";
+    impl ::xst::internal::ShardLiteral for Literal1 {
+        const LITERAL: &'static ::xst::internal::Str = ",";
     }
 
     #[allow(dead_code)]
     pub struct Literal2;
 
-    impl ::aeris::ui::internal::ShardLiteral for Literal2 {
-        const LITERAL: &'static ::aeris::ui::internal::Str = "]";
+    impl ::xst::internal::ShardLiteral for Literal2 {
+        const LITERAL: &'static ::xst::internal::Str = "]";
     }
 
-    impl<'i> ::aeris::ui::internal::StaticShard for JSONArray<'i> {}
+    impl<'i> ::xst::internal::StaticShard for JSONArray<'i> {}
 };
 
 // ////////////////
@@ -169,23 +160,23 @@ pub struct JSONNull {
 
 #[derive(Debug)]
 pub struct JSONNull<'i> {
-    _i: ::std::marker::PhantomData<&'i ()>,
-    text: &'i ::aeris::ui::internal::Str,
+    _i: ::xst::internal::PhantomData<&'i ()>,
+    text: &'i ::xst::internal::Str,
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for JSONNull<'i> {
-        type Data = ::aeris::ui::internal::Literal<Literal0>;
+    impl<'i> ::xst::internal::Shard for JSONNull<'i> {
+        type Data = ::xst::internal::Literal<Literal0>;
     }
 
     #[allow(dead_code)]
     pub struct Literal0;
 
-    impl ::aeris::ui::internal::ShardLiteral for Literal0 {
-        const LITERAL: &'static ::aeris::ui::internal::Str = "null";
+    impl ::xst::internal::ShardLiteral for Literal0 {
+        const LITERAL: &'static ::xst::internal::Str = "null";
     }
 
-    impl<'i> ::aeris::ui::internal::StaticShard for JSONNull<'i> {}
+    impl<'i> ::xst::internal::StaticShard for JSONNull<'i> {}
 };
 
 // ////////////////
@@ -204,24 +195,24 @@ pub struct WS {
 
 #[derive(Debug)]
 pub struct WS<'i> {
-    _i: ::std::marker::PhantomData<&'i ()>,
-    space: &'i ::aeris::ui::internal::Str,
+    _i: ::xst::internal::PhantomData<&'i ()>,
+    space: &'i ::xst::internal::Str,
 }
 
 const _: () = {
-    impl<'i> ::aeris::ui::internal::Shard for WS<'i> {
-        type Data = ::aeris::ui::internal::Vec<::aeris::ui::internal::Set<false, Set0>, 0, 0>;
+    impl<'i> ::xst::internal::Shard for WS<'i> {
+        type Data = ::xst::internal::Vec<::xst::internal::Set<false, Set0>, 0, 0>;
     }
 
     #[allow(dead_code)]
     pub struct Set0;
 
-    impl ::aeris::ui::internal::ShardSet for Set0 {
+    impl ::xst::internal::ShardSet for Set0 {
         const SET: &'static [::std::ops::RangeInclusive<char>] =
             &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'];
     }
 
-    impl<'i> ::aeris::ui::internal::StaticShard for WS<'i> {}
+    impl<'i> ::xst::internal::StaticShard for WS<'i> {}
 };
 
 // ////////////////
@@ -240,20 +231,20 @@ pub struct Punctuated<T, P> {
 
 #[derive(Debug)]
 pub struct Punctuated<'i, T, P> {
-    _i: ::std::marker::PhantomData<&'i ()>,
+    _i: ::xst::internal::PhantomData<&'i ()>,
     inner: Option<(Box<T>, Vec<(P, T)>)>,
 }
 
 const _: () = {
-    impl<'i, T, P> ::aeris::ui::internal::Shard for Punctuated<'i, T, P>
+    impl<'i, T, P> ::xst::internal::Shard for Punctuated<'i, T, P>
     where
-        T: ::aeris::ui::internal::ShardParam,
-        P: ::aeris::ui::internal::ShardParam,
+        T: ::xst::internal::ShardParam,
+        P: ::xst::internal::ShardParam,
     {
-        type Data = ::aeris::ui::internal::Option<
-            ::aeris::ui::internal::Sequence<(
+        type Data = ::xst::internal::Option<
+            ::xst::internal::Sequence<(
                 T,
-                ::aeris::ui::internal::Vec<::aeris::ui::internal::Sequence<(P, T)>, 0, 0>,
+                ::xst::internal::Vec<::xst::internal::Sequence<(P, T)>, 0, 0>,
             )>,
         >;
     }
@@ -276,18 +267,17 @@ pub struct Spanned {
 
 #[derive(Debug)]
 pub struct Spanned<'i, T> {
-    _i: ::std::marker::PhantomData<&'i ()>,
+    _i: ::xst::internal::PhantomData<&'i ()>,
     inner: T,
     ws: WS<'i>,
 }
 
 const _: () = {
-    impl<'i, T> ::aeris::ui::internal::Shard for Spanned<'i, T>
+    impl<'i, T> ::xst::internal::Shard for Spanned<'i, T>
     where
-        T: ::aeris::ui::internal::ShardParam,
+        T: ::xst::internal::ShardParam,
     {
-        type Data =
-            ::aeris::ui::internal::Sequence<(T, ::aeris::ui::internal::Extern<WS<'static>>)>;
+        type Data = ::xst::internal::Sequence<(T, ::xst::internal::Extern<WS<'static>>)>;
     }
 };
 
