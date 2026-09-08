@@ -6,7 +6,7 @@ mod test {
 
     #[test]
     fn test() {
-        let _: Cluster<JSON> = Cluster::build();
+        let cluster: Cluster<JSON> = Cluster::build();
     }
 }
 
@@ -30,7 +30,7 @@ pub struct JSON<'i> {
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::Shard for JSON<'i> {
+    impl ::xst::internal::Shard for JSON<'static> {
         type Data = ::xst::internal::Alternative<(
             ::xst::internal::Extern<WS<'static>>,
             ::xst::internal::Extern<JSONValue<'static>>,
@@ -38,7 +38,7 @@ const _: () = {
         )>;
     }
 
-    impl<'i> ::xst::internal::StaticShard for JSON<'i> {}
+    impl ::xst::internal::StaticShard for JSON<'static> {}
 };
 
 // ////////////////
@@ -67,14 +67,14 @@ pub enum JSONValue<'i> {
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::Shard for JSONValue<'i> {
+    impl ::xst::internal::Shard for JSONValue<'static> {
         type Data = ::xst::internal::Alternative<(
             ::xst::internal::Extern<JSONArray<'static>>,
             ::xst::internal::Extern<JSONNull<'static>>,
         )>;
     }
 
-    impl<'i> ::xst::internal::StaticShard for JSONValue<'i> {}
+    impl ::xst::internal::StaticShard for JSONValue<'static> {}
 };
 
 // ////////////////
@@ -90,20 +90,20 @@ const _: () = {
 pub struct JSONArray {
     bracket: x!["["],
     ws: WS,
-    entries: Punctuated<Spanned<[JSONValue; boxed]>, Spanned<x![","]>>,
+    entries: Punctuated<Spanned<Box<JSONValue>>, Spanned<x![","]>>,
     bracket: x!["["],
 }
 
 #[derive(Debug)]
 pub struct JSONArray<'i> {
     _i: ::xst::internal::PhantomData<&'i ()>,
-    bracket: (&'i ::xst::internal::Str, &'i ::xst::internal::Str),
+    bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: WS<'i>,
-    entries: Punctuated<'i, Spanned<'i, Box<JSONValue<'i>>>, Spanned<'i, &'i ::xst::internal::Str>>,
+    entries: Punctuated<'i, Spanned<'i, Box<JSONValue<'i>>>, Spanned<'i, &'i ::xst::internal::str>>,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::Shard for JSONArray<'i> {
+    impl ::xst::internal::Shard for JSONArray<'static> {
         type Data = ::xst::internal::Sequence<(
             ::xst::internal::Literal<Literal0>,
             ::xst::internal::Extern<WS<'static>>,
@@ -124,24 +124,24 @@ const _: () = {
     pub struct Literal0;
 
     impl ::xst::internal::ShardLiteral for Literal0 {
-        const LITERAL: &'static ::xst::internal::Str = "[";
+        const LITERAL: &'static ::xst::internal::str = "[";
     }
 
     #[allow(dead_code)]
     pub struct Literal1;
 
     impl ::xst::internal::ShardLiteral for Literal1 {
-        const LITERAL: &'static ::xst::internal::Str = ",";
+        const LITERAL: &'static ::xst::internal::str = ",";
     }
 
     #[allow(dead_code)]
     pub struct Literal2;
 
     impl ::xst::internal::ShardLiteral for Literal2 {
-        const LITERAL: &'static ::xst::internal::Str = "]";
+        const LITERAL: &'static ::xst::internal::str = "]";
     }
 
-    impl<'i> ::xst::internal::StaticShard for JSONArray<'i> {}
+    impl ::xst::internal::StaticShard for JSONArray<'static> {}
 };
 
 // ////////////////
@@ -161,11 +161,11 @@ pub struct JSONNull {
 #[derive(Debug)]
 pub struct JSONNull<'i> {
     _i: ::xst::internal::PhantomData<&'i ()>,
-    text: &'i ::xst::internal::Str,
+    text: &'i ::xst::internal::str,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::Shard for JSONNull<'i> {
+    impl ::xst::internal::Shard for JSONNull<'static> {
         type Data = ::xst::internal::Literal<Literal0>;
     }
 
@@ -173,10 +173,10 @@ const _: () = {
     pub struct Literal0;
 
     impl ::xst::internal::ShardLiteral for Literal0 {
-        const LITERAL: &'static ::xst::internal::Str = "null";
+        const LITERAL: &'static ::xst::internal::str = "null";
     }
 
-    impl<'i> ::xst::internal::StaticShard for JSONNull<'i> {}
+    impl ::xst::internal::StaticShard for JSONNull<'static> {}
 };
 
 // ////////////////
@@ -196,11 +196,11 @@ pub struct WS {
 #[derive(Debug)]
 pub struct WS<'i> {
     _i: ::xst::internal::PhantomData<&'i ()>,
-    space: &'i ::xst::internal::Str,
+    space: &'i ::xst::internal::str,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::Shard for WS<'i> {
+    impl ::xst::internal::Shard for WS<'static> {
         type Data = ::xst::internal::Vec<::xst::internal::Set<false, Set0>, 0, 0>;
     }
 
@@ -208,11 +208,11 @@ const _: () = {
     pub struct Set0;
 
     impl ::xst::internal::ShardSet for Set0 {
-        const SET: &'static [::std::ops::RangeInclusive<char>] =
+        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
             &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'];
     }
 
-    impl<'i> ::xst::internal::StaticShard for WS<'i> {}
+    impl ::xst::internal::StaticShard for WS<'static> {}
 };
 
 // ////////////////
@@ -226,7 +226,7 @@ const _: () = {
 #[cfg(false)]
 #[shard]
 pub struct Punctuated<T, P> {
-    inner: [([T; boxed], [(P, T); ..]); option],
+    inner: Option<(Box<T>, vec![(P, T); ..])>,
 }
 
 #[derive(Debug)]
@@ -236,7 +236,7 @@ pub struct Punctuated<'i, T, P> {
 }
 
 const _: () = {
-    impl<'i, T, P> ::xst::internal::Shard for Punctuated<'i, T, P>
+    impl<T, P> ::xst::internal::Shard for Punctuated<'static, T, P>
     where
         T: ::xst::internal::ShardParam,
         P: ::xst::internal::ShardParam,
@@ -273,7 +273,7 @@ pub struct Spanned<'i, T> {
 }
 
 const _: () = {
-    impl<'i, T> ::xst::internal::Shard for Spanned<'i, T>
+    impl<T> ::xst::internal::Shard for Spanned<'static, T>
     where
         T: ::xst::internal::ShardParam,
     {
