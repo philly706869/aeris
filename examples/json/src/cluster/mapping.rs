@@ -90,7 +90,7 @@ const _: () = {
 pub struct JSONArray {
     bracket: x!["["],
     ws: WS,
-    entries: Punctuated<Spanned<Box<JSONValue>>, Spanned<x![","]>>,
+    entries: Punctuated<Spanned<xbox![JSONValue]>, Spanned<x![","]>>,
     bracket: x!["["],
 }
 
@@ -226,7 +226,7 @@ const _: () = {
 #[cfg(false)]
 #[shard]
 pub struct Punctuated<T, P> {
-    inner: Option<(Box<T>, vec![(P, T); ..])>,
+    inner: xopt![(xbox![T], xvec![(P, T); ..])],
 }
 
 #[derive(Debug)]
