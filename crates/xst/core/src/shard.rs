@@ -1,6 +1,6 @@
 use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
-pub trait Shard {
+pub trait Shard: 'static {
     type Data: ShardDataType;
 }
 

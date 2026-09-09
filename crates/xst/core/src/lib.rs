@@ -41,30 +41,35 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        // let data = <shard::ExternType<S>>::data();
+        let data = <shard::ExternType<S>>::data();
+        let mut stack: Vec<&ShardData> = vec![&data.into()];
+        let mut table: FxHashMap<TypeId, &ShardData> = FxHashMap::default();
 
-        // let mut stack = vec![data];
-        // let mut table: FxHashMap<TypeId, &ShardData> = FxHashMap::default();
-
-        // table.insert(TypeId::of::<S::Data>(), data);
-
-        // while let Some(data) = stack.pop() {
-        //     match data {
-        //         ShardData::Literal(_) => {}
-        //         ShardData::Set(_) => {}
-        //         ShardData::Option(data) => stack.push(data),
-        //         ShardData::Vec(data) => stack.push(data.item),
-        //         ShardData::Sequence(data) => stack.extend(data.iter()),
-        //         ShardData::Alternative(data) => stack.extend(data.iter()),
-        //         ShardData::Extern(type_id, data) => {
-        //             if let Entry::Vacant(entry) = table.entry(type_id.to_owned()) {
-        //                 let data = data();
-        //                 entry.insert(data);
-        //                 stack.push(data);
-        //             }
-        //         }
-        //     }
-        // }
+        while let Some(data) = stack.pop() {
+            match data {
+                ShardData::Literal(_) => {}
+                ShardData::Set(_) => {}
+                ShardData::Option(data) => {
+                    stack.push(&*data.item);
+                }
+                ShardData::Vec(data) => {
+                    stack.push(&*data.item);
+                }
+                ShardData::Sequence(data) => {
+                    stack.extend(data.items.iter());
+                }
+                ShardData::Alternative(data) => {
+                    stack.extend(data.items.iter());
+                }
+                ShardData::Extern(data) => {
+                    if let Entry::Vacant(entry) = table.entry(data.id) {
+                        let data = (data.reference)();
+                        entry.insert(&data);
+                        stack.push(&data);
+                    }
+                }
+            }
+        }
 
         Self {
             _shard: PhantomData,
