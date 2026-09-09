@@ -38,6 +38,7 @@ impl StaticShard for Binding<'static> {}
 
 // Generic bindings substitute *output types* into the output struct, while
 // their static grammar identity continues to use grammar descriptors.
+#[derive(Debug)]
 struct Wrapper<T>(T);
 impl<T: ShardParam> Shard for Wrapper<T> {
     type Data = T;
@@ -101,6 +102,7 @@ fn inline_pattern_capture_ignores_internal_bindings() {
 mod scoped_fields {
     use super::*;
 
+    #[derive(Debug)]
     pub struct Group<T>(pub T);
     impl<T: ShardParam> Shard for Group<T> {
         type Data = T;
@@ -149,6 +151,10 @@ mod scoped_fields {
         let second = Second {
             value: Group(&input[1..]),
         };
+        fn debug_field<S: ShardField<0>>(value: &FieldOutput<'_, S, 0>) -> String {
+            format!("{value:?}")
+        }
+        assert!(debug_field::<First<'static>>(&first.value).contains(','));
         assert_eq!(first.value.0, ",");
         assert_eq!(second.value.0, ";");
         assert_eq!(

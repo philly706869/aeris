@@ -12,7 +12,7 @@ pub type Output<'i, S> = <S as Shard>::Output<'i>;
 /// FIELD is the zero-based source field index (before repeated-name grouping).
 /// For enum bindings, FIELD is the variant index; each variant contains one shard.
 pub trait ShardField<const INDEX: usize>: Shard {
-    type Output<'i>;
+    type Output<'i>: core::fmt::Debug;
 }
 
 pub type FieldOutput<'i, S, const INDEX: usize> = <S as ShardField<INDEX>>::Output<'i>;
@@ -22,7 +22,7 @@ pub trait ShardDataType: 'static {
 }
 
 pub trait ShardParam: ShardDataType {
-    type Output<'i>;
+    type Output<'i>: core::fmt::Debug;
 }
 
 pub type ParamOutput<'i, T> = <T as ShardParam>::Output<'i>;
@@ -35,7 +35,10 @@ impl<const NEGATED: bool, T: ShardSet> ShardParam for SetType<NEGATED, T> {
     type Output<'i> = &'i str;
 }
 
-impl<T: Shard> ShardParam for ExternType<T> {
+impl<T: Shard> ShardParam for ExternType<T>
+where
+    for<'i> T::Output<'i>: core::fmt::Debug,
+{
     type Output<'i> = T::Output<'i>;
 }
 
@@ -134,6 +137,7 @@ macro_rules! impl_shard_ext_for_sequence {
     [@impl $($t:ident)*] => {
         impl<$($t),*> ShardParam for SequenceType<($($t,)*)>
         where
+            for<'i> ($($t::Output<'i>,)*): core::fmt::Debug,
             $($t: ShardParam),*
         {
             type Output<'i> = ($($t::Output<'i>,)*);

@@ -89,3 +89,12 @@ helper names. Exercise nested generic applications and borrowed output values.
 `xst-core/tests/output.rs` covers these contracts without depending on the
 unfinished procedural macro implementation. Type-check the mapping module as
 well; checking only the proc-macro crate cannot validate expansion examples.
+
+## Debug contract
+
+`ShardField::Output<'i>` and generic `ShardParam::Output<'i>` implement Debug.
+`Ext<S>` is a ShardParam when every `S::Output<'i>` implements Debug; grammar-only
+references remain unrestricted. Sequence arguments require Debug on the complete
+output tuple (the standard library implements tuple Debug only up to its supported
+arity). Generated Debug implementations need no additional field-output bounds
+and must not require Debug on grammar descriptor types themselves.

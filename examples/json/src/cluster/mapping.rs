@@ -962,13 +962,22 @@ pub struct Punctuated<T, P> {
     inner: xopt![(xbox![T], xvec![(P, T); ..])],
 }
 
-#[derive(Debug)]
 pub struct Punctuated<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::ShardParam> {
     __xst_marker0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::FieldOutput<'i, Punctuated<'static, T, P>, 0>,
 }
 
 const _: () = {
+    impl<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::ShardParam> ::core::fmt::Debug
+        for Punctuated<'i, T, P>
+    {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.debug_struct("Punctuated")
+                .field("inner", &self.inner)
+                .finish()
+        }
+    }
+
     impl<T, P> ::xst::internal::Shard for Punctuated<'static, T, P>
     where
         T: ::xst::internal::ShardParam,
@@ -1017,6 +1026,15 @@ pub struct Spanned<'i, T: ::xst::internal::ShardParam> {
 }
 
 const _: () = {
+    impl<'i, T: ::xst::internal::ShardParam> ::core::fmt::Debug for Spanned<'i, T> {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.debug_struct("Spanned")
+                .field("inner", &self.inner)
+                .field("ws", &self.ws)
+                .finish()
+        }
+    }
+
     impl<T> ::xst::internal::Shard for Spanned<'static, T>
     where
         T: ::xst::internal::ShardParam,
