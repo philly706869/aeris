@@ -97,3 +97,72 @@ fn inline_pattern_capture_ignores_internal_bindings() {
         <Pattern as xst_core::internal::ShardDataType>::DATA,
     ));
 }
+
+mod scoped_fields {
+    use super::*;
+
+    pub struct Group<T>(pub T);
+    impl<T: ShardParam> Shard for Group<T> {
+        type Data = T;
+        type Output<'i> = Group<ParamOutput<'i, T>>;
+    }
+
+    // User-owned names intentionally collide with generated helper names.
+    struct Literal0;
+    struct Grammar;
+
+    macro_rules! expansion {
+        ($name:ident, $literal:literal) => {
+            pub struct $name<'i> {
+                pub value: FieldOutput<'i, $name<'static>, 0>,
+            }
+
+            const _: () = {
+                pub struct Literal0;
+                impl ShardLiteral for Literal0 {
+                    const LITERAL: &'static str = $literal;
+                }
+                type Grammar = Ext<Group<Capture<Lit<Literal0>>>>;
+
+                impl ShardField<0> for $name<'static> {
+                    type Output<'i> = ParamOutput<'i, Grammar>;
+                }
+                impl Shard for $name<'static> {
+                    type Data = Grammar;
+                    type Output<'i> = $name<'i>;
+                }
+                impl StaticShard for $name<'static> {}
+            };
+        };
+    }
+
+    expansion!(First, ",");
+    expansion!(Second, ";");
+
+    #[test]
+    fn local_helpers_do_not_leak_or_collide() {
+        let _user_types = (Literal0, Grammar);
+        let input = String::from(",;");
+        let first = First {
+            value: Group(&input[..1]),
+        };
+        let second = Second {
+            value: Group(&input[1..]),
+        };
+        assert_eq!(first.value.0, ",");
+        assert_eq!(second.value.0, ";");
+        assert_eq!(
+            Cluster::<First<'static>>::build().parse(first.value.0),
+            Ok(())
+        );
+        assert_eq!(
+            Cluster::<Second<'static>>::build().parse(second.value.0),
+            Ok(())
+        );
+        assert!(
+            Cluster::<First<'static>>::build()
+                .parse(second.value.0)
+                .is_err()
+        );
+    }
+}

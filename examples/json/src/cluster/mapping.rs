@@ -99,29 +99,35 @@ pub struct JSONObject {
     brace: x! { "}" },
 }
 
-#[allow(dead_code)]
-pub struct ObjectComma;
-
-impl ::xst::internal::ShardLiteral for ObjectComma {
-    const LITERAL: &'static ::xst::internal::str = ",";
-}
-
 #[derive(Debug)]
 pub struct JSONObject<'i> {
     _i: ::xst::internal::PhantomData<&'i ()>,
     brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: ::xst::internal::Output<'i, WS<'static>>,
-    content: ::xst::internal::Output<
-        'i,
-        Punctuated<
-            'static,
-            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Ext<JSONObjectEntry<'static>>>>,
-            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<ObjectComma>>>,
-        >,
-    >,
+    content: ::xst::internal::FieldOutput<'i, JSONObject<'static>, 2>,
 }
 
 const _: () = {
+    impl ::xst::internal::ShardField<2> for JSONObject<'static> {
+        type Output<'i> = ::xst::internal::Output<
+            'i,
+            Punctuated<
+                'static,
+                ::xst::internal::Ext<
+                    Spanned<'static, ::xst::internal::Ext<JSONObjectEntry<'static>>>,
+                >,
+                ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<ObjectComma>>>,
+            >,
+        >;
+    }
+
+    #[allow(dead_code)]
+    pub struct ObjectComma;
+
+    impl ::xst::internal::ShardLiteral for ObjectComma {
+        const LITERAL: &'static ::xst::internal::str = ",";
+    }
+
     impl ::xst::internal::Shard for JSONObject<'static> {
         type Output<'i> = JSONObject<'i>;
 
@@ -220,29 +226,33 @@ pub struct JSONArray {
     bracket: x! { "[" },
 }
 
-#[allow(dead_code)]
-pub struct ArrayComma;
-
-impl ::xst::internal::ShardLiteral for ArrayComma {
-    const LITERAL: &'static ::xst::internal::str = ",";
-}
-
 #[derive(Debug)]
 pub struct JSONArray<'i> {
     _i: ::xst::internal::PhantomData<&'i ()>,
     bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: ::xst::internal::Output<'i, WS<'static>>,
-    entries: ::xst::internal::Output<
-        'i,
-        Punctuated<
-            'static,
-            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Ext<JSONValue<'static>>>>,
-            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<ArrayComma>>>,
-        >,
-    >,
+    entries: ::xst::internal::FieldOutput<'i, JSONArray<'static>, 2>,
 }
 
 const _: () = {
+    impl ::xst::internal::ShardField<2> for JSONArray<'static> {
+        type Output<'i> = ::xst::internal::Output<
+            'i,
+            Punctuated<
+                'static,
+                ::xst::internal::Ext<Spanned<'static, ::xst::internal::Ext<JSONValue<'static>>>>,
+                ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<ArrayComma>>>,
+            >,
+        >;
+    }
+
+    #[allow(dead_code)]
+    pub struct ArrayComma;
+
+    impl ::xst::internal::ShardLiteral for ArrayComma {
+        const LITERAL: &'static ::xst::internal::str = ",";
+    }
+
     impl ::xst::internal::Shard for JSONArray<'static> {
         type Output<'i> = JSONArray<'i>;
 

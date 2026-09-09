@@ -7,10 +7,12 @@ pub mod internal {
     pub use core::primitive::char;
     pub use core::primitive::str;
 
+    pub use crate::shard::FieldOutput;
     pub use crate::shard::Output;
     pub use crate::shard::ParamOutput;
     pub use crate::shard::Shard;
     pub use crate::shard::ShardDataType;
+    pub use crate::shard::ShardField;
     pub use crate::shard::ShardLiteral;
     pub use crate::shard::ShardParam;
     pub use crate::shard::ShardSet;

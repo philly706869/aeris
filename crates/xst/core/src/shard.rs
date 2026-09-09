@@ -7,6 +7,17 @@ pub trait Shard: 'static {
 
 pub type Output<'i, S> = <S as Shard>::Output<'i>;
 
+/// Output of a generated binding field. Implementations live in the binding's
+/// anonymous const so grammar-only helper names never enter the module scope.
+/// FIELD is the zero-based source field index (before repeated-name grouping).
+/// Enum bindings use a separate VARIANT index, in source order.
+pub trait ShardField<const FIELD: usize, const VARIANT: usize = 0>: Shard {
+    type Output<'i>;
+}
+
+pub type FieldOutput<'i, S, const FIELD: usize, const VARIANT: usize = 0> =
+    <S as ShardField<FIELD, VARIANT>>::Output<'i>;
+
 pub trait ShardDataType: 'static {
     const DATA: &'static ShardData;
 }
