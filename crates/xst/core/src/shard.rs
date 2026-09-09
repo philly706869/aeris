@@ -2,15 +2,58 @@ use core::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
 pub trait Shard: 'static {
     type Data: ShardDataType;
+    type Output<'i>;
 }
+
+pub type Output<'i, S> = <S as Shard>::Output<'i>;
 
 pub trait ShardDataType: 'static {
     const DATA: &'static ShardData;
 }
 
-pub trait ShardParam: ShardDataType {}
+pub trait ShardParam: ShardDataType {
+    type Output<'i>;
+}
 
-impl<T> ShardParam for T where T: ShardDataType {}
+pub type ParamOutput<'i, T> = <T as ShardParam>::Output<'i>;
+
+impl<T: ShardLiteral> ShardParam for LiteralType<T> {
+    type Output<'i> = &'i str;
+}
+
+impl<const NEGATED: bool, T: ShardSet> ShardParam for SetType<NEGATED, T> {
+    type Output<'i> = &'i str;
+}
+
+impl<T: Shard> ShardParam for ExternType<T> {
+    type Output<'i> = T::Output<'i>;
+}
+
+impl<T: ShardParam> ShardParam for OptionType<T> {
+    type Output<'i> = Option<T::Output<'i>>;
+}
+
+impl<T: ShardParam, const MIN: usize, const MAX: usize> ShardParam for VecType<T, MIN, MAX> {
+    type Output<'i> = Vec<T::Output<'i>>;
+}
+
+/// An inline x! pattern captures its entire matched slice, regardless of its
+/// internal grammar (sequence, alternative, repetition, or shard references).
+pub struct CaptureType<T>(PhantomData<fn() -> T>);
+
+impl<T> ShardDataType for CaptureType<T>
+where
+    T: ShardDataType,
+{
+    const DATA: &'static ShardData = T::DATA;
+}
+
+impl<T> ShardParam for CaptureType<T>
+where
+    T: ShardDataType,
+{
+    type Output<'i> = &'i str;
+}
 
 pub trait StaticShard: Shard {}
 
@@ -79,6 +122,13 @@ macro_rules! impl_shard_ext_for_sequence {
         impl_shard_ext_for_sequence![@impl];
     };
     [@impl $($t:ident)*] => {
+        impl<$($t),*> ShardParam for SequenceType<($($t,)*)>
+        where
+            $($t: ShardParam),*
+        {
+            type Output<'i> = ($($t::Output<'i>,)*);
+        }
+
         impl<$($t),*> ShardDataType for SequenceType<($($t,)*)>
         where
             $($t: ShardDataType),*

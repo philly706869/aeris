@@ -441,6 +441,7 @@ mod tests {
 
     struct Recursive;
     impl Shard for Recursive {
+        type Output<'i> = ();
         type Data = AlternativeType<(
             Lit,
             SequenceType<(ExternType<Recursive>, ExternType<Recursive>)>,
@@ -485,9 +486,11 @@ mod tests {
     struct Left;
     struct Right;
     impl Shard for Left {
+        type Output<'i> = ();
         type Data = AlternativeType<(Lit, SequenceType<(Lit, ExternType<Right>)>)>;
     }
     impl Shard for Right {
+        type Output<'i> = ();
         type Data = ExternType<Left>;
     }
 
@@ -526,6 +529,7 @@ mod tests {
     fn nullable_recursive_grammar_builds() {
         struct EmptyRecursive;
         impl Shard for EmptyRecursive {
+            type Output<'i> = ();
             type Data = OptionType<ExternType<EmptyRecursive>>;
         }
         assert!(!table::<<EmptyRecursive as Shard>::Data>().states.is_empty());
