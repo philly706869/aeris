@@ -1,4 +1,4 @@
-use std::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
+use core::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
 pub trait Shard: 'static {
     type Data: ShardDataType;

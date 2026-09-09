@@ -8,10 +8,10 @@ pub enum JSONBoolean {
 
 #[shard]
 pub struct JSONTrue {
-    text: x!["true"],
+    text: x! { "true" },
 }
 
 #[shard]
 pub struct JSONFalse {
-    text: x!["false"],
+    text: x! { "false" },
 }

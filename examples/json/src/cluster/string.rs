@@ -2,21 +2,21 @@ use xst::shard;
 
 #[shard]
 pub struct JSONString {
-    quote: x!["\""],
+    quote: x! { "\"" },
     content: Content,
-    quote: x!["\""],
+    quote: x! { "\"" },
 }
 
 #[shard]
 type Content = x! {
-    (
+    [
         | {! '"' '\\' '\u{0000}'..'\u{001F}'}
         | '\\' Escape
-    )*
+    ]*
 };
 
 #[shard]
-type Escape = x! {
+type Escape = x! {[
     | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
-    | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}[4]
-};
+    | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}![4]
+]};

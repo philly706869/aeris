@@ -4,17 +4,17 @@ use xst::shard;
 
 #[shard]
 pub struct JSONObject {
-    brace: x!["{"],
+    brace: x! { "{" },
     ws: WS,
-    content: Punctuated<Spanned<JSONObjectEntry>, Spanned<x![","]>>,
-    brace: x!["}"],
+    content: Punctuated<Spanned<JSONObjectEntry>, Spanned<x! { "," }>>,
+    brace: x! { "}" },
 }
 
 #[shard]
 pub struct JSONObjectEntry {
     name: JSONString,
     ws: WS,
-    colon: x![":"],
+    colon: x! { ":" },
     ws: WS,
     value: JSONValue,
 }

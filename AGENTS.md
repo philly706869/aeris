@@ -15,10 +15,10 @@ JIT과 REPL 지원은 후속 단계에서 추가한다.
 
 ## 모듈
 
-- [AERIS CLI - `./apps/cli`]()
-- [AERIS Daemon - `./apps/daemon`]()
-- [AERIS Core - `./crates/core`](./agents/modules/core.md)
-- [AERIS Core / UI - `./crates/core/ui`](./agents/modules/core/ui.md)
-- [AERIS Standard - `./crates/std`]()
-- [AERIS Standard / UI - `./crates/std/ui`]()
+- [AERIS CLI - `./apps/aeris`]()
+- [AERIS Daemon - `./apps/aerisd`]()
+- [AERIS Core - `./crates/aeris`](./agents/modules/core.md)
+- [AERIS Core / UI - `./crates/aeris/ui`](./agents/modules/core/ui.md)
+- [AERIS Standard - `./crates/aeris-std`]()
+- [AERIS Standard / UI - `./crates/aeris-std/ui`]()
 - [Example / JSON - `./examples/json`]()

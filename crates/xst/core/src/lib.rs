@@ -22,16 +22,22 @@ pub mod internal {
     pub use crate::shard::VecType as Vec;
 }
 
+mod parser;
 mod shard;
+mod table;
 
-use std::marker::PhantomData;
+use core::any::TypeId;
+use core::marker::PhantomData;
 
 use crate::shard::{ShardDataType, StaticShard};
+
+pub use parser::ParseError;
 
 pub struct Cluster<S>
 where
     S: StaticShard,
 {
+    table: table::Table,
     _shard: PhantomData<fn() -> S>,
 }
 
@@ -40,14 +46,17 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        let data = S::Data::DATA;
+        let table = table::Table::build(TypeId::of::<S::Data>(), S::Data::DATA);
 
         Self {
+            table,
             _shard: PhantomData,
         }
     }
 
-    pub fn parse<'i>(&self, input: &'i str) -> S {
-        todo!()
+    /// Recognizes the entire input, accepting if any GLR branch succeeds.
+    /// Output extraction and mapping are not performed yet.
+    pub fn parse(&self, input: &str) -> Result<(), ParseError> {
+        self.table.parse(input)
     }
 }

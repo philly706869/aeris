@@ -2,40 +2,36 @@ use xst::shard;
 
 #[shard]
 pub struct JSONNumber {
-    sign: Option<x!["-"]>,
-    integer: x! {
+    sign: xopt![x! { "-" }],
+    integer: x! {[
         | Digit
         | One2Nine Digits
-    },
-    fraction: Option<JSONFraction>,
-    exponent: Option<JSONExponent>,
+    ]},
+    fraction: xopt![JSONFraction],
+    exponent: xopt![JSONExponent],
 }
 
 #[shard]
 pub struct JSONFraction {
-    point: x!["."],
+    point: x! { "." },
     digits: Digits,
 }
 
 #[shard]
 pub struct JSONExponent {
-    e: x![{'E' 'e'}],
-    sign: Option<x![{'+' '-'}]>,
+    e: x! { {'E' 'e'} },
+    sign: xopt![x! { {'+' '-'} }],
     digits: Digits,
 }
 
 #[shard]
-type Digits = x! {
-    | Digit+
-};
+type Digits = x! { Digit+ };
 
 #[shard]
-type Digit = x! {
+type Digit = x! {[
     | '0'
     | One2Nine
-};
+]};
 
 #[shard]
-type One2Nine = x! {
-    | {'1'..'9'}
-};
+type One2Nine = x! { {'1'..'9'} };

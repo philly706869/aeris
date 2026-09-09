@@ -2,5 +2,5 @@ use xst::shard;
 
 #[shard]
 pub struct Punctuated<T, P> {
-    inner: Option<(T, Vec<(P, T)>)>,
+    inner: xopt![(xbox![T], xvec![(P, T); ..])],
 }

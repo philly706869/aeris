@@ -4,8 +4,8 @@ use xst::shard;
 
 #[shard]
 pub struct JSONArray {
-    bracket: x!["["],
+    bracket: x! { "[" },
     ws: WS,
-    entries: Punctuated<Spanned<Box<JSONValue>>, Spanned<x![","]>>,
-    bracket: x!["["],
+    entries: Punctuated<Spanned<xbox![JSONValue]>, Spanned<x! { "," }>>,
+    bracket: x! { "[" },
 }
