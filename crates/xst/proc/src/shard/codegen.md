@@ -18,6 +18,25 @@ Forward shard names are source-declared identities, not generated helper names.
 Their `Shard::Output<'i>` is `&'i str`. Binding outputs are their generated
 structs/enums. Do not inspect another declaration to decide its output type.
 
+## Deterministic identifiers
+
+Traverse each source declaration in source order, depth-first and left-to-right
+through field patterns and generic arguments. Assign a single zero-based leaf
+counter to literal and character-set occurrences: `Literal0`, `Set1`, etc.
+Reset it for each declaration. Count repeated occurrences separately; share the
+assigned identifier between grammar and output generation rather than allocating
+it again. Numbering must not depend on HashMap iteration, other declarations,
+shard kinds, or allocation order. Field/variant names and declared generic
+parameter names are preserved from the source.
+
+The lifetime marker uses `__xst_marker0`; if a source field already owns that
+name, choose the first unused `__xst_markerN` in ascending order. It is a
+synthetic field, not a parsed field, and does not get a ShardField index.
+Forward shard marker storage is likewise not a binding field. Generated helper
+identifiers must use macro hygiene so a same-spelled source path still resolves
+to the source item. If an additional local grammar alias is needed, use
+`GrammarN` with its source field index rather than a semantic name.
+
 ## Two type expressions per field
 
 Generate the grammar descriptor and the output type independently:
@@ -32,8 +51,7 @@ Generate the grammar descriptor and the output type independently:
 - A generic shard application computes its output through `Shard::Output`,
   rather than assuming that the referenced shard is a binding.
 
-If a field's output expression needs a local grammar helper (including helpers
-nested inside generic shard arguments), emit `FieldOutput<'i, Owner, FIELD,
+For every source binding field, unconditionally emit `FieldOutput<'i, Owner, FIELD,
 VARIANT>` in the struct/enum. Define `ShardField<FIELD, VARIANT>` for the static
 owner inside the anonymous const, where all grammar helpers are in scope. The
 associated output normalizes to the borrowed/binding output and does not store
@@ -43,10 +61,18 @@ same expression twice.
 FIELD is the zero-based source field index before grouping repeated names.
 VARIANT is the zero-based source variant index, or zero for structs. Repeated
 field names form tuples of their individual output expressions. Generic owners
-carry the same parameter bounds on their Shard and ShardField implementations.
+carry the same ShardParam bounds on the binding type, Shard implementation,
+and ShardField implementations. Preserve their grammar parameters in
+Shard::Output: `Spanned<'i, T>`, not `Spanned<'i, T::Output<'i>>`. The input
+lifetime is applied by each field projection. This ensures static grammar
+identities never contain borrowed output parameters. For generated Debug impls,
+bound the field projections instead of grammar parameters; place these impls
+in the anonymous const as well.
 
-Simple fields can use direct output types/projections to avoid unnecessary
-ShardField implementations. The field projection is a type-level indirection;
+Do not special-case literals, simple references, or generic parameters in the
+struct/enum field declaration. Direct types and Output/ParamOutput projections
+belong only in the corresponding ShardField implementation. The field
+projection is a type-level indirection;
 it adds no runtime allocation or lookup. Keep the existing typed grammar
 representation unless another requirement needs a value-based representation.
 
