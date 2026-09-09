@@ -26,7 +26,7 @@ counter to literal and character-set occurrences: `Literal0`, `Set1`, etc.
 Reset it for each declaration. Count repeated occurrences separately; share the
 assigned identifier between grammar and output generation rather than allocating
 it again. Numbering must not depend on HashMap iteration, other declarations,
-shard kinds, or allocation order. Field/variant names and declared generic
+shard kinds, or allocation order. Source field/variant names and declared generic
 parameter names are preserved from the source.
 
 The lifetime marker uses `__xst_marker0`; if a source field already owns that
@@ -51,16 +51,22 @@ Generate the grammar descriptor and the output type independently:
 - A generic shard application computes its output through `Shard::Output`,
   rather than assuming that the referenced shard is a binding.
 
-For every source binding field, unconditionally emit `FieldOutput<'i, Owner, FIELD,
-VARIANT>` in the struct/enum. Define `ShardField<FIELD, VARIANT>` for the static
+For every source binding field, unconditionally emit `FieldOutput<'i, Owner, FIELD>` in the struct/enum. Define `ShardField<FIELD>` for the static
 owner inside the anonymous const, where all grammar helpers are in scope. The
 associated output normalizes to the borrowed/binding output and does not store
 grammar descriptors. Reuse a local grammar alias when it avoids generating the
 same expression twice.
 
-FIELD is the zero-based source field index before grouping repeated names.
-VARIANT is the zero-based source variant index, or zero for structs. Repeated
-field names form tuples of their individual output expressions. Generic owners
+FIELD is a single zero-based index: the source field index before grouping
+repeated names for structs, or the source variant index for enums. Repeated
+struct field names form tuples of their individual output expressions.
+
+Enum variants must be `Variant(ShardReference)`: exactly one named struct,
+enum, or forward shard reference. Named-field variants, unit variants, empty
+payloads, multiple payloads, and direct inline patterns/wrapper expressions are
+not allowed. Generic arguments on the referenced shard follow the normal shard
+reference rules. No separate variant index or nested enum field index exists.
+The emitter need not know which kind of shard the reference denotes. Generic owners
 carry the same ShardParam bounds on the binding type, Shard implementation,
 and ShardField implementations. Preserve their grammar parameters in
 Shard::Output: `Spanned<'i, T>`, not `Spanned<'i, T::Output<'i>>`. The input
