@@ -41,7 +41,7 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        let data = <shard::ExternType<S>>::data();
+        let data = shard::ExternType::<S>::data();
 
         Self {
             _shard: PhantomData,
