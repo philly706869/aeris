@@ -98,3 +98,25 @@ references remain unrestricted. Sequence arguments require Debug on the complete
 output tuple (the standard library implements tuple Debug only up to its supported
 arity). Generated Debug implementations need no additional field-output bounds
 and must not require Debug on grammar descriptor types themselves.
+
+## Private references: compiler-checked limits
+
+An anonymous const isolates names, not visibility checking. A local public
+trait/struct cannot transparently forward a private type through a public
+associated type: `type Output = <Private as Shard>::Output` still produces
+E0446, even through an extra forwarding trait. This also affects private
+forward identities whose output would normalize to a public string slice.
+
+Grammar-only visibility can be solved by a local public `GrammarN` implementing
+ShardDataType, whose DATA constant forwards the private grammar value. The
+public Shard::Data then names GrammarN rather than a private descriptor.
+
+For a private binding output, a local public `OutputN` struct with a private
+field can wrap the output. That compiles, but changes the field's output type:
+it is no longer the referenced enum/struct/string slice. Deref::Target or
+another public associated-type alias to the private output would reintroduce
+the same visibility error. This is therefore an experiment, not the default
+expansion rule; adopting it requires a decision about the public output API.
+
+`xst-core/tests/visibility.rs` checks the grammar adapter and opaque wrapper
+with a private binding and public owner, including borrowed storage and parsing.

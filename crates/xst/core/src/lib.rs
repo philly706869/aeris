@@ -11,6 +11,7 @@ pub mod internal {
     pub use crate::shard::Output;
     pub use crate::shard::ParamOutput;
     pub use crate::shard::Shard;
+    pub use crate::shard::ShardData;
     pub use crate::shard::ShardDataType;
     pub use crate::shard::ShardField;
     pub use crate::shard::ShardLiteral;

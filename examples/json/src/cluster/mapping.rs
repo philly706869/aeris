@@ -69,7 +69,7 @@ pub enum JSONValue {
 }
 
 #[derive(Debug)]
-pub enum JSONValue<'i> {
+enum JSONValue<'i> {
     Object(::xst::internal::FieldOutput<'i, JSONValue<'static>, 0>),
     Array(::xst::internal::FieldOutput<'i, JSONValue<'static>, 1>),
     String(::xst::internal::FieldOutput<'i, JSONValue<'static>, 2>),
