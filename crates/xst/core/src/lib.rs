@@ -1,3 +1,5 @@
+/// Internal API for generated code.
+/// This module is not intended for direct use.
 #[doc(hidden)]
 pub mod internal {
     pub use core::primitive::char;
@@ -12,22 +14,20 @@ pub mod internal {
     pub use crate::shard::ShardSet;
     pub use crate::shard::StaticShard;
 
-    pub use crate::shard::AlternativeType as Alternative;
-    pub use crate::shard::ExternType as Extern;
-    pub use crate::shard::LiteralType as Literal;
-    pub use crate::shard::OptionType as Option;
-    pub use crate::shard::SequenceType as Sequence;
+    pub use crate::shard::AlternativeType as Alt;
+    pub use crate::shard::ExternType as Ext;
+    pub use crate::shard::LiteralType as Lit;
+    pub use crate::shard::OptionType as Opt;
+    pub use crate::shard::SequenceType as Seq;
     pub use crate::shard::SetType as Set;
     pub use crate::shard::VecType as Vec;
 }
 
 mod shard;
 
-use std::{any::TypeId, collections::hash_map::Entry, marker::PhantomData};
+use std::marker::PhantomData;
 
-use rustc_hash::FxHashMap;
-
-use crate::shard::{ShardData, ShardDataType, StaticShard};
+use crate::shard::{ShardDataType, StaticShard};
 
 pub struct Cluster<S>
 where
@@ -42,34 +42,6 @@ where
 {
     pub fn build() -> Self {
         let data = <shard::ExternType<S>>::data();
-        let mut stack: Vec<&ShardData> = vec![&data.into()];
-        let mut table: FxHashMap<TypeId, &ShardData> = FxHashMap::default();
-
-        while let Some(data) = stack.pop() {
-            match data {
-                ShardData::Literal(_) => {}
-                ShardData::Set(_) => {}
-                ShardData::Option(data) => {
-                    stack.push(&*data.item);
-                }
-                ShardData::Vec(data) => {
-                    stack.push(&*data.item);
-                }
-                ShardData::Sequence(data) => {
-                    stack.extend(data.items.iter());
-                }
-                ShardData::Alternative(data) => {
-                    stack.extend(data.items.iter());
-                }
-                ShardData::Extern(data) => {
-                    if let Entry::Vacant(entry) = table.entry(data.id) {
-                        let data = (data.reference)();
-                        entry.insert(&data);
-                        stack.push(&data);
-                    }
-                }
-            }
-        }
 
         Self {
             _shard: PhantomData,

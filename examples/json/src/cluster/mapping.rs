@@ -31,10 +31,10 @@ pub struct JSON<'i> {
 
 const _: () = {
     impl ::xst::internal::Shard for JSON<'static> {
-        type Data = ::xst::internal::Alternative<(
-            ::xst::internal::Extern<WS<'static>>,
-            ::xst::internal::Extern<JSONValue<'static>>,
-            ::xst::internal::Extern<WS<'static>>,
+        type Data = ::xst::internal::Alt<(
+            ::xst::internal::Ext<WS<'static>>,
+            ::xst::internal::Ext<JSONValue<'static>>,
+            ::xst::internal::Ext<WS<'static>>,
         )>;
     }
 
@@ -68,9 +68,9 @@ pub enum JSONValue<'i> {
 
 const _: () = {
     impl ::xst::internal::Shard for JSONValue<'static> {
-        type Data = ::xst::internal::Alternative<(
-            ::xst::internal::Extern<JSONArray<'static>>,
-            ::xst::internal::Extern<JSONNull<'static>>,
+        type Data = ::xst::internal::Alt<(
+            ::xst::internal::Ext<JSONArray<'static>>,
+            ::xst::internal::Ext<JSONNull<'static>>,
         )>;
     }
 
@@ -104,19 +104,19 @@ pub struct JSONArray<'i> {
 
 const _: () = {
     impl ::xst::internal::Shard for JSONArray<'static> {
-        type Data = ::xst::internal::Sequence<(
-            ::xst::internal::Literal<Literal0>,
-            ::xst::internal::Extern<WS<'static>>,
-            ::xst::internal::Extern<
+        type Data = ::xst::internal::Seq<(
+            ::xst::internal::Lit<Literal0>,
+            ::xst::internal::Ext<WS<'static>>,
+            ::xst::internal::Ext<
                 Punctuated<
                     'static,
-                    ::xst::internal::Extern<
-                        Spanned<'static, ::xst::internal::Extern<JSONValue<'static>>>,
+                    ::xst::internal::Ext<
+                        Spanned<'static, ::xst::internal::Ext<JSONValue<'static>>>,
                     >,
-                    ::xst::internal::Extern<Spanned<'static, ::xst::internal::Literal<Literal1>>>,
+                    ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<Literal1>>>,
                 >,
             >,
-            ::xst::internal::Literal<Literal2>,
+            ::xst::internal::Lit<Literal2>,
         )>;
     }
 
@@ -166,7 +166,7 @@ pub struct JSONNull<'i> {
 
 const _: () = {
     impl ::xst::internal::Shard for JSONNull<'static> {
-        type Data = ::xst::internal::Literal<Literal0>;
+        type Data = ::xst::internal::Lit<Literal0>;
     }
 
     #[allow(dead_code)]
@@ -241,11 +241,8 @@ const _: () = {
         T: ::xst::internal::ShardParam,
         P: ::xst::internal::ShardParam,
     {
-        type Data = ::xst::internal::Option<
-            ::xst::internal::Sequence<(
-                T,
-                ::xst::internal::Vec<::xst::internal::Sequence<(P, T)>, 0, 0>,
-            )>,
+        type Data = ::xst::internal::Opt<
+            ::xst::internal::Seq<(T, ::xst::internal::Vec<::xst::internal::Seq<(P, T)>, 0, 0>)>,
         >;
     }
 };
@@ -277,7 +274,7 @@ const _: () = {
     where
         T: ::xst::internal::ShardParam,
     {
-        type Data = ::xst::internal::Sequence<(T, ::xst::internal::Extern<WS<'static>>)>;
+        type Data = ::xst::internal::Seq<(T, ::xst::internal::Ext<WS<'static>>)>;
     }
 };
 
