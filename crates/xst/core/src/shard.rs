@@ -11,11 +11,11 @@ pub type Output<'i, S> = <S as Shard>::Output<'i>;
 /// anonymous const so grammar-only helper names never enter the module scope.
 /// FIELD is the zero-based source field index (before repeated-name grouping).
 /// For enum bindings, FIELD is the variant index; each variant contains one shard.
-pub trait ShardField<const FIELD: usize>: Shard {
+pub trait ShardField<const INDEX: usize>: Shard {
     type Output<'i>;
 }
 
-pub type FieldOutput<'i, S, const FIELD: usize> = <S as ShardField<FIELD>>::Output<'i>;
+pub type FieldOutput<'i, S, const INDEX: usize> = <S as ShardField<INDEX>>::Output<'i>;
 
 pub trait ShardDataType: 'static {
     const DATA: &'static ShardData;
