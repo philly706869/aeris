@@ -2,11 +2,10 @@
 /// This module is not intended for direct use.
 #[doc(hidden)]
 pub mod internal {
+    pub use core::marker::PhantomData;
+    pub use core::ops::RangeInclusive;
     pub use core::primitive::char;
     pub use core::primitive::str;
-
-    pub use std::marker::PhantomData;
-    pub use std::ops::RangeInclusive;
 
     pub use crate::shard::Shard;
     pub use crate::shard::ShardLiteral;
@@ -41,7 +40,7 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        let data = shard::ExternType::<S>::data();
+        let data = S::Data::DATA;
 
         Self {
             _shard: PhantomData,

@@ -5,9 +5,7 @@ pub trait Shard: 'static {
 }
 
 pub trait ShardDataType: 'static {
-    type Data: Into<ShardData>;
-
-    fn data() -> Self::Data;
+    const DATA: &'static ShardData;
 }
 
 pub trait ShardParam: ShardDataType {}
@@ -22,11 +20,7 @@ impl<T> ShardDataType for LiteralType<T>
 where
     T: ShardLiteral,
 {
-    type Data = LiteralData;
-
-    fn data() -> Self::Data {
-        LiteralData { text: T::LITERAL }
-    }
+    const DATA: &'static ShardData = &ShardData::Literal(LiteralData { text: T::LITERAL });
 }
 
 pub trait ShardLiteral: 'static {
@@ -39,14 +33,10 @@ impl<const NEGATED: bool, T> ShardDataType for SetType<NEGATED, T>
 where
     T: ShardSet,
 {
-    type Data = SetData;
-
-    fn data() -> Self::Data {
-        SetData {
-            negated: NEGATED,
-            range: T::SET,
-        }
-    }
+    const DATA: &'static ShardData = &ShardData::Set(SetData {
+        negated: NEGATED,
+        range: T::SET,
+    });
 }
 
 pub trait ShardSet: 'static {
@@ -59,13 +49,7 @@ impl<T> ShardDataType for OptionType<T>
 where
     T: ShardDataType,
 {
-    type Data = OptionData;
-
-    fn data() -> Self::Data {
-        OptionData {
-            item: Box::new(T::data().into()),
-        }
-    }
+    const DATA: &'static ShardData = &ShardData::Option(OptionData { item: T::DATA });
 }
 
 pub struct VecType<T, const MIN: usize, const MAX: usize>(PhantomData<fn() -> T>);
@@ -74,15 +58,11 @@ impl<T, const MIN: usize, const MAX: usize> ShardDataType for VecType<T, MIN, MA
 where
     T: ShardDataType,
 {
-    type Data = VecData;
-
-    fn data() -> Self::Data {
-        VecData {
-            item: Box::new(T::data().into()),
-            min: MIN,
-            max: MAX,
-        }
-    }
+    const DATA: &'static ShardData = &ShardData::Vec(VecData {
+        item: T::DATA,
+        min: MIN,
+        max: MAX,
+    });
 }
 
 pub struct SequenceType<T>(PhantomData<fn() -> T>);
@@ -103,13 +83,9 @@ macro_rules! impl_shard_ext_for_sequence {
         where
             $($t: ShardDataType),*
         {
-            type Data = SequenceData;
-
-            fn data() -> Self::Data {
-                SequenceData {
-                    items: vec![$($t::data().into()),*],
-                }
-            }
+            const DATA: &'static ShardData = &ShardData::Sequence(SequenceData {
+                items: &[$($t::DATA),*],
+            });
         }
     }
 }
@@ -134,13 +110,9 @@ macro_rules! impl_shard_ext_for_alternative {
         where
             $($t: ShardDataType),*
         {
-            type Data = AlternativeData;
-
-            fn data() -> Self::Data {
-                AlternativeData {
-                    items: vec![$($t::data().into()),*],
-                }
-            }
+            const DATA: &'static ShardData = &ShardData::Alternative(AlternativeData {
+                items: &[$($t::DATA),*],
+            });
         }
     }
 }
@@ -153,14 +125,10 @@ impl<T> ShardDataType for ExternType<T>
 where
     T: Shard + 'static,
 {
-    type Data = ExternData;
-
-    fn data() -> Self::Data {
-        ExternData {
-            id: TypeId::of::<T::Data>(),
-            reference: || T::Data::data().into(),
-        }
-    }
+    const DATA: &'static ShardData = &ShardData::Extern(ExternData {
+        id: TypeId::of::<T::Data>(),
+        reference: || <T::Data as ShardDataType>::DATA,
+    });
 }
 
 #[derive(Debug)]
@@ -172,28 +140,6 @@ pub enum ShardData {
     Sequence(SequenceData),
     Alternative(AlternativeData),
     Extern(ExternData),
-}
-
-macro_rules! impl_shard_data_from {
-    ($($ty:ty => $variant:ident,)*) => {
-        $(
-            impl From<$ty> for ShardData {
-                fn from(value: $ty) -> Self {
-                    Self::$variant(value)
-                }
-            }
-        )*
-    };
-}
-
-impl_shard_data_from! {
-    LiteralData => Literal,
-    SetData => Set,
-    OptionData => Option,
-    VecData => Vec,
-    SequenceData => Sequence,
-    AlternativeData => Alternative,
-    ExternData => Extern,
 }
 
 #[derive(Debug)]
@@ -209,30 +155,30 @@ pub struct SetData {
 
 #[derive(Debug)]
 pub struct OptionData {
-    pub item: Box<ShardData>,
+    pub item: &'static ShardData,
 }
 
 #[derive(Debug)]
 pub struct VecData {
-    pub item: Box<ShardData>,
+    pub item: &'static ShardData,
     pub min: usize,
     pub max: usize,
 }
 
 #[derive(Debug)]
 pub struct SequenceData {
-    pub items: Vec<ShardData>,
+    pub items: &'static [&'static ShardData],
 }
 
 #[derive(Debug)]
 pub struct AlternativeData {
-    pub items: Vec<ShardData>,
+    pub items: &'static [&'static ShardData],
 }
 
 #[derive(Debug)]
 pub struct ExternData {
     pub id: TypeId,
-    pub reference: fn() -> ShardData,
+    pub reference: fn() -> &'static ShardData,
 }
 
 fn normalize_set(set: &SetData) -> Vec<RangeInclusive<char>> {
