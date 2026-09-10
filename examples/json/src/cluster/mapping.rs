@@ -37,7 +37,7 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSON<'i>;
-        type Data = ::xst::internal::Alt<(
+        type Data = ::xst::internal::Seq<(
             ::xst::internal::Ext<WS<'static>>,
             ::xst::internal::Ext<JSONValue<'static>>,
             ::xst::internal::Ext<WS<'static>>,
@@ -65,7 +65,7 @@ pub enum JSONValue {
 }
 
 #[derive(Debug)]
-enum JSONValue<'i> {
+pub enum JSONValue<'i> {
     Object(::xst::internal::FieldOutput<'i, JSONValue<'static>, 0>),
     Array(::xst::internal::FieldOutput<'i, JSONValue<'static>, 1>),
     String(::xst::internal::FieldOutput<'i, JSONValue<'static>, 2>),
@@ -318,7 +318,7 @@ pub struct JSONArray {
     bracket: x! { "[" },
     ws: WS,
     entries: Punctuated<Spanned<JSONValue>, Spanned<x! { "," }>>,
-    bracket: x! { "[" },
+    bracket: x! { "]" },
 }
 
 #[derive(Debug)]
@@ -495,7 +495,8 @@ type Content = x! {
     ]*
 };
 
-struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
+#[doc(hidden)]
+pub struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
     impl<'i> ::xst::internal::StaticShard for Content<'i> {}
@@ -519,7 +520,7 @@ const _: () = {
                 )>,
             )>,
             0,
-            0,
+            { ::core::primitive::usize::MAX },
         >;
     }
 
@@ -548,7 +549,8 @@ type Escape = x! {[
     | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
 ]};
 
-struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
+#[doc(hidden)]
+pub struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
     impl<'i> ::xst::internal::StaticShard for Escape<'i> {}
@@ -567,7 +569,7 @@ const _: () = {
             ::xst::internal::Set<false, __xst_shard_set_0>,
             ::xst::internal::Seq<(
                 ::xst::internal::Lit<__xst_shard_literal_1>,
-                ::xst::internal::Set<false, __xst_shard_set_2>, // TODO
+                ::xst::internal::Vec<::xst::internal::Set<false, __xst_shard_set_2>, 4, 4>,
             )>,
         )>;
     }
@@ -809,7 +811,8 @@ const _: () = {
 #[shard]
 type Digits = x! { Digit+ };
 
-struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
+#[doc(hidden)]
+pub struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
     impl<'i> ::xst::internal::StaticShard for Digits<'i> {}
@@ -824,7 +827,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = &'i ::xst::internal::str;
-        type Data = ::xst::internal::Vec<::xst::internal::Ext<Digit<'static>>, 1, 0>;
+        type Data = ::xst::internal::Vec<
+            ::xst::internal::Ext<Digit<'static>>,
+            1,
+            { ::core::primitive::usize::MAX },
+        >;
     }
 };
 
@@ -835,7 +842,8 @@ type Digit = x! {[
     | One2Nine
 ]};
 
-struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
+#[doc(hidden)]
+pub struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
     impl<'i> ::xst::internal::StaticShard for Digit<'i> {}
@@ -869,7 +877,8 @@ const _: () = {
 #[shard]
 type One2Nine = x! { {'1'..'9'} };
 
-struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
+#[doc(hidden)]
+pub struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
     impl<'i> ::xst::internal::StaticShard for One2Nine<'i> {}
@@ -1109,7 +1118,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = WS<'i>;
-        type Data = ::xst::internal::Vec<::xst::internal::Set<false, __xst_shard_set_0>, 0, 0>;
+        type Data = ::xst::internal::Vec<
+            ::xst::internal::Set<false, __xst_shard_set_0>,
+            0,
+            { ::core::primitive::usize::MAX },
+        >;
     }
 
     impl ::xst::internal::ShardField<0> for WS<'static> {
@@ -1146,6 +1159,16 @@ pub struct Punctuated<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::Sh
 }
 
 const _: () = {
+    impl<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::ShardParam> ::core::fmt::Debug
+        for Punctuated<'i, T, P>
+    {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.debug_struct("Punctuated")
+                .field("inner", &self.inner)
+                .finish()
+        }
+    }
+
     impl<'i, T, P> ::xst::internal::Shard for Punctuated<'i, T, P>
     where
         T: ::xst::internal::ShardParam,
@@ -1165,7 +1188,14 @@ const _: () = {
     {
         type Output<'i> = Punctuated<'i, T, P>;
         type Data = ::xst::internal::Opt<
-            ::xst::internal::Seq<(T, ::xst::internal::Vec<::xst::internal::Seq<(P, T)>, 0, 0>)>,
+            ::xst::internal::Seq<(
+                T,
+                ::xst::internal::Vec<
+                    ::xst::internal::Seq<(P, T)>,
+                    0,
+                    { ::core::primitive::usize::MAX },
+                >,
+            )>,
         >;
     }
 
@@ -1206,6 +1236,15 @@ pub struct Spanned<'i, T: ::xst::internal::ShardParam> {
 }
 
 const _: () = {
+    impl<'i, T: ::xst::internal::ShardParam> ::core::fmt::Debug for Spanned<'i, T> {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.debug_struct("Spanned")
+                .field("inner", &self.inner)
+                .field("ws", &self.ws)
+                .finish()
+        }
+    }
+
     impl<'i, T> ::xst::internal::Shard for Spanned<'i, T>
     where
         T: ::xst::internal::ShardParam,
@@ -1253,6 +1292,19 @@ mod test {
     #[test]
     fn test() {
         let cluster: Cluster<JSON> = Cluster::build();
+        for input in [
+            "null",
+            " true ",
+            "-12.5e+2",
+            "[]",
+            "{}",
+            r#"{"a":[1,false,null,"\u0041"]}"#,
+        ] {
+            assert_eq!(cluster.parse(input), Ok(()), "{input:?}");
+        }
+        for input in ["", "01", "1.", "[1,]", r#""\u00""#, "true false"] {
+            assert!(cluster.parse(input).is_err(), "{input:?}");
+        }
     }
 
     #[test]
