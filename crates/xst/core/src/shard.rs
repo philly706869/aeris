@@ -31,7 +31,7 @@ pub type ShardField<'i, T> = <<T as Shard>::Core as ShardCore>::Output<'i>;
 
 #[derive(Debug)]
 pub struct ShardData {
-    pub(crate) kind: ShardDataKind,
+    kind: ShardDataKind,
 }
 
 impl ShardData {
@@ -84,7 +84,7 @@ pub enum ShardDataKind {
 
 #[derive(Debug)]
 pub struct LiteralData {
-    pub(crate) text: &'static str,
+    text: &'static str,
 }
 
 impl LiteralData {
@@ -95,8 +95,8 @@ impl LiteralData {
 
 #[derive(Debug)]
 pub struct SetData {
-    pub(crate) negated: bool,
-    pub(crate) range: &'static [RangeInclusive<char>],
+    negated: bool,
+    range: &'static [RangeInclusive<char>],
 }
 
 impl SetData {
@@ -107,7 +107,7 @@ impl SetData {
 
 #[derive(Debug)]
 pub struct OptionData {
-    pub(crate) item: &'static ShardData,
+    item: &'static ShardData,
 }
 
 impl OptionData {
@@ -118,9 +118,9 @@ impl OptionData {
 
 #[derive(Debug)]
 pub struct VecData {
-    pub(crate) item: &'static ShardData,
-    pub(crate) min: usize,
-    pub(crate) max: usize,
+    item: &'static ShardData,
+    min: usize,
+    max: usize,
 }
 
 impl VecData {
@@ -131,7 +131,7 @@ impl VecData {
 
 #[derive(Debug)]
 pub struct SequenceData {
-    pub(crate) items: &'static [&'static ShardData],
+    items: &'static [&'static ShardData],
 }
 
 impl SequenceData {
@@ -142,7 +142,7 @@ impl SequenceData {
 
 #[derive(Debug)]
 pub struct AlternativeData {
-    pub(crate) items: &'static [&'static ShardData],
+    items: &'static [&'static ShardData],
 }
 
 impl AlternativeData {
@@ -153,8 +153,8 @@ impl AlternativeData {
 
 #[derive(Debug)]
 pub struct ReferenceData {
-    pub(crate) id: TypeId,
-    pub(crate) reference: fn() -> &'static ShardData,
+    id: TypeId,
+    reference: fn() -> &'static ShardData,
 }
 
 impl ReferenceData {

@@ -2,7 +2,7 @@
 use core::{any::TypeId, ops::RangeInclusive};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-use crate::shard::{ShardData, ShardDataKind};
+use crate::shard::ShardData;
 
 type Nonterminal = usize;
 type Terminal = usize;
@@ -88,7 +88,7 @@ impl Grammar {
     }
 
     fn lower(&mut self, data: &'static ShardData) -> Nonterminal {
-        if let ShardDataKind::Reference(data) = &data.kind {
+        if let ShardData::Extern(data) = data {
             if let Some(&id) = self.externs.get(&data.id) {
                 return id;
             }
@@ -105,8 +105,8 @@ impl Grammar {
 
     fn define(&mut self, lhs: Nonterminal, data: &'static ShardData) {
         use Symbol::Nonterminal as N;
-        match &data.kind {
-            ShardDataKind::Literal(data) => {
+        match data {
+            ShardData::Literal(data) => {
                 let rhs = data
                     .text
                     .chars()
@@ -114,19 +114,19 @@ impl Grammar {
                     .collect();
                 self.rule(lhs, rhs);
             }
-            ShardDataKind::Set(data) => {
+            ShardData::Set(data) => {
                 let symbol = self.terminal(Character::Set {
                     negated: data.negated,
                     ranges: data.range,
                 });
                 self.rule(lhs, vec![symbol]);
             }
-            ShardDataKind::Option(data) => {
+            ShardData::Option(data) => {
                 let item = self.lower(data.item);
                 self.rule(lhs, vec![]);
                 self.rule(lhs, vec![N(item)]);
             }
-            ShardDataKind::Vec(data) => {
+            ShardData::Vec(data) => {
                 assert!(
                     data.min <= data.max,
                     "shard repetition minimum exceeds maximum"
@@ -152,17 +152,17 @@ impl Grammar {
                     self.rule(current, vec![]);
                 }
             }
-            ShardDataKind::Sequence(data) => {
+            ShardData::Sequence(data) => {
                 let rhs = data.items.iter().map(|item| N(self.lower(item))).collect();
                 self.rule(lhs, rhs);
             }
-            ShardDataKind::Alternative(data) => {
+            ShardData::Alternative(data) => {
                 for item in data.items {
                     let item = self.lower(item);
                     self.rule(lhs, vec![N(item)]);
                 }
             }
-            ShardDataKind::Reference(_) => {
+            ShardData::Extern(_) => {
                 let item = self.lower(data);
                 self.rule(lhs, vec![N(item)]);
             }
@@ -336,11 +336,18 @@ mod tests {
     use super::*;
     use crate::shard::*;
 
-    macro_rules! table {
-        ($data:expr) => {{
-            const DATA: &'static ShardData = $data;
-            Table::build(TypeId::of::<()>(), DATA)
-        }};
+    struct A;
+    impl Literal for A {
+        const LITERAL: &'static str = "a";
+    }
+    struct Unicode;
+    impl Literal for Unicode {
+        const LITERAL: &'static str = "에🦀";
+    }
+    type Lit = LiteralType<A>;
+
+    fn table<T: ShardDataType>() -> Table {
+        Table::build(TypeId::of::<T>(), T::DATA)
     }
 
     // Small exhaustive stack interpreter, independent of the future GLR runtime.
@@ -376,70 +383,50 @@ mod tests {
         false
     }
 
-    macro_rules! check {
-        ($data:expr, $yes:expr, $no:expr $(,)?) => {{
-            let table = table!($data);
-            for input in $yes {
-                assert!(accepts(&table, input), "rejected {input:?}");
-                assert!(table.parse(input).is_ok(), "GLR rejected {input:?}");
-            }
-            for input in $no {
-                assert!(!accepts(&table, input), "accepted {input:?}");
-                assert!(table.parse(input).is_err(), "GLR accepted {input:?}");
-            }
-        }};
+    fn check<T: ShardDataType>(yes: &[&str], no: &[&str]) {
+        let table = table::<T>();
+        for input in yes {
+            assert!(accepts(&table, input), "rejected {input:?}");
+            assert!(table.parse(input).is_ok(), "GLR rejected {input:?}");
+        }
+        for input in no {
+            assert!(!accepts(&table, input), "accepted {input:?}");
+            assert!(table.parse(input).is_err(), "GLR accepted {input:?}");
+        }
     }
 
     #[test]
     fn literals_and_empty_grammars() {
-        check!(&ShardData::literal("에🦀"), &["에🦀"], &["", "에", "에🦀a"]);
-        check!(&ShardData::sequence(&[]), &[""], &["a"]);
-        check!(&ShardData::alternative(&[]), &[] as &[&str], &["", "a"]);
+        check::<LiteralType<Unicode>>(&["에🦀"], &["", "에", "에🦀a"]);
+        check::<SequenceType<()>>(&[""], &["a"]);
+        check::<AlternativeType<()>>(&[], &["", "a"]);
     }
 
     #[test]
     fn nullable_prefix_and_suffix() {
-        const A: ShardData = ShardData::literal("a");
-        check!(
-            &ShardData::sequence(&[&ShardData::option(&A), &A, &ShardData::option(&A)]),
-            &["a", "aa", "aaa"],
-            &["", "aaaa", "b"],
-        );
+        type Grammar = SequenceType<(OptionType<Lit>, Lit, OptionType<Lit>)>;
+        check::<Grammar>(&["a", "aa", "aaa"], &["", "aaaa", "b"]);
     }
 
     #[test]
     fn repetitions() {
-        const A: ShardData = ShardData::literal("a");
-        check!(
-            &ShardData::vec(&A, 2, 4),
-            &["aa", "aaa", "aaaa"],
-            &["", "a", "aaaaa"],
-        );
-        check!(&ShardData::vec(&A, 0, 0), &[""], &["a"]);
-        check!(&ShardData::vec(&A, 2, 2), &["aa"], &["", "a", "aaa"]);
-        check!(
-            &ShardData::vec(&A, 0, usize::MAX),
-            &["", "a", "aaaaa"],
-            &["b", "ab"],
-        );
-        check!(
-            &ShardData::vec(&A, 2, usize::MAX),
-            &["aa", "aaaaa"],
-            &["", "a"],
-        );
-        check!(
-            &ShardData::vec(&ShardData::option(&A), 1, 3),
-            &["", "a", "aaa"],
-            &["aaaa"],
-        );
+        check::<VecType<Lit, 2, 4>>(&["aa", "aaa", "aaaa"], &["", "a", "aaaaa"]);
+        check::<VecType<Lit, 0, 0>>(&[""], &["a"]);
+        check::<VecType<Lit, 2, 2>>(&["aa"], &["", "a", "aaa"]);
+        check::<VecType<Lit, 0, { usize::MAX }>>(&["", "a", "aaaaa"], &["b", "ab"]);
+        check::<VecType<Lit, 2, { usize::MAX }>>(&["aa", "aaaaa"], &["", "a"]);
+        check::<VecType<OptionType<Lit>, 1, 3>>(&["", "a", "aaa"], &["aaaa"]);
+    }
+
+    struct Letters;
+    impl Set for Letters {
+        const SET: &'static [std::ops::RangeInclusive<char>] = &['a'..='z', 'b'..='d'];
     }
 
     #[test]
     fn overlapping_and_negated_character_sets() {
-        const A: ShardData = ShardData::literal("a");
-        const LETTERS: &[RangeInclusive<char>] = &['a'..='z', 'b'..='d'];
-        const GRAMMAR: ShardData = ShardData::alternative(&[&A, &ShardData::set(false, LETTERS)]);
-        let table = table!(&GRAMMAR);
+        type Grammar = AlternativeType<(Lit, SetType<false, Letters>)>;
+        let table = table::<Grammar>();
         assert_eq!(
             table
                 .actions(0, Some('a'))
@@ -448,12 +435,8 @@ mod tests {
                 .count(),
             2
         );
-        check!(&GRAMMAR, &["a", "b", "z"], &["", "aa", "에"]);
-        check!(
-            &ShardData::set(true, LETTERS),
-            &["에", "🦀", "\0"],
-            &["", "a", "z", "AA"],
-        );
+        check::<Grammar>(&["a", "b", "z"], &["", "aa", "에"]);
+        check::<SetType<true, Letters>>(&["에", "🦀", "\0"], &["", "a", "z", "AA"]);
     }
 
     struct Recursive;
@@ -462,13 +445,10 @@ mod tests {
     }
     impl ShardCore for Recursive {
         type Output<'i> = ();
-        const DATA: &'static ShardData = &ShardData::alternative(&[
-            &ShardData::literal("a"),
-            &ShardData::sequence(&[
-                &ShardData::reference::<Recursive>(),
-                &ShardData::reference::<Recursive>(),
-            ]),
-        ]);
+        type Data = AlternativeType<(
+            Lit,
+            SequenceType<(ExternType<Recursive>, ExternType<Recursive>)>,
+        )>;
     }
     impl StaticShard for Recursive {}
 
@@ -493,10 +473,8 @@ mod tests {
 
     #[test]
     fn reduce_reduce_conflicts() {
-        const A: ShardData = ShardData::literal("a");
-        const GRAMMAR: ShardData =
-            ShardData::alternative(&[&ShardData::sequence(&[]), &ShardData::option(&A)]);
-        let table = table!(&GRAMMAR);
+        type Grammar = AlternativeType<(SequenceType<()>, OptionType<Lit>)>;
+        let table = table::<Grammar>();
         assert!(
             table
                 .actions(0, None)
@@ -505,7 +483,7 @@ mod tests {
                 .count()
                 >= 2
         );
-        check!(&GRAMMAR, &["", "a"], &["aa"]);
+        check::<Grammar>(&["", "a"], &["aa"]);
     }
 
     struct Left;
@@ -515,37 +493,33 @@ mod tests {
     }
     impl ShardCore for Left {
         type Output<'i> = ();
-        const DATA: &'static ShardData = &ShardData::alternative(&[
-            &ShardData::literal("a"),
-            &ShardData::sequence(&[&ShardData::literal("a"), &ShardData::reference::<Right>()]),
-        ]);
+        type Data = AlternativeType<(Lit, SequenceType<(Lit, ExternType<Right>)>)>;
     }
     impl Shard for Right {
         type Core = Right;
     }
     impl ShardCore for Right {
         type Output<'i> = ();
-        const DATA: &'static ShardData = &ShardData::reference::<Left>();
+        type Data = ExternType<Left>;
     }
 
     #[test]
     fn mutual_recursion() {
-        check!(Left::DATA, &["a", "aa", "aaa"], &["", "b"]);
+        check::<<<Left as Shard>::Core as ShardCore>::Data>(&["a", "aa", "aaa"], &["", "b"]);
     }
 
     #[test]
     fn glr_matches_exhaustive_stack_interpreter() {
-        const A: ShardData = ShardData::literal("a");
-        const B: ShardData = ShardData::literal("b");
-        const GRAMMAR: ShardData = ShardData::alternative(&[
-            &ShardData::sequence(&[&ShardData::vec(&A, 0, 4), &B]),
-            &ShardData::sequence(&[
-                &A,
-                &ShardData::vec(&ShardData::alternative(&[&A, &B]), 0, 3),
-            ]),
-            &ShardData::sequence(&[&ShardData::option(&A), &ShardData::option(&A)]),
-        ]);
-        let table = table!(&GRAMMAR);
+        struct B;
+        impl Literal for B {
+            const LITERAL: &'static str = "b";
+        }
+        type Grammar = AlternativeType<(
+            SequenceType<(VecType<Lit, 0, 4>, LiteralType<B>)>,
+            SequenceType<(Lit, VecType<AlternativeType<(Lit, LiteralType<B>)>, 0, 3>)>,
+            SequenceType<(OptionType<Lit>, OptionType<Lit>)>,
+        )>;
+        let table = table::<Grammar>();
         for len in 0..=6 {
             for bits in 0..(1 << len) {
                 let input: String = (0..len)
@@ -569,8 +543,8 @@ mod tests {
         }
         impl StaticShard for Recursive {}
         impl ShardCore for Core {
+            type Data = ExternType<Recursive>;
             type Output<'i> = ();
-            const DATA: &'static ShardData = &ShardData::reference::<Recursive>();
         }
         let cluster = crate::Cluster::<Recursive>::build();
         assert_eq!(cluster.table.productions.len(), 2);
@@ -590,11 +564,10 @@ mod tests {
         }
         impl ShardCore for EmptyRecursive {
             type Output<'i> = ();
-            const DATA: &'static ShardData =
-                &ShardData::option(&ShardData::reference::<EmptyRecursive>());
+            type Data = OptionType<ExternType<EmptyRecursive>>;
         }
         assert!(
-            !Table::build(TypeId::of::<EmptyRecursive>(), EmptyRecursive::DATA)
+            !table::<<<EmptyRecursive as Shard>::Core as ShardCore>::Data>()
                 .states
                 .is_empty()
         );
@@ -603,6 +576,6 @@ mod tests {
     #[test]
     #[should_panic(expected = "shard repetition minimum exceeds maximum")]
     fn invalid_repetition_is_rejected() {
-        table!(&ShardData::vec(&ShardData::literal("a"), 2, 1));
+        table::<VecType<Lit, 2, 1>>();
     }
 }

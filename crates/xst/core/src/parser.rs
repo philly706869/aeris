@@ -131,20 +131,22 @@ impl Table {
 #[cfg(test)]
 mod tests {
     use crate::{Cluster, ParseError, shard::*};
+    use core::marker::PhantomData;
 
-    macro_rules! root {
-        ($name:ident, $data:expr) => {
-            struct $name;
-            impl Shard for $name {
-                type Core = $name;
-            }
-            impl ShardCore for $name {
-                type Output<'i> = ();
-                const DATA: &'static ShardData = &$data;
-            }
-            impl StaticShard for $name {}
-        };
+    struct Root<T>(PhantomData<T>);
+    impl<T: ShardDataType> Shard for Root<T> {
+        type Core = Root<T>;
     }
+    impl<T: ShardDataType> ShardCore for Root<T> {
+        type Output<'i> = ();
+        type Data = T;
+    }
+    impl<T: ShardDataType> StaticShard for Root<T> {}
+    struct A;
+    impl Literal for A {
+        const LITERAL: &'static str = "a";
+    }
+    type Lit = LiteralType<A>;
 
     #[test]
     fn nullable_cycles_and_unbounded_nullable_repetition() {
@@ -154,19 +156,13 @@ mod tests {
         }
         impl ShardCore for Recursive {
             type Output<'i> = ();
-            const DATA: &'static ShardData =
-                &ShardData::option(&ShardData::reference::<Recursive>());
+            type Data = OptionType<ExternType<Recursive>>;
         }
-        impl StaticShard for Recursive {}
-        let cluster = Cluster::<Recursive>::build();
+        let cluster = Cluster::<Root<ExternType<Recursive>>>::build();
         assert_eq!(cluster.parse(""), Ok(()));
         assert!(cluster.parse("a").is_err());
 
-        root!(
-            Repeated,
-            ShardData::vec(&ShardData::option(&ShardData::literal("a")), 0, usize::MAX)
-        );
-        let cluster = Cluster::<Repeated>::build();
+        let cluster = Cluster::<Root<VecType<OptionType<Lit>, 0, { usize::MAX }>>>::build();
         for input in ["", "a", "aa", "aaaa"] {
             assert_eq!(cluster.parse(input), Ok(()));
         }
@@ -181,17 +177,13 @@ mod tests {
         }
         impl ShardCore for Recursive {
             type Output<'i> = ();
-            const DATA: &'static ShardData = &ShardData::alternative(&[
-                &ShardData::sequence(&[]),
-                &ShardData::literal("a"),
-                &ShardData::sequence(&[
-                    &ShardData::reference::<Recursive>(),
-                    &ShardData::reference::<Recursive>(),
-                ]),
-            ]);
+            type Data = AlternativeType<(
+                SequenceType<()>,
+                Lit,
+                SequenceType<(ExternType<Recursive>, ExternType<Recursive>)>,
+            )>;
         }
-        impl StaticShard for Recursive {}
-        let cluster = Cluster::<Recursive>::build();
+        let cluster = Cluster::<Root<ExternType<Recursive>>>::build();
         for input in ["", "a", "aa", "aaaa"] {
             assert_eq!(cluster.parse(input), Ok(()));
         }
@@ -206,18 +198,20 @@ mod tests {
         }
         impl ShardCore for Recursive {
             type Output<'i> = ();
-            const DATA: &'static ShardData = &ShardData::reference::<Recursive>();
+            type Data = ExternType<Recursive>;
         }
-        impl StaticShard for Recursive {}
-        let cluster = Cluster::<Recursive>::build();
+        let cluster = Cluster::<Root<ExternType<Recursive>>>::build();
         assert!(cluster.parse("").is_err());
         assert!(cluster.parse("a").is_err());
     }
 
     #[test]
     fn reports_byte_offsets_and_can_be_reused() {
-        root!(Text, ShardData::literal("에🦀"));
-        let cluster = Cluster::<Text>::build();
+        struct Text;
+        impl Literal for Text {
+            const LITERAL: &'static str = "에🦀";
+        }
+        let cluster = Cluster::<Root<LiteralType<Text>>>::build();
         assert_eq!(
             cluster.parse("에x"),
             Err(ParseError {
@@ -260,21 +254,13 @@ mod tests {
         }
         impl ShardCore for Recursive {
             type Output<'i> = ();
-            const DATA: &'static ShardData = &ShardData::alternative(&[
-                &ShardData::sequence(&[]),
-                &ShardData::sequence(&[
-                    &ShardData::literal("a"),
-                    &ShardData::reference::<Recursive>(),
-                    &ShardData::literal("a"),
-                ]),
-                &ShardData::sequence(&[
-                    &ShardData::literal("a"),
-                    &ShardData::reference::<Recursive>(),
-                ]),
-            ]);
+            type Data = AlternativeType<(
+                SequenceType<()>,
+                SequenceType<(Lit, ExternType<Recursive>, Lit)>,
+                SequenceType<(Lit, ExternType<Recursive>)>,
+            )>;
         }
-        impl StaticShard for Recursive {}
-        let cluster = Cluster::<Recursive>::build();
+        let cluster = Cluster::<Root<ExternType<Recursive>>>::build();
         for n in 0..12 {
             assert_eq!(cluster.parse(&"a".repeat(n)), Ok(()));
         }
