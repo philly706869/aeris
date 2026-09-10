@@ -1,11 +1,49 @@
 use core::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
 
-pub trait Shard: 'static {
+/// Internal API for generated code.
+/// This module is not intended for direct use.
+#[doc(hidden)]
+pub mod internal {
+    pub use core::marker::PhantomData;
+    pub use core::ops::RangeInclusive;
+    pub use core::primitive::char;
+    pub use core::primitive::str;
+
+    pub use super::FieldOutput;
+    pub use super::Output;
+    pub use super::ParamOutput;
+    pub use super::Shard;
+    pub use super::ShardCore;
+    pub use super::ShardData;
+    pub use super::ShardDataType;
+    pub use super::ShardField;
+    pub use super::ShardLiteral;
+    pub use super::ShardParam;
+    pub use super::ShardSet;
+    pub use super::StaticShard;
+
+    pub use super::AlternativeType as Alt;
+    pub use super::CaptureType as Capture;
+    pub use super::ExternType as Ext;
+    pub use super::LiteralType as Lit;
+    pub use super::OptionType as Opt;
+    pub use super::SequenceType as Seq;
+    pub use super::SetType as Set;
+    pub use super::VecType as Vec;
+}
+
+pub trait StaticShard: Shard {}
+
+pub trait Shard {
+    type Core: ShardCore;
+}
+
+pub trait ShardCore: 'static {
     type Data: ShardDataType;
     type Output<'i>;
 }
 
-pub type Output<'i, S> = <S as Shard>::Output<'i>;
+pub type Output<'i, S> = <<S as Shard>::Core as ShardCore>::Output<'i>;
 
 /// Output of a generated binding field. Implementations live in the binding's
 /// anonymous const so grammar-only helper names never enter the module scope.
@@ -35,11 +73,12 @@ impl<const NEGATED: bool, T: ShardSet> ShardParam for SetType<NEGATED, T> {
     type Output<'i> = &'i str;
 }
 
-impl<T: Shard> ShardParam for ExternType<T>
+impl<T> ShardParam for ExternType<T>
 where
-    for<'i> T::Output<'i>: core::fmt::Debug,
+    T: Shard,
+    for<'i> <T::Core as ShardCore>::Output<'i>: core::fmt::Debug,
 {
-    type Output<'i> = T::Output<'i>;
+    type Output<'i> = <T::Core as ShardCore>::Output<'i>;
 }
 
 impl<T: ShardParam> ShardParam for OptionType<T> {
@@ -67,8 +106,6 @@ where
 {
     type Output<'i> = &'i str;
 }
-
-pub trait StaticShard: Shard {}
 
 pub struct LiteralType<T>(PhantomData<fn() -> T>);
 
@@ -190,8 +227,8 @@ where
     T: Shard + 'static,
 {
     const DATA: &'static ShardData = &ShardData::Extern(ExternData {
-        id: TypeId::of::<T::Data>(),
-        reference: || <T::Data as ShardDataType>::DATA,
+        id: TypeId::of::<<T::Core as ShardCore>::Data>(),
+        reference: || <<T::Core as ShardCore>::Data as ShardDataType>::DATA,
     });
 }
 
