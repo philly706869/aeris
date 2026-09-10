@@ -135,6 +135,9 @@ mod tests {
 
     struct Root<T>(PhantomData<T>);
     impl<T: ShardDataType> Shard for Root<T> {
+        type Core = Root<T>;
+    }
+    impl<T: ShardDataType> ShardCore for Root<T> {
         type Output<'i> = ();
         type Data = T;
     }
@@ -149,6 +152,9 @@ mod tests {
     fn nullable_cycles_and_unbounded_nullable_repetition() {
         struct Recursive;
         impl Shard for Recursive {
+            type Core = Recursive;
+        }
+        impl ShardCore for Recursive {
             type Output<'i> = ();
             type Data = OptionType<ExternType<Recursive>>;
         }
@@ -167,6 +173,9 @@ mod tests {
     fn recursive_nullable_binary_rule() {
         struct Recursive;
         impl Shard for Recursive {
+            type Core = Recursive;
+        }
+        impl ShardCore for Recursive {
             type Output<'i> = ();
             type Data = AlternativeType<(
                 SequenceType<()>,
@@ -185,6 +194,9 @@ mod tests {
     fn nonproductive_cycle_rejects() {
         struct Recursive;
         impl Shard for Recursive {
+            type Core = Recursive;
+        }
+        impl ShardCore for Recursive {
             type Output<'i> = ();
             type Data = ExternType<Recursive>;
         }
@@ -238,6 +250,9 @@ mod tests {
         // state at a position, and reductions must retain all predecessors.
         struct Recursive;
         impl Shard for Recursive {
+            type Core = Recursive;
+        }
+        impl ShardCore for Recursive {
             type Output<'i> = ();
             type Data = AlternativeType<(
                 SequenceType<()>,

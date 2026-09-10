@@ -441,6 +441,9 @@ mod tests {
 
     struct Recursive;
     impl Shard for Recursive {
+        type Core = Recursive;
+    }
+    impl ShardCore for Recursive {
         type Output<'i> = ();
         type Data = AlternativeType<(
             Lit,
@@ -486,17 +489,23 @@ mod tests {
     struct Left;
     struct Right;
     impl Shard for Left {
+        type Core = Left;
+    }
+    impl ShardCore for Left {
         type Output<'i> = ();
         type Data = AlternativeType<(Lit, SequenceType<(Lit, ExternType<Right>)>)>;
     }
     impl Shard for Right {
+        type Core = Right;
+    }
+    impl ShardCore for Right {
         type Output<'i> = ();
         type Data = ExternType<Left>;
     }
 
     #[test]
     fn mutual_recursion() {
-        check::<<Left as Shard>::Data>(&["a", "aa", "aaa"], &["", "b"]);
+        check::<<<Left as Shard>::Core as ShardCore>::Data>(&["a", "aa", "aaa"], &["", "b"]);
     }
 
     #[test]
@@ -526,13 +535,42 @@ mod tests {
     }
 
     #[test]
+    fn root_and_external_references_use_the_same_core_identity() {
+        struct Recursive;
+        struct Core;
+        impl Shard for Recursive {
+            type Core = Core;
+        }
+        impl StaticShard for Recursive {}
+        impl ShardCore for Core {
+            type Data = ExternType<Recursive>;
+            type Output<'i> = ();
+        }
+        let cluster = crate::Cluster::<Recursive>::build();
+        assert_eq!(cluster.table.productions.len(), 2);
+        let root = cluster.table.productions[1].lhs;
+        assert_eq!(
+            cluster.table.productions[1].rhs,
+            vec![Symbol::Nonterminal(root)]
+        );
+        assert!(cluster.parse("").is_err());
+    }
+
+    #[test]
     fn nullable_recursive_grammar_builds() {
         struct EmptyRecursive;
         impl Shard for EmptyRecursive {
+            type Core = EmptyRecursive;
+        }
+        impl ShardCore for EmptyRecursive {
             type Output<'i> = ();
             type Data = OptionType<ExternType<EmptyRecursive>>;
         }
-        assert!(!table::<<EmptyRecursive as Shard>::Data>().states.is_empty());
+        assert!(
+            !table::<<<EmptyRecursive as Shard>::Core as ShardCore>::Data>()
+                .states
+                .is_empty()
+        );
     }
 
     #[test]

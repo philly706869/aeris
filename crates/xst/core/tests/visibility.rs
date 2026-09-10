@@ -10,6 +10,9 @@ const _: () = {
         const LITERAL: &'static str = "value";
     }
     impl Shard for PrivateBinding<'static> {
+        type Core = PrivateBinding<'static>;
+    }
+    impl ShardCore for PrivateBinding<'static> {
         type Data = Lit<Literal0>;
         type Output<'i> = PrivateBinding<'i>;
     }
@@ -25,7 +28,7 @@ const _: () = {
     pub struct Grammar0;
     impl ShardDataType for Grammar0 {
         const DATA: &'static xst_core::internal::ShardData =
-            <PrivateBinding<'static> as Shard>::Data::DATA;
+            <<PrivateBinding<'static> as Shard>::Core as ShardCore>::Data::DATA;
     }
 
     // A new output type can contain a private binding. This is an opaque
@@ -34,6 +37,10 @@ const _: () = {
     pub struct Output0<'i>(Output<'i, PrivateBinding<'static>>);
 
     impl Shard for PublicBinding<'static> {
+        type Core = PublicBinding<'static>;
+    }
+
+    impl ShardCore for PublicBinding<'static> {
         type Data = Grammar0;
         type Output<'i> = PublicBinding<'i>;
     }

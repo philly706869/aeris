@@ -1,4 +1,4 @@
-use core::{any::TypeId, marker::PhantomData, ops::RangeInclusive};
+use core::{any::TypeId, fmt::Debug, marker::PhantomData, ops::RangeInclusive};
 
 /// Internal API for generated code.
 /// This module is not intended for direct use.
@@ -40,7 +40,7 @@ pub trait Shard {
 
 pub trait ShardCore: 'static {
     type Data: ShardDataType;
-    type Output<'i>;
+    type Output<'i>: Debug;
 }
 
 pub type Output<'i, S> = <<S as Shard>::Core as ShardCore>::Output<'i>;
@@ -50,7 +50,7 @@ pub type Output<'i, S> = <<S as Shard>::Core as ShardCore>::Output<'i>;
 /// FIELD is the zero-based source field index (before repeated-name grouping).
 /// For enum bindings, FIELD is the variant index; each variant contains one shard.
 pub trait ShardField<const INDEX: usize>: Shard {
-    type Output<'i>: core::fmt::Debug;
+    type Output<'i>: Debug;
 }
 
 pub type FieldOutput<'i, S, const INDEX: usize> = <S as ShardField<INDEX>>::Output<'i>;
@@ -73,12 +73,12 @@ impl<const NEGATED: bool, T: ShardSet> ShardParam for SetType<NEGATED, T> {
     type Output<'i> = &'i str;
 }
 
-impl<T> ShardParam for ExternType<T>
+impl<T> ShardParam for CoreType<T>
 where
-    T: Shard,
-    for<'i> <T::Core as ShardCore>::Output<'i>: core::fmt::Debug,
+    T: ShardCore,
+    for<'i> T::Output<'i>: core::fmt::Debug,
 {
-    type Output<'i> = <T::Core as ShardCore>::Output<'i>;
+    type Output<'i> = T::Output<'i>;
 }
 
 impl<T: ShardParam> ShardParam for OptionType<T> {
@@ -220,15 +220,20 @@ macro_rules! impl_shard_ext_for_alternative {
 
 impl_shard_ext_for_alternative!();
 
-pub struct ExternType<T>(PhantomData<fn() -> T>);
+/// Resolve a borrowed shard to its static core. Only the core is stored in
+/// the grammar descriptor; neither its identity nor its lifetime depends on S.
+/// This alias does not bypass Rust's visibility checks on a source reference.
+pub type ExternType<T> = CoreType<<T as Shard>::Core>;
 
-impl<T> ShardDataType for ExternType<T>
+pub struct CoreType<T>(PhantomData<fn() -> T>);
+
+impl<T> ShardDataType for CoreType<T>
 where
-    T: Shard + 'static,
+    T: ShardCore,
 {
     const DATA: &'static ShardData = &ShardData::Extern(ExternData {
-        id: TypeId::of::<<T::Core as ShardCore>::Data>(),
-        reference: || <<T::Core as ShardCore>::Data as ShardDataType>::DATA,
+        id: TypeId::of::<T>(),
+        reference: || <T::Data as ShardDataType>::DATA,
     });
 }
 

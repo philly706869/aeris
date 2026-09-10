@@ -9,6 +9,9 @@ impl ShardLiteral for Text {
 // #[shard] type Foo = x! { "hello" };
 struct Foo;
 impl Shard for Foo {
+    type Core = Foo;
+}
+impl ShardCore for Foo {
     type Data = Lit<Text>;
     type Output<'i> = &'i str;
 }
@@ -20,6 +23,9 @@ struct Bar<'i> {
     foo: Output<'i, Foo>,
 }
 impl Shard for Bar<'static> {
+    type Core = Bar<'static>;
+}
+impl ShardCore for Bar<'static> {
     type Data = Ext<Foo>;
     type Output<'i> = Bar<'i>;
 }
@@ -31,6 +37,9 @@ enum Binding<'i> {
     Struct(Output<'i, Bar<'static>>),
 }
 impl Shard for Binding<'static> {
+    type Core = Binding<'static>;
+}
+impl ShardCore for Binding<'static> {
     type Data = Alt<(Ext<Foo>, Ext<Bar<'static>>)>;
     type Output<'i> = Binding<'i>;
 }
@@ -41,6 +50,9 @@ impl StaticShard for Binding<'static> {}
 #[derive(Debug)]
 struct Wrapper<T>(T);
 impl<T: ShardParam> Shard for Wrapper<T> {
+    type Core = Wrapper<T>;
+}
+impl<T: ShardParam> ShardCore for Wrapper<T> {
     type Data = T;
     type Output<'i> = Wrapper<ParamOutput<'i, T>>;
 }
@@ -105,6 +117,9 @@ mod scoped_fields {
     #[derive(Debug)]
     pub struct Group<T>(pub T);
     impl<T: ShardParam> Shard for Group<T> {
+        type Core = Group<T>;
+    }
+    impl<T: ShardParam> ShardCore for Group<T> {
         type Data = T;
         type Output<'i> = Group<ParamOutput<'i, T>>;
     }
@@ -130,6 +145,9 @@ mod scoped_fields {
                     type Output<'i> = ParamOutput<'i, Grammar>;
                 }
                 impl Shard for $name<'static> {
+                    type Core = $name<'static>;
+                }
+                impl ShardCore for $name<'static> {
                     type Data = Grammar;
                     type Output<'i> = $name<'i>;
                 }
