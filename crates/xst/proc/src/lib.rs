@@ -1,6 +1,6 @@
-mod shard;
-
 use proc_macro::TokenStream;
+
+mod shard;
 
 ///
 #[proc_macro_attribute]

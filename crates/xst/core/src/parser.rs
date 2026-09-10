@@ -143,7 +143,7 @@ mod tests {
     }
     impl<T: ShardDataType> StaticShard for Root<T> {}
     struct A;
-    impl ShardLiteral for A {
+    impl Literal for A {
         const LITERAL: &'static str = "a";
     }
     type Lit = LiteralType<A>;
@@ -208,7 +208,7 @@ mod tests {
     #[test]
     fn reports_byte_offsets_and_can_be_reused() {
         struct Text;
-        impl ShardLiteral for Text {
+        impl Literal for Text {
             const LITERAL: &'static str = "에🦀";
         }
         let cluster = Cluster::<Root<LiteralType<Text>>>::build();

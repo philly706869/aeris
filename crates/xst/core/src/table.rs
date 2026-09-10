@@ -337,11 +337,11 @@ mod tests {
     use crate::shard::*;
 
     struct A;
-    impl ShardLiteral for A {
+    impl Literal for A {
         const LITERAL: &'static str = "a";
     }
     struct Unicode;
-    impl ShardLiteral for Unicode {
+    impl Literal for Unicode {
         const LITERAL: &'static str = "에🦀";
     }
     type Lit = LiteralType<A>;
@@ -419,7 +419,7 @@ mod tests {
     }
 
     struct Letters;
-    impl ShardSet for Letters {
+    impl Set for Letters {
         const SET: &'static [std::ops::RangeInclusive<char>] = &['a'..='z', 'b'..='d'];
     }
 
@@ -511,7 +511,7 @@ mod tests {
     #[test]
     fn glr_matches_exhaustive_stack_interpreter() {
         struct B;
-        impl ShardLiteral for B {
+        impl Literal for B {
             const LITERAL: &'static str = "b";
         }
         type Grammar = AlternativeType<(

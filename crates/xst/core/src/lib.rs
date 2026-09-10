@@ -1,4 +1,3 @@
-use core::any::TypeId;
 use core::marker::PhantomData;
 
 mod parser;
@@ -8,14 +7,14 @@ mod table;
 pub use parser::ParseError;
 pub use shard::internal;
 
-use shard::{ShardCore, ShardDataType, StaticShard};
+use shard::{ShardCore, StaticShard};
 
 pub struct Cluster<S>
 where
     S: StaticShard,
 {
-    table: table::Table,
     _shard: PhantomData<fn() -> S>,
+    table: table::Table,
 }
 
 impl<S> Cluster<S>
@@ -23,12 +22,11 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        let table =
-            table::Table::build(TypeId::of::<S::Core>(), <S::Core as ShardCore>::Data::DATA);
+        // let table = table::Table::build(TypeId::of::<S::Core>(), <S::Core as ShardCore>::Data::DATA);
 
         Self {
-            table,
             _shard: PhantomData,
+            table: todo!(),
         }
     }
 

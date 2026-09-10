@@ -29,7 +29,7 @@ type Digits = x! { Digit+ };
 
 #[shard]
 type Digit = x! {[
-    | '0'
+    | "0"
     | One2Nine
 ]};
 

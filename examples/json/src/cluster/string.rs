@@ -11,12 +11,12 @@ pub struct JSONString {
 type Content = x! {
     [
         | {! '"' '\\' '\u{0000}'..'\u{001F}'}
-        | '\\' Escape
+        | "\\" Escape
     ]*
 };
 
 #[shard]
 type Escape = x! {[
     | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
-    | 'u' {'0'..'9' 'A'..'F' 'a'..'f'}![4]
+    | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
 ]};

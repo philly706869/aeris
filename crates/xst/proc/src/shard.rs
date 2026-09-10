@@ -1,7 +1,7 @@
-mod ast;
-
 use proc_macro2::TokenStream;
 use syn::parse2;
+
+mod ast;
 
 pub fn shard(attr: TokenStream, item: TokenStream) -> TokenStream {
     let expanded_attr = expand_attr(attr);

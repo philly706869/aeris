@@ -1,4 +1,4 @@
-use core::{any::TypeId, fmt::Debug, marker::PhantomData, ops::RangeInclusive};
+use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 
 /// Internal API for generated code.
 /// This module is not intended for direct use.
@@ -9,27 +9,11 @@ pub mod internal {
     pub use core::primitive::char;
     pub use core::primitive::str;
 
-    pub use super::FieldOutput;
-    pub use super::Output;
-    pub use super::ParamOutput;
     pub use super::Shard;
     pub use super::ShardCore;
     pub use super::ShardData;
-    pub use super::ShardDataType;
     pub use super::ShardField;
-    pub use super::ShardLiteral;
-    pub use super::ShardParam;
-    pub use super::ShardSet;
     pub use super::StaticShard;
-
-    pub use super::AlternativeType as Alt;
-    pub use super::CaptureType as Capture;
-    pub use super::ExternType as Ext;
-    pub use super::LiteralType as Lit;
-    pub use super::OptionType as Opt;
-    pub use super::SequenceType as Seq;
-    pub use super::SetType as Set;
-    pub use super::VecType as Vec;
 }
 
 pub trait StaticShard: Shard {}
@@ -39,206 +23,56 @@ pub trait Shard {
 }
 
 pub trait ShardCore: 'static {
-    type Data: ShardDataType;
     type Output<'i>: Debug;
-}
-
-pub type Output<'i, S> = <<S as Shard>::Core as ShardCore>::Output<'i>;
-
-/// Output of a generated binding field. Implementations live in the binding's
-/// anonymous const so grammar-only helper names never enter the module scope.
-/// FIELD is the zero-based source field index (before repeated-name grouping).
-/// For enum bindings, FIELD is the variant index; each variant contains one shard.
-pub trait ShardField<const INDEX: usize>: Shard {
-    type Output<'i>: Debug;
-}
-
-pub type FieldOutput<'i, S, const INDEX: usize> = <S as ShardField<INDEX>>::Output<'i>;
-
-pub trait ShardDataType: 'static {
     const DATA: &'static ShardData;
 }
 
-pub trait ShardParam: ShardDataType {
-    type Output<'i>: core::fmt::Debug;
+pub type ShardField<'i, T> = <<T as Shard>::Core as ShardCore>::Output<'i>;
+
+#[derive(Debug)]
+pub struct ShardData {
+    kind: ShardDataKind,
 }
 
-pub type ParamOutput<'i, T> = <T as ShardParam>::Output<'i>;
-
-impl<T: ShardLiteral> ShardParam for LiteralType<T> {
-    type Output<'i> = &'i str;
-}
-
-impl<const NEGATED: bool, T: ShardSet> ShardParam for SetType<NEGATED, T> {
-    type Output<'i> = &'i str;
-}
-
-impl<T> ShardParam for CoreType<T>
-where
-    T: ShardCore,
-    for<'i> T::Output<'i>: core::fmt::Debug,
-{
-    type Output<'i> = T::Output<'i>;
-}
-
-impl<T: ShardParam> ShardParam for OptionType<T> {
-    type Output<'i> = Option<T::Output<'i>>;
-}
-
-impl<T: ShardParam, const MIN: usize, const MAX: usize> ShardParam for VecType<T, MIN, MAX> {
-    type Output<'i> = Vec<T::Output<'i>>;
-}
-
-/// An inline x! pattern captures its entire matched slice, regardless of its
-/// internal grammar (sequence, alternative, repetition, or shard references).
-pub struct CaptureType<T>(PhantomData<fn() -> T>);
-
-impl<T> ShardDataType for CaptureType<T>
-where
-    T: ShardDataType,
-{
-    const DATA: &'static ShardData = T::DATA;
-}
-
-impl<T> ShardParam for CaptureType<T>
-where
-    T: ShardDataType,
-{
-    type Output<'i> = &'i str;
-}
-
-pub struct LiteralType<T>(PhantomData<fn() -> T>);
-
-impl<T> ShardDataType for LiteralType<T>
-where
-    T: ShardLiteral,
-{
-    const DATA: &'static ShardData = &ShardData::Literal(LiteralData { text: T::LITERAL });
-}
-
-pub trait ShardLiteral: 'static {
-    const LITERAL: &'static str;
-}
-
-pub struct SetType<const NEGATED: bool, T>(PhantomData<fn() -> T>);
-
-impl<const NEGATED: bool, T> ShardDataType for SetType<NEGATED, T>
-where
-    T: ShardSet,
-{
-    const DATA: &'static ShardData = &ShardData::Set(SetData {
-        negated: NEGATED,
-        range: T::SET,
-    });
-}
-
-pub trait ShardSet: 'static {
-    const SET: &'static [RangeInclusive<char>];
-}
-
-pub struct OptionType<T>(PhantomData<fn() -> T>);
-
-impl<T> ShardDataType for OptionType<T>
-where
-    T: ShardDataType,
-{
-    const DATA: &'static ShardData = &ShardData::Option(OptionData { item: T::DATA });
-}
-
-pub struct VecType<T, const MIN: usize, const MAX: usize>(PhantomData<fn() -> T>);
-
-impl<T, const MIN: usize, const MAX: usize> ShardDataType for VecType<T, MIN, MAX>
-where
-    T: ShardDataType,
-{
-    const DATA: &'static ShardData = &ShardData::Vec(VecData {
-        item: T::DATA,
-        min: MIN,
-        max: MAX,
-    });
-}
-
-pub struct SequenceType<T>(PhantomData<fn() -> T>);
-
-macro_rules! impl_shard_ext_for_sequence {
-    () => {
-        impl_shard_ext_for_sequence![@for A B C D E F G H I J K L M N O P Q R S T U V W X Y Z];
-    };
-    [@for $first_t:ident $($t:ident)*] => {
-        impl_shard_ext_for_sequence![@for $($t)*];
-        impl_shard_ext_for_sequence![@impl $first_t $($t)*];
-    };
-    [@for] => {
-        impl_shard_ext_for_sequence![@impl];
-    };
-    [@impl $($t:ident)*] => {
-        impl<$($t),*> ShardParam for SequenceType<($($t,)*)>
-        where
-            for<'i> ($($t::Output<'i>,)*): core::fmt::Debug,
-            $($t: ShardParam),*
-        {
-            type Output<'i> = ($($t::Output<'i>,)*);
-        }
-
-        impl<$($t),*> ShardDataType for SequenceType<($($t,)*)>
-        where
-            $($t: ShardDataType),*
-        {
-            const DATA: &'static ShardData = &ShardData::Sequence(SequenceData {
-                items: &[$($t::DATA),*],
-            });
-        }
+impl ShardData {
+    const fn new(kind: ShardDataKind) -> Self {
+        Self { kind }
     }
-}
 
-impl_shard_ext_for_sequence!();
-
-pub struct AlternativeType<T>(PhantomData<fn() -> T>);
-
-macro_rules! impl_shard_ext_for_alternative {
-    () => {
-        impl_shard_ext_for_alternative![@for A B C D E F G H I J K L M N O P Q R S T U V W X Y Z];
-    };
-    [@for $first_t:ident $($t:ident)*] => {
-        impl_shard_ext_for_alternative![@for $($t)*];
-        impl_shard_ext_for_alternative![@impl $first_t $($t)*];
-    };
-    [@for] => {
-        impl_shard_ext_for_alternative![@impl];
-    };
-    [@impl $($t:ident)*] => {
-        impl<$($t),*> ShardDataType for AlternativeType<($($t,)*)>
-        where
-            $($t: ShardDataType),*
-        {
-            const DATA: &'static ShardData = &ShardData::Alternative(AlternativeData {
-                items: &[$($t::DATA),*],
-            });
-        }
+    pub const fn literal(text: &'static str) -> Self {
+        Self::new(ShardDataKind::Literal(LiteralData::new(text)))
     }
-}
 
-impl_shard_ext_for_alternative!();
+    pub const fn set(negated: bool, range: &'static [RangeInclusive<char>]) -> Self {
+        Self::new(ShardDataKind::Set(SetData::new(negated, range)))
+    }
 
-/// Resolve a borrowed shard to its static core. Only the core is stored in
-/// the grammar descriptor; neither its identity nor its lifetime depends on S.
-/// This alias does not bypass Rust's visibility checks on a source reference.
-pub type ExternType<T> = CoreType<<T as Shard>::Core>;
+    pub const fn option(item: &'static ShardData) -> Self {
+        Self::new(ShardDataKind::Option(OptionData::new(item)))
+    }
 
-pub struct CoreType<T>(PhantomData<fn() -> T>);
+    pub const fn vec(item: &'static ShardData, min: usize, max: usize) -> Self {
+        Self::new(ShardDataKind::Vec(VecData::new(item, min, max)))
+    }
 
-impl<T> ShardDataType for CoreType<T>
-where
-    T: ShardCore,
-{
-    const DATA: &'static ShardData = &ShardData::Extern(ExternData {
-        id: TypeId::of::<T>(),
-        reference: || <T::Data as ShardDataType>::DATA,
-    });
+    pub const fn sequence(items: &'static [&'static ShardData]) -> Self {
+        Self::new(ShardDataKind::Sequence(SequenceData::new(items)))
+    }
+
+    pub const fn alternative(items: &'static [&'static ShardData]) -> Self {
+        Self::new(ShardDataKind::Alternative(AlternativeData::new(items)))
+    }
+
+    pub const fn r#extern<T>() -> Self
+    where
+        T: Shard,
+    {
+        Self::new(ShardDataKind::Extern(ExternData::new::<T>()))
+    }
 }
 
 #[derive(Debug)]
-pub enum ShardData {
+pub enum ShardDataKind {
     Literal(LiteralData),
     Set(SetData),
     Option(OptionData),
@@ -250,41 +84,89 @@ pub enum ShardData {
 
 #[derive(Debug)]
 pub struct LiteralData {
-    pub text: &'static str,
+    text: &'static str,
+}
+
+impl LiteralData {
+    pub const fn new(text: &'static str) -> Self {
+        Self { text }
+    }
 }
 
 #[derive(Debug)]
 pub struct SetData {
-    pub negated: bool,
-    pub range: &'static [RangeInclusive<char>],
+    negated: bool,
+    range: &'static [RangeInclusive<char>],
+}
+
+impl SetData {
+    pub const fn new(negated: bool, range: &'static [RangeInclusive<char>]) -> Self {
+        Self { negated, range }
+    }
 }
 
 #[derive(Debug)]
 pub struct OptionData {
-    pub item: &'static ShardData,
+    item: &'static ShardData,
+}
+
+impl OptionData {
+    pub const fn new(item: &'static ShardData) -> Self {
+        Self { item }
+    }
 }
 
 #[derive(Debug)]
 pub struct VecData {
-    pub item: &'static ShardData,
-    pub min: usize,
-    pub max: usize,
+    item: &'static ShardData,
+    min: usize,
+    max: usize,
+}
+
+impl VecData {
+    pub const fn new(item: &'static ShardData, min: usize, max: usize) -> Self {
+        Self { item, min, max }
+    }
 }
 
 #[derive(Debug)]
 pub struct SequenceData {
-    pub items: &'static [&'static ShardData],
+    items: &'static [&'static ShardData],
+}
+
+impl SequenceData {
+    pub const fn new(items: &'static [&'static ShardData]) -> Self {
+        Self { items }
+    }
 }
 
 #[derive(Debug)]
 pub struct AlternativeData {
-    pub items: &'static [&'static ShardData],
+    items: &'static [&'static ShardData],
+}
+
+impl AlternativeData {
+    pub const fn new(items: &'static [&'static ShardData]) -> Self {
+        Self { items }
+    }
 }
 
 #[derive(Debug)]
 pub struct ExternData {
-    pub id: TypeId,
-    pub reference: fn() -> &'static ShardData,
+    id: TypeId,
+    reference: fn() -> &'static ShardData,
+}
+
+impl ExternData {
+    pub const fn new<T>() -> Self
+    where
+        T: Shard,
+    {
+        Self {
+            id: TypeId::of::<T::Core>(),
+            reference: || T::Core::DATA,
+        }
+    }
 }
 
 fn normalize_set(set: &SetData) -> Vec<RangeInclusive<char>> {

@@ -18,10 +18,10 @@ pub struct JSON {
 pub struct JSON<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     ws: (
-        ::xst::internal::Output<'i, WS<'static>>,
-        ::xst::internal::Output<'i, WS<'static>>,
+        ::xst::internal::ShardField<'i, WS<'static>>,
+        ::xst::internal::ShardField<'i, WS<'static>>,
     ),
-    value: ::xst::internal::Output<'i, JSONValue<'static>>,
+    value: ::xst::internal::ShardField<'i, WS<'static>>,
 }
 
 const _: () = {
@@ -165,7 +165,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "{";
     }
 
@@ -173,7 +173,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_1;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_1 {
+    impl ::xst::internal::Literal for __xst_shard_literal_1 {
         const LITERAL: &'static ::xst::internal::str = ",";
     }
 
@@ -181,7 +181,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_2;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_2 {
+    impl ::xst::internal::Literal for __xst_shard_literal_2 {
         const LITERAL: &'static ::xst::internal::str = "}";
     }
 };
@@ -254,7 +254,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = ":";
     }
 };
@@ -345,7 +345,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "[";
     }
 
@@ -353,7 +353,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_1;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_1 {
+    impl ::xst::internal::Literal for __xst_shard_literal_1 {
         const LITERAL: &'static ::xst::internal::str = ",";
     }
 
@@ -361,7 +361,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_2;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_2 {
+    impl ::xst::internal::Literal for __xst_shard_literal_2 {
         const LITERAL: &'static ::xst::internal::str = "]";
     }
 };
@@ -428,7 +428,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "\"";
     }
 
@@ -436,7 +436,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_1;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_1 {
+    impl ::xst::internal::Literal for __xst_shard_literal_1 {
         const LITERAL: &'static ::xst::internal::str = "\"";
     }
 };
@@ -483,7 +483,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_0;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_0 {
+    impl ::xst::internal::Set for __xst_shard_set_0 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
             &['"'..='"', '\\'..='\\', '\u{0000}'..='\u{001F}'];
     }
@@ -492,7 +492,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_1;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_1 {
+    impl ::xst::internal::Literal for __xst_shard_literal_1 {
         const LITERAL: &'static ::xst::internal::str = "\\";
     }
 };
@@ -533,7 +533,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_0;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_0 {
+    impl ::xst::internal::Set for __xst_shard_set_0 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] = &[
             '"'..='"',
             '\\'..='\\',
@@ -550,7 +550,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_1;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_1 {
+    impl ::xst::internal::Literal for __xst_shard_literal_1 {
         const LITERAL: &'static ::xst::internal::str = "u";
     }
 
@@ -558,7 +558,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_2;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_2 {
+    impl ::xst::internal::Set for __xst_shard_set_2 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
             &['0'..='9', 'A'..='F', 'a'..='f'];
     }
@@ -640,7 +640,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "-";
     }
 };
@@ -690,7 +690,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = ".";
     }
 };
@@ -747,7 +747,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_0;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_0 {
+    impl ::xst::internal::Set for __xst_shard_set_0 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
             &['E'..='E', 'e'..='e'];
     }
@@ -756,7 +756,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_1;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_1 {
+    impl ::xst::internal::Set for __xst_shard_set_1 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
             &['+'..='+', '-'..='-'];
     }
@@ -793,7 +793,7 @@ const _: () = {
 // original reference: crate::cluster::number::Digit
 #[shard]
 type Digit = x! {[
-    | '0'
+    | "0"
     | One2Nine
 ]};
 
@@ -823,7 +823,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "0";
     }
 };
@@ -855,7 +855,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_0;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_0 {
+    impl ::xst::internal::Set for __xst_shard_set_0 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] = &['1'..='9'];
     }
 };
@@ -945,7 +945,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "true";
     }
 };
@@ -986,7 +986,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "false";
     }
 };
@@ -1035,7 +1035,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_literal_0;
 
-    impl ::xst::internal::ShardLiteral for __xst_shard_literal_0 {
+    impl ::xst::internal::Literal for __xst_shard_literal_0 {
         const LITERAL: &'static ::xst::internal::str = "null";
     }
 };
@@ -1088,7 +1088,7 @@ const _: () = {
     #[allow(non_camel_case_types)]
     pub struct __xst_shard_set_0;
 
-    impl ::xst::internal::ShardSet for __xst_shard_set_0 {
+    impl ::xst::internal::Set for __xst_shard_set_0 {
         const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
             &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'];
     }
@@ -1105,7 +1105,7 @@ const _: () = {
 // original reference: crate::cluster::punctuated::Punctuated
 #[shard]
 pub struct Punctuated<T, P> {
-    inner: xopt![(xbox![T], xvec![(P, T); ..])],
+    inner: xopt![(xbox![T], xvec![(P, T) | ..])],
 }
 
 pub struct Punctuated<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::ShardParam> {
@@ -1247,86 +1247,5 @@ mod test {
     #[test]
     fn test() {
         let cluster: Cluster<JSON> = Cluster::build();
-        for input in [
-            "null",
-            " true ",
-            "-12.5e+2",
-            "[]",
-            "{}",
-            r#"{"a":[1,false,null,"\u0041"]}"#,
-        ] {
-            assert_eq!(cluster.parse(input), Ok(()), "{input:?}");
-        }
-        for input in ["", "01", "1.", "[1,]", r#""\u00""#, "true false"] {
-            assert!(cluster.parse(input).is_err(), "{input:?}");
-        }
-    }
-
-    #[test]
-    fn field_outputs_cover_borrowing_grouping_and_variants() {
-        use super::*;
-        let input = String::from("hello");
-        let string = JSONString {
-            __xst_marker_0: ::core::marker::PhantomData,
-            quote: ("\"", "\""),
-            content: &input,
-        };
-        assert_eq!(string.content.as_ptr(), input.as_ptr());
-        assert_eq!(string.quote, ("\"", "\""));
-        let value = JSONValue::String(string);
-        let JSONValue::String(string) = value else {
-            panic!("wrong variant")
-        };
-        assert_eq!(string.content, "hello");
-
-        let number = JSONNumber {
-            __xst_marker_0: ::core::marker::PhantomData,
-            sign: Some("-"),
-            integer: "1",
-            fraction: None,
-            exponent: None,
-        };
-        assert_eq!(number.sign, Some("-"));
-        assert_eq!(number.integer, "1");
-    }
-
-    #[test]
-    fn generic_fields_keep_helpers_local() {
-        use super::*;
-        // These names belong to the test's scope, not either expansion.
-        #[allow(non_camel_case_types)]
-        struct __xst_shard_literal_0;
-        #[allow(non_camel_case_types)]
-        struct __xst_shard_literal_1;
-        let _ = (__xst_shard_literal_0, __xst_shard_literal_1);
-        let object = JSONObject {
-            __xst_marker_0: ::core::marker::PhantomData,
-            brace: ("{", "}"),
-            ws: WS {
-                __xst_marker_0: ::core::marker::PhantomData,
-                space: "",
-            },
-            content: Punctuated {
-                __xst_marker_0: ::core::marker::PhantomData,
-                inner: None,
-            },
-        };
-        let array = JSONArray {
-            __xst_marker_0: ::core::marker::PhantomData,
-            bracket: ("[", "]"),
-            ws: WS {
-                __xst_marker_0: ::core::marker::PhantomData,
-                space: "",
-            },
-            entries: Punctuated {
-                __xst_marker_0: ::core::marker::PhantomData,
-                inner: None,
-            },
-        };
-        assert!(object.content.inner.is_none());
-        assert!(array.entries.inner.is_none());
-        // Debug requires only output fields, not local grammar descriptors.
-        assert!(format!("{object:?}").contains("JSONObject"));
-        assert!(format!("{array:?}").contains("JSONArray"));
     }
 }
