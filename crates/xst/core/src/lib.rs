@@ -7,6 +7,7 @@ mod table;
 pub use parser::ParseError;
 pub use shard::internal;
 
+use core::any::TypeId;
 use shard::{ShardCore, StaticShard};
 
 pub struct Cluster<S>
@@ -22,11 +23,9 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
-        // let table = table::Table::build(TypeId::of::<S::Core>(), <S::Core as ShardCore>::Data::DATA);
-
         Self {
             _shard: PhantomData,
-            table: todo!(),
+            table: table::Table::build(TypeId::of::<S::Core>(), <S::Core as ShardCore>::DATA),
         }
     }
 
