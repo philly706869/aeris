@@ -37,11 +37,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSON<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Ext<WS<'static>>,
-            ::xst::internal::Ext<JSONValue<'static>>,
-            ::xst::internal::Ext<WS<'static>>,
-        )>;
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+            &::xst::internal::ShardData::reference::<JSONValue<'static>>(),
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+        ]);
     }
 };
 
@@ -87,14 +87,15 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONValue<'i>;
-        type Data = ::xst::internal::Alt<(
-            ::xst::internal::Ext<JSONObject<'static>>,
-            ::xst::internal::Ext<JSONArray<'static>>,
-            ::xst::internal::Ext<JSONString<'static>>,
-            ::xst::internal::Ext<JSONNumber<'static>>,
-            ::xst::internal::Ext<JSONBoolean<'static>>,
-            ::xst::internal::Ext<JSONNull<'static>>,
-        )>;
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::alternative(&[
+                &::xst::internal::ShardData::reference::<JSONObject<'static>>(),
+                &::xst::internal::ShardData::reference::<JSONArray<'static>>(),
+                &::xst::internal::ShardData::reference::<JSONString<'static>>(),
+                &::xst::internal::ShardData::reference::<JSONNumber<'static>>(),
+                &::xst::internal::ShardData::reference::<JSONBoolean<'static>>(),
+                &::xst::internal::ShardData::reference::<JSONNull<'static>>(),
+            ]);
     }
 };
 

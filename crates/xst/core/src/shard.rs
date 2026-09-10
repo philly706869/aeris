@@ -63,11 +63,11 @@ impl ShardData {
         Self::new(ShardDataKind::Alternative(AlternativeData::new(items)))
     }
 
-    pub const fn r#extern<T>() -> Self
+    pub const fn reference<T>() -> Self
     where
         T: Shard,
     {
-        Self::new(ShardDataKind::Extern(ExternData::new::<T>()))
+        Self::new(ShardDataKind::Reference(ReferenceData::new::<T>()))
     }
 }
 
@@ -79,7 +79,7 @@ pub enum ShardDataKind {
     Vec(VecData),
     Sequence(SequenceData),
     Alternative(AlternativeData),
-    Extern(ExternData),
+    Reference(ReferenceData),
 }
 
 #[derive(Debug)]
@@ -152,12 +152,12 @@ impl AlternativeData {
 }
 
 #[derive(Debug)]
-pub struct ExternData {
+pub struct ReferenceData {
     id: TypeId,
     reference: fn() -> &'static ShardData,
 }
 
-impl ExternData {
+impl ReferenceData {
     pub const fn new<T>() -> Self
     where
         T: Shard,
