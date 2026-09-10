@@ -66,12 +66,12 @@ pub enum JSONValue {
 
 #[derive(Debug)]
 pub enum JSONValue<'i> {
-    Object(::xst::internal::FieldOutput<'i, JSONValue<'static>, 0>),
-    Array(::xst::internal::FieldOutput<'i, JSONValue<'static>, 1>),
-    String(::xst::internal::FieldOutput<'i, JSONValue<'static>, 2>),
-    Number(::xst::internal::FieldOutput<'i, JSONValue<'static>, 3>),
-    Boolean(::xst::internal::FieldOutput<'i, JSONValue<'static>, 4>),
-    Null(::xst::internal::FieldOutput<'i, JSONValue<'static>, 5>),
+    Object(::xst::internal::Output<'i, JSONObject<'static>>),
+    Array(::xst::internal::Output<'i, JSONArray<'static>>),
+    String(::xst::internal::Output<'i, JSONString<'static>>),
+    Number(::xst::internal::Output<'i, JSONNumber<'static>>),
+    Boolean(::xst::internal::Output<'i, JSONBoolean<'static>>),
+    Null(::xst::internal::Output<'i, JSONNull<'static>>),
 }
 
 const _: () = {
@@ -96,30 +96,6 @@ const _: () = {
             ::xst::internal::Ext<JSONNull<'static>>,
         )>;
     }
-
-    impl ::xst::internal::ShardField<0> for JSONValue<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONObject<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONValue<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONArray<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONValue<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONString<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<3> for JSONValue<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONNumber<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<4> for JSONValue<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONBoolean<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<5> for JSONValue<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONNull<'static>>;
-    }
 };
 
 // ////////////////
@@ -142,12 +118,16 @@ pub struct JSONObject {
 #[derive(Debug)]
 pub struct JSONObject<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    brace: (
-        ::xst::internal::FieldOutput<'i, JSONObject<'static>, 0>,
-        ::xst::internal::FieldOutput<'i, JSONObject<'static>, 3>,
-    ),
-    ws: ::xst::internal::FieldOutput<'i, JSONObject<'static>, 1>,
-    content: ::xst::internal::FieldOutput<'i, JSONObject<'static>, 2>,
+    brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
+    ws: ::xst::internal::Output<'i, WS<'static>>,
+    content: ::xst::internal::Output<
+        'i,
+        Punctuated<
+            'static,
+            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Ext<JSONObjectEntry<'static>>>>,
+            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<__xst_shard_literal_1>>>,
+        >,
+    >,
 }
 
 const _: () = {
@@ -179,31 +159,6 @@ const _: () = {
             >,
             ::xst::internal::Lit<__xst_shard_literal_2>,
         )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONObject<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONObject<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, WS<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONObject<'static> {
-        type Output<'i> = ::xst::internal::Output<
-            'i,
-            Punctuated<
-                'static,
-                ::xst::internal::Ext<
-                    Spanned<'static, ::xst::internal::Ext<JSONObjectEntry<'static>>>,
-                >,
-                ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<__xst_shard_literal_1>>>,
-            >,
-        >;
-    }
-
-    impl ::xst::internal::ShardField<3> for JSONObject<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
     }
 
     #[allow(dead_code)]
