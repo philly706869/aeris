@@ -4,10 +4,16 @@ use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 /// This module is not intended for direct use.
 #[doc(hidden)]
 pub mod internal {
+    pub use core::fmt::Debug;
     pub use core::marker::PhantomData;
     pub use core::ops::RangeInclusive;
+    pub use core::option::Option;
     pub use core::primitive::char;
     pub use core::primitive::str;
+
+    extern crate alloc;
+    pub use alloc::boxed::Box;
+    pub use alloc::vec::Vec;
 
     pub use super::Shard;
     pub use super::ShardCore;
@@ -18,12 +24,12 @@ pub mod internal {
 
 pub trait StaticShard: Shard {}
 
-pub trait Shard {
+pub trait Shard: 'static {
     type Core: ShardCore;
 }
 
 pub trait ShardCore: 'static {
-    type Output<'i>: Debug;
+    type Output<'i>;
     const DATA: &'static ShardData;
 }
 

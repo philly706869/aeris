@@ -1,10 +1,10 @@
 use core::marker::PhantomData;
 
-mod parser;
+// mod parser;
 mod shard;
-mod table;
+// mod table;
 
-pub use parser::ParseError;
+// pub use parser::ParseError;
 pub use shard::internal;
 
 use shard::{ShardCore, StaticShard};
@@ -14,7 +14,7 @@ where
     S: StaticShard,
 {
     _shard: PhantomData<fn() -> S>,
-    table: table::Table,
+    // table: table::Table,
 }
 
 impl<S> Cluster<S>
@@ -26,13 +26,13 @@ where
 
         Self {
             _shard: PhantomData,
-            table: todo!(),
+            // table: todo!(),
         }
     }
 
-    /// Recognizes the entire input, accepting if any GLR branch succeeds.
-    /// Output extraction and mapping are not performed yet.
-    pub fn parse(&self, input: &str) -> Result<(), ParseError> {
-        self.table.parse(input)
-    }
+    // /// Recognizes the entire input, accepting if any GLR branch succeeds.
+    // /// Output extraction and mapping are not performed yet.
+    // pub fn parse(&self, input: &str) -> Result<(), ParseError> {
+    //     self.table.parse(input)
+    // }
 }

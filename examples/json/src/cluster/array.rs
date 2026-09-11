@@ -7,5 +7,5 @@ pub struct JSONArray {
     bracket: x! { "[" },
     ws: WS,
     entries: Punctuated<Spanned<xbox![JSONValue]>, Spanned<x! { "," }>>,
-    bracket: x! { "[" },
+    bracket: x! { "]" },
 }

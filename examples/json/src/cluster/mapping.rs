@@ -14,7 +14,7 @@ pub struct JSON {
     ws: WS,
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSON<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     ws: (
@@ -25,9 +25,9 @@ pub struct JSON<'i> {
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSON<'i> {}
+    impl ::xst::internal::StaticShard for JSON<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSON<'i> {
+    impl ::xst::internal::Shard for JSON<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -64,20 +64,20 @@ pub enum JSONValue {
     Null(JSONNull),
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub enum JSONValue<'i> {
-    Object(::xst::internal::Output<'i, JSONObject<'static>>),
-    Array(::xst::internal::Output<'i, JSONArray<'static>>),
-    String(::xst::internal::Output<'i, JSONString<'static>>),
-    Number(::xst::internal::Output<'i, JSONNumber<'static>>),
-    Boolean(::xst::internal::Output<'i, JSONBoolean<'static>>),
-    Null(::xst::internal::Output<'i, JSONNull<'static>>),
+    Object(::xst::internal::ShardField<'i, JSONObject<'static>>),
+    Array(::xst::internal::ShardField<'i, JSONArray<'static>>),
+    String(::xst::internal::ShardField<'i, JSONString<'static>>),
+    Number(::xst::internal::ShardField<'i, JSONNumber<'static>>),
+    Boolean(::xst::internal::ShardField<'i, JSONBoolean<'static>>),
+    Null(::xst::internal::ShardField<'i, JSONNull<'static>>),
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONValue<'i> {}
+    impl ::xst::internal::StaticShard for JSONValue<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONValue<'i> {
+    impl ::xst::internal::Shard for JSONValue<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -116,25 +116,25 @@ pub struct JSONObject {
     brace: x! { "}" },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONObject<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
-    ws: ::xst::internal::Output<'i, WS<'static>>,
-    content: ::xst::internal::Output<
+    ws: ::xst::internal::ShardField<'i, WS<'static>>,
+    content: ::xst::internal::ShardField<
         'i,
         Punctuated<
             'static,
-            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Ext<JSONObjectEntry<'static>>>>,
-            ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<__xst_shard_literal_1>>>,
+            Spanned<'static, JSONObjectEntry<'static>>,
+            Spanned<'static, WS<'static> /* TODO */>,
         >,
     >,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONObject<'i> {}
+    impl ::xst::internal::StaticShard for JSONObject<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONObject<'i> {
+    impl ::xst::internal::Shard for JSONObject<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -144,46 +144,18 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONObject<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Lit<__xst_shard_literal_0>,
-            ::xst::internal::Ext<WS<'static>>,
-            ::xst::internal::Ext<
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::literal("{"),
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+            &::xst::internal::ShardData::reference::<
                 Punctuated<
                     'static,
-                    ::xst::internal::Ext<
-                        Spanned<'static, ::xst::internal::Ext<JSONObjectEntry<'static>>>,
-                    >,
-                    ::xst::internal::Ext<
-                        Spanned<'static, ::xst::internal::Lit<__xst_shard_literal_1>>,
-                    >,
+                    Spanned<'static, JSONObjectEntry<'static>>,
+                    Spanned<'static, WS<'static> /* TODO */>,
                 >,
-            >,
-            ::xst::internal::Lit<__xst_shard_literal_2>,
-        )>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "{";
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_1;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_1 {
-        const LITERAL: &'static ::xst::internal::str = ",";
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_2;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_2 {
-        const LITERAL: &'static ::xst::internal::str = "}";
+            >(),
+            &::xst::internal::ShardData::literal("}"),
+        ]);
     }
 };
 
@@ -197,22 +169,22 @@ pub struct JSONObjectEntry {
     value: JSONValue,
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONObjectEntry<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    name: ::xst::internal::FieldOutput<'i, JSONObjectEntry<'static>, 0>,
+    name: ::xst::internal::ShardField<'i, JSONString<'static>>,
     ws: (
-        ::xst::internal::FieldOutput<'i, JSONObjectEntry<'static>, 1>,
-        ::xst::internal::FieldOutput<'i, JSONObjectEntry<'static>, 3>,
+        ::xst::internal::ShardField<'i, WS<'static>>,
+        ::xst::internal::ShardField<'i, WS<'static>>,
     ),
-    colon: ::xst::internal::FieldOutput<'i, JSONObjectEntry<'static>, 2>,
-    value: ::xst::internal::FieldOutput<'i, JSONObjectEntry<'static>, 4>,
+    colon: &'i ::xst::internal::str,
+    value: ::xst::internal::ShardField<'i, JSONValue<'static>>,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONObjectEntry<'i> {}
+    impl ::xst::internal::StaticShard for JSONObjectEntry<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONObjectEntry<'i> {
+    impl ::xst::internal::Shard for JSONObjectEntry<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -222,41 +194,13 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONObjectEntry<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Ext<JSONString<'static>>,
-            ::xst::internal::Ext<WS<'static>>,
-            ::xst::internal::Lit<__xst_shard_literal_0>,
-            ::xst::internal::Ext<WS<'static>>,
-            ::xst::internal::Ext<JSONValue<'static>>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONObjectEntry<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONString<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONObjectEntry<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, WS<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONObjectEntry<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<3> for JSONObjectEntry<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, WS<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<4> for JSONObjectEntry<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONValue<'static>>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = ":";
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::reference::<JSONString<'static>>(),
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+            &::xst::internal::ShardData::literal(":"),
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+            &::xst::internal::ShardData::reference::<JSONValue<'static>>(),
+        ]);
     }
 };
 
@@ -277,21 +221,25 @@ pub struct JSONArray {
     bracket: x! { "]" },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONArray<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    bracket: (
-        ::xst::internal::FieldOutput<'i, JSONArray<'static>, 0>,
-        ::xst::internal::FieldOutput<'i, JSONArray<'static>, 3>,
-    ),
-    ws: ::xst::internal::FieldOutput<'i, JSONArray<'static>, 1>,
-    entries: ::xst::internal::FieldOutput<'i, JSONArray<'static>, 2>,
+    bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
+    ws: ::xst::internal::ShardField<'i, WS<'static>>,
+    entries: ::xst::internal::ShardField<
+        'i,
+        Punctuated<
+            'static,
+            Spanned<'static, JSONValue<'static>>,
+            Spanned<'static, WS<'static> /* TODO */>,
+        >,
+    >,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONArray<'i> {}
+    impl ::xst::internal::StaticShard for JSONArray<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONArray<'i> {
+    impl ::xst::internal::Shard for JSONArray<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -301,69 +249,18 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONArray<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Lit<__xst_shard_literal_0>,
-            ::xst::internal::Ext<WS<'static>>,
-            ::xst::internal::Ext<
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::literal("["),
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+            &::xst::internal::ShardData::reference::<
                 Punctuated<
                     'static,
-                    ::xst::internal::Ext<
-                        Spanned<'static, ::xst::internal::Ext<JSONValue<'static>>>,
-                    >,
-                    ::xst::internal::Ext<
-                        Spanned<'static, ::xst::internal::Lit<__xst_shard_literal_1>>,
-                    >,
+                    Spanned<'static, JSONValue<'static>>,
+                    Spanned<'static, WS<'static> /* TODO */>,
                 >,
-            >,
-            ::xst::internal::Lit<__xst_shard_literal_2>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONArray<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONArray<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, WS<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONArray<'static> {
-        type Output<'i> = ::xst::internal::Output<
-            'i,
-            Punctuated<
-                'static,
-                ::xst::internal::Ext<Spanned<'static, ::xst::internal::Ext<JSONValue<'static>>>>,
-                ::xst::internal::Ext<Spanned<'static, ::xst::internal::Lit<__xst_shard_literal_1>>>,
-            >,
-        >;
-    }
-
-    impl ::xst::internal::ShardField<3> for JSONArray<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "[";
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_1;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_1 {
-        const LITERAL: &'static ::xst::internal::str = ",";
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_2;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_2 {
-        const LITERAL: &'static ::xst::internal::str = "]";
+            >(),
+            &::xst::internal::ShardData::literal("]"),
+        ]);
     }
 };
 
@@ -383,20 +280,17 @@ pub struct JSONString {
     quote: x! { "\"" },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONString<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    quote: (
-        ::xst::internal::FieldOutput<'i, JSONString<'static>, 0>,
-        ::xst::internal::FieldOutput<'i, JSONString<'static>, 2>,
-    ),
-    content: ::xst::internal::FieldOutput<'i, JSONString<'static>, 1>,
+    quote: (&'i ::xst::internal::str, &'i ::xst::internal::str),
+    content: ::xst::internal::ShardField<'i, Content<'static>>,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONString<'i> {}
+    impl ::xst::internal::StaticShard for JSONString<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONString<'i> {
+    impl ::xst::internal::Shard for JSONString<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -406,39 +300,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONString<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Lit<__xst_shard_literal_0>,
-            ::xst::internal::Ext<Content<'static>>,
-            ::xst::internal::Lit<__xst_shard_literal_1>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONString<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONString<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, Content<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONString<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "\"";
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_1;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_1 {
-        const LITERAL: &'static ::xst::internal::str = "\"";
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::literal("\""),
+            &::xst::internal::ShardData::reference::<Content<'static>>(),
+            &::xst::internal::ShardData::literal("\""),
+        ]);
     }
 };
 
@@ -451,13 +317,12 @@ type Content = x! {
     ]*
 };
 
-#[doc(hidden)]
-pub struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
+struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for Content<'i> {}
+    impl ::xst::internal::StaticShard for Content<'static> {}
 
-    impl<'i> ::xst::internal::Shard for Content<'i> {
+    impl ::xst::internal::Shard for Content<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -467,34 +332,20 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = &'i ::xst::internal::str;
-        type Data = ::xst::internal::Vec<
-            ::xst::internal::Alt<(
-                ::xst::internal::Set<true, __xst_shard_set_0>,
-                ::xst::internal::Seq<(
-                    ::xst::internal::Lit<__xst_shard_literal_1>,
-                    ::xst::internal::Ext<Escape<'static>>,
-                )>,
-            )>,
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::vec(
+            &::xst::internal::ShardData::alternative(&[
+                &::xst::internal::ShardData::set(
+                    true,
+                    &['"'..='"', '\\'..='\\', '\u{0000}'..='\u{001F}'],
+                ),
+                &::xst::internal::ShardData::sequence(&[
+                    &::xst::internal::ShardData::literal("\\"),
+                    &::xst::internal::ShardData::reference::<Escape<'static>>(),
+                ]),
+            ]),
             0,
-            { ::core::primitive::usize::MAX },
-        >;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_0;
-
-    impl ::xst::internal::Set for __xst_shard_set_0 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
-            &['"'..='"', '\\'..='\\', '\u{0000}'..='\u{001F}'];
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_1;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_1 {
-        const LITERAL: &'static ::xst::internal::str = "\\";
+            0,
+        );
     }
 };
 
@@ -505,13 +356,12 @@ type Escape = x! {[
     | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
 ]};
 
-#[doc(hidden)]
-pub struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
+struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for Escape<'i> {}
+    impl ::xst::internal::StaticShard for Escape<'static> {}
 
-    impl<'i> ::xst::internal::Shard for Escape<'i> {
+    impl ::xst::internal::Shard for Escape<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -521,47 +371,30 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = &'i ::xst::internal::str;
-        type Data = ::xst::internal::Alt<(
-            ::xst::internal::Set<false, __xst_shard_set_0>,
-            ::xst::internal::Seq<(
-                ::xst::internal::Lit<__xst_shard_literal_1>,
-                ::xst::internal::Vec<::xst::internal::Set<false, __xst_shard_set_2>, 4, 4>,
-            )>,
-        )>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_0;
-
-    impl ::xst::internal::Set for __xst_shard_set_0 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] = &[
-            '"'..='"',
-            '\\'..='\\',
-            '/'..='/',
-            'b'..='b',
-            'f'..='f',
-            'n'..='n',
-            'r'..='r',
-            't'..='t',
-        ];
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_1;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_1 {
-        const LITERAL: &'static ::xst::internal::str = "u";
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_2;
-
-    impl ::xst::internal::Set for __xst_shard_set_2 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
-            &['0'..='9', 'A'..='F', 'a'..='f'];
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::alternative(&[
+                &::xst::internal::ShardData::set(
+                    false,
+                    &[
+                        '"'..='"',
+                        '\\'..='\\',
+                        '/'..='/',
+                        'b'..='b',
+                        'f'..='f',
+                        'n'..='n',
+                        'r'..='r',
+                        't'..='t',
+                    ],
+                ),
+                &::xst::internal::ShardData::sequence(&[
+                    &::xst::internal::ShardData::literal("u"),
+                    &::xst::internal::ShardData::vec(
+                        &::xst::internal::ShardData::set(false, &['0'..='9', 'A'..='F', 'a'..='f']),
+                        4,
+                        4,
+                    ),
+                ]),
+            ]);
     }
 };
 
@@ -585,19 +418,19 @@ pub struct JSONNumber {
     exponent: xopt![JSONExponent],
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONNumber<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    sign: ::xst::internal::FieldOutput<'i, JSONNumber<'static>, 0>,
-    integer: ::xst::internal::FieldOutput<'i, JSONNumber<'static>, 1>,
-    fraction: ::xst::internal::FieldOutput<'i, JSONNumber<'static>, 2>,
-    exponent: ::xst::internal::FieldOutput<'i, JSONNumber<'static>, 3>,
+    sign: ::xst::internal::Option<&'i ::xst::internal::str>,
+    integer: &'i ::xst::internal::str,
+    fraction: ::xst::internal::Option<::xst::internal::ShardField<'i, JSONFraction<'static>>>,
+    exponent: ::xst::internal::Option<::xst::internal::ShardField<'i, JSONExponent<'static>>>,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONNumber<'i> {}
+    impl ::xst::internal::StaticShard for JSONNumber<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONNumber<'i> {
+    impl ::xst::internal::Shard for JSONNumber<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -607,42 +440,22 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONNumber<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Opt<::xst::internal::Lit<__xst_shard_literal_0>>,
-            ::xst::internal::Alt<(
-                ::xst::internal::Ext<Digit<'static>>,
-                ::xst::internal::Seq<(
-                    ::xst::internal::Ext<One2Nine<'static>>,
-                    ::xst::internal::Ext<Digits<'static>>,
-                )>,
-            )>,
-            ::xst::internal::Opt<::xst::internal::Ext<JSONFraction<'static>>>,
-            ::xst::internal::Opt<::xst::internal::Ext<JSONExponent<'static>>>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONNumber<'static> {
-        type Output<'i> = Option<&'i ::xst::internal::str>;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONNumber<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONNumber<'static> {
-        type Output<'i> = Option<::xst::internal::Output<'i, JSONFraction<'static>>>;
-    }
-
-    impl ::xst::internal::ShardField<3> for JSONNumber<'static> {
-        type Output<'i> = Option<::xst::internal::Output<'i, JSONExponent<'static>>>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "-";
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::option(&::xst::internal::ShardData::literal("-")),
+            &::xst::internal::ShardData::alternative(&[
+                &::xst::internal::ShardData::reference::<Digit<'static>>(),
+                &::xst::internal::ShardData::sequence(&[
+                    &::xst::internal::ShardData::reference::<One2Nine<'static>>(),
+                    &::xst::internal::ShardData::reference::<Digits<'static>>(),
+                ]),
+            ]),
+            &::xst::internal::ShardData::option(&::xst::internal::ShardData::reference::<
+                JSONFraction<'static>,
+            >()),
+            &::xst::internal::ShardData::option(&::xst::internal::ShardData::reference::<
+                JSONExponent<'static>,
+            >()),
+        ]);
     }
 };
 
@@ -653,17 +466,17 @@ pub struct JSONFraction {
     digits: Digits,
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONFraction<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    point: ::xst::internal::FieldOutput<'i, JSONFraction<'static>, 0>,
-    digits: ::xst::internal::FieldOutput<'i, JSONFraction<'static>, 1>,
+    point: &'i ::xst::internal::str,
+    digits: ::xst::internal::ShardField<'i, Digits<'static>>,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONFraction<'i> {}
+    impl ::xst::internal::StaticShard for JSONFraction<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONFraction<'i> {
+    impl ::xst::internal::Shard for JSONFraction<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -673,26 +486,10 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONFraction<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Lit<__xst_shard_literal_0>,
-            ::xst::internal::Ext<Digits<'static>>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONFraction<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONFraction<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, Digits<'static>>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = ".";
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::literal("."),
+            &::xst::internal::ShardData::reference::<Digits<'static>>(),
+        ]);
     }
 };
 
@@ -704,18 +501,18 @@ pub struct JSONExponent {
     digits: Digits,
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONExponent<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    e: ::xst::internal::FieldOutput<'i, JSONExponent<'static>, 0>,
-    sign: ::xst::internal::FieldOutput<'i, JSONExponent<'static>, 1>,
-    digits: ::xst::internal::FieldOutput<'i, JSONExponent<'static>, 2>,
+    e: &'i ::xst::internal::str,
+    sign: ::xst::internal::Option<&'i ::xst::internal::str>,
+    digits: ::xst::internal::ShardField<'i, Digits<'static>>,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONExponent<'i> {}
+    impl ::xst::internal::StaticShard for JSONExponent<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONExponent<'i> {
+    impl ::xst::internal::Shard for JSONExponent<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -725,41 +522,14 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONExponent<'i>;
-        type Data = ::xst::internal::Seq<(
-            ::xst::internal::Set<false, __xst_shard_set_0>,
-            ::xst::internal::Opt<::xst::internal::Set<false, __xst_shard_set_1>>,
-            ::xst::internal::Ext<Digits<'static>>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONExponent<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONExponent<'static> {
-        type Output<'i> = Option<&'i ::xst::internal::str>;
-    }
-
-    impl ::xst::internal::ShardField<2> for JSONExponent<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, Digits<'static>>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_0;
-
-    impl ::xst::internal::Set for __xst_shard_set_0 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
-            &['E'..='E', 'e'..='e'];
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_1;
-
-    impl ::xst::internal::Set for __xst_shard_set_1 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
-            &['+'..='+', '-'..='-'];
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::set(false, &['E'..='E', 'e'..='e']),
+            &::xst::internal::ShardData::option(&::xst::internal::ShardData::set(
+                false,
+                &['+'..='+', '-'..='-'],
+            )),
+            &::xst::internal::ShardData::reference::<Digits<'static>>(),
+        ]);
     }
 };
 
@@ -767,13 +537,12 @@ const _: () = {
 #[shard]
 type Digits = x! { Digit+ };
 
-#[doc(hidden)]
-pub struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
+struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for Digits<'i> {}
+    impl ::xst::internal::StaticShard for Digits<'static> {}
 
-    impl<'i> ::xst::internal::Shard for Digits<'i> {
+    impl ::xst::internal::Shard for Digits<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -783,11 +552,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = &'i ::xst::internal::str;
-        type Data = ::xst::internal::Vec<
-            ::xst::internal::Ext<Digit<'static>>,
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::vec(
+            &::xst::internal::ShardData::reference::<Digit<'static>>(),
             1,
-            { ::core::primitive::usize::MAX },
-        >;
+            0,
+        );
     }
 };
 
@@ -798,13 +567,12 @@ type Digit = x! {[
     | One2Nine
 ]};
 
-#[doc(hidden)]
-pub struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
+struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for Digit<'i> {}
+    impl ::xst::internal::StaticShard for Digit<'static> {}
 
-    impl<'i> ::xst::internal::Shard for Digit<'i> {
+    impl ::xst::internal::Shard for Digit<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -814,18 +582,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = &'i ::xst::internal::str;
-        type Data = ::xst::internal::Alt<(
-            ::xst::internal::Lit<__xst_shard_literal_0>,
-            ::xst::internal::Ext<One2Nine<'static>>,
-        )>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "0";
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::alternative(&[
+                &::xst::internal::ShardData::literal("0"),
+                &::xst::internal::ShardData::reference::<One2Nine<'static>>(),
+            ]);
     }
 };
 
@@ -833,13 +594,12 @@ const _: () = {
 #[shard]
 type One2Nine = x! { {'1'..'9'} };
 
-#[doc(hidden)]
-pub struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
+struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for One2Nine<'i> {}
+    impl ::xst::internal::StaticShard for One2Nine<'static> {}
 
-    impl<'i> ::xst::internal::Shard for One2Nine<'i> {
+    impl ::xst::internal::Shard for One2Nine<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -849,15 +609,8 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = &'i ::xst::internal::str;
-        type Data = ::xst::internal::Set<false, __xst_shard_set_0>;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_0;
-
-    impl ::xst::internal::Set for __xst_shard_set_0 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] = &['1'..='9'];
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::set(false, &['1'..='9']);
     }
 };
 
@@ -876,16 +629,16 @@ pub enum JSONBoolean {
     False(JSONFalse),
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub enum JSONBoolean<'i> {
-    True(::xst::internal::FieldOutput<'i, JSONBoolean<'static>, 0>),
-    False(::xst::internal::FieldOutput<'i, JSONBoolean<'static>, 1>),
+    True(::xst::internal::ShardField<'i, JSONBoolean<'static>>),
+    False(::xst::internal::ShardField<'i, JSONBoolean<'static>>),
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONBoolean<'i> {}
+    impl ::xst::internal::StaticShard for JSONBoolean<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONBoolean<'i> {
+    impl ::xst::internal::Shard for JSONBoolean<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -895,18 +648,11 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONBoolean<'i>;
-        type Data = ::xst::internal::Alt<(
-            ::xst::internal::Ext<JSONTrue<'static>>,
-            ::xst::internal::Ext<JSONFalse<'static>>,
-        )>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONBoolean<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONTrue<'static>>;
-    }
-
-    impl ::xst::internal::ShardField<1> for JSONBoolean<'static> {
-        type Output<'i> = ::xst::internal::Output<'i, JSONFalse<'static>>;
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::alternative(&[
+                &::xst::internal::ShardData::reference::<JSONTrue<'static>>(),
+                &::xst::internal::ShardData::reference::<JSONFalse<'static>>(),
+            ]);
     }
 };
 
@@ -916,16 +662,16 @@ pub struct JSONTrue {
     text: x! { "true" },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONTrue<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    text: ::xst::internal::FieldOutput<'i, JSONTrue<'static>, 0>,
+    text: &'i ::xst::internal::str,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONTrue<'i> {}
+    impl ::xst::internal::StaticShard for JSONTrue<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONTrue<'i> {
+    impl ::xst::internal::Shard for JSONTrue<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -935,19 +681,8 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONTrue<'i>;
-        type Data = ::xst::internal::Lit<__xst_shard_literal_0>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONTrue<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "true";
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::literal("true");
     }
 };
 
@@ -957,16 +692,16 @@ pub struct JSONFalse {
     text: x! { "false" },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONFalse<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    text: ::xst::internal::FieldOutput<'i, JSONFalse<'static>, 0>,
+    text: &'i ::xst::internal::str,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONFalse<'i> {}
+    impl ::xst::internal::StaticShard for JSONFalse<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONFalse<'i> {
+    impl ::xst::internal::Shard for JSONFalse<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -976,19 +711,8 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONFalse<'i>;
-        type Data = ::xst::internal::Lit<__xst_shard_literal_0>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONFalse<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "false";
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::literal("false");
     }
 };
 
@@ -1006,16 +730,16 @@ pub struct JSONNull {
     text: x! { "null" },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct JSONNull<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    text: ::xst::internal::FieldOutput<'i, JSONNull<'static>, 0>,
+    text: &'i ::xst::internal::str,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for JSONNull<'i> {}
+    impl ::xst::internal::StaticShard for JSONNull<'static> {}
 
-    impl<'i> ::xst::internal::Shard for JSONNull<'i> {
+    impl ::xst::internal::Shard for JSONNull<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -1025,19 +749,8 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = JSONNull<'i>;
-        type Data = ::xst::internal::Lit<__xst_shard_literal_0>;
-    }
-
-    impl ::xst::internal::ShardField<0> for JSONNull<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_literal_0;
-
-    impl ::xst::internal::Literal for __xst_shard_literal_0 {
-        const LITERAL: &'static ::xst::internal::str = "null";
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::literal("null");
     }
 };
 
@@ -1055,16 +768,16 @@ pub struct WS {
     space: x! { {' ' '\t' '\n' '\r'}* },
 }
 
-#[derive(Debug)]
+#[derive(::xst::internal::Debug)]
 pub struct WS<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    space: ::xst::internal::FieldOutput<'i, WS<'static>, 0>,
+    space: &'i ::xst::internal::str,
 }
 
 const _: () = {
-    impl<'i> ::xst::internal::StaticShard for WS<'i> {}
+    impl ::xst::internal::StaticShard for WS<'static> {}
 
-    impl<'i> ::xst::internal::Shard for WS<'i> {
+    impl ::xst::internal::Shard for WS<'static> {
         type Core = __xst_shard_core_0;
     }
 
@@ -1074,24 +787,14 @@ const _: () = {
 
     impl ::xst::internal::ShardCore for __xst_shard_core_0 {
         type Output<'i> = WS<'i>;
-        type Data = ::xst::internal::Vec<
-            ::xst::internal::Set<false, __xst_shard_set_0>,
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::vec(
+            &::xst::internal::ShardData::set(
+                false,
+                &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'],
+            ),
             0,
-            { ::core::primitive::usize::MAX },
-        >;
-    }
-
-    impl ::xst::internal::ShardField<0> for WS<'static> {
-        type Output<'i> = &'i ::xst::internal::str;
-    }
-
-    #[allow(dead_code)]
-    #[allow(non_camel_case_types)]
-    pub struct __xst_shard_set_0;
-
-    impl ::xst::internal::Set for __xst_shard_set_0 {
-        const SET: &'static [::xst::internal::RangeInclusive<::xst::internal::char>] =
-            &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'];
+            0,
+        );
     }
 };
 
@@ -1109,64 +812,56 @@ pub struct Punctuated<T, P> {
     inner: xopt![(xbox![T], xvec![(P, T) | ..])],
 }
 
-pub struct Punctuated<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::ShardParam> {
+#[derive(::xst::internal::Debug)]
+pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard>
+where
+    ::xst::internal::Option<(
+        ::xst::internal::Box<::xst::internal::ShardField<'i, T>>,
+        ::xst::internal::Vec<(
+            ::xst::internal::ShardField<'i, P>,
+            ::xst::internal::ShardField<'i, T>,
+        )>,
+    )>: ::xst::internal::Debug,
+{
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    inner: ::xst::internal::FieldOutput<'i, Punctuated<'static, T, P>, 0>,
+    inner: ::xst::internal::Option<(
+        ::xst::internal::Box<::xst::internal::ShardField<'i, T>>,
+        ::xst::internal::Vec<(
+            ::xst::internal::ShardField<'i, P>,
+            ::xst::internal::ShardField<'i, T>,
+        )>,
+    )>,
 }
 
 const _: () = {
-    impl<'i, T: ::xst::internal::ShardParam, P: ::xst::internal::ShardParam> ::core::fmt::Debug
-        for Punctuated<'i, T, P>
-    {
-        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_struct("Punctuated")
-                .field("inner", &self.inner)
-                .finish()
-        }
-    }
-
-    impl<'i, T, P> ::xst::internal::Shard for Punctuated<'i, T, P>
-    where
-        T: ::xst::internal::ShardParam,
-        P: ::xst::internal::ShardParam,
+    impl<T: ::xst::internal::Shard, P: ::xst::internal::Shard> ::xst::internal::Shard
+        for Punctuated<'static, T, P>
     {
         type Core = __xst_shard_core_0<T, P>;
     }
 
     #[allow(dead_code)]
     #[allow(non_camel_case_types)]
-    pub struct __xst_shard_core_0<T, P>(::xst::internal::PhantomData<fn() -> (T, P)>);
+    pub struct __xst_shard_core_0<T: ::xst::internal::Shard, P: ::xst::internal::Shard>(
+        ::xst::internal::PhantomData<fn() -> (T, P)>,
+    );
 
-    impl<T, P> ::xst::internal::ShardCore for __xst_shard_core_0<T, P>
-    where
-        T: ::xst::internal::ShardParam,
-        P: ::xst::internal::ShardParam,
+    impl<T: ::xst::internal::Shard, P: ::xst::internal::Shard> ::xst::internal::ShardCore
+        for __xst_shard_core_0<T, P>
     {
         type Output<'i> = Punctuated<'i, T, P>;
-        type Data = ::xst::internal::Opt<
-            ::xst::internal::Seq<(
-                T,
-                ::xst::internal::Vec<
-                    ::xst::internal::Seq<(P, T)>,
+        const DATA: &'static ::xst::internal::ShardData =
+            &::xst::internal::ShardData::option(&::xst::internal::ShardData::sequence(&[
+                &::xst::internal::ShardData::reference::<T>(),
+                &::xst::internal::ShardData::vec(
+                    &::xst::internal::ShardData::sequence(&[
+                        &::xst::internal::ShardData::reference::<P>(),
+                        &::xst::internal::ShardData::reference::<T>(),
+                    ]),
                     0,
-                    { ::core::primitive::usize::MAX },
-                >,
-            )>,
-        >;
-    }
-
-    impl<T, P> ::xst::internal::ShardField<0> for Punctuated<'static, T, P>
-    where
-        T: ::xst::internal::ShardParam,
-        P: ::xst::internal::ShardParam,
-    {
-        type Output<'i> = Option<(
-            Box<::xst::internal::ParamOutput<'i, T>>,
-            Vec<(
-                ::xst::internal::ParamOutput<'i, P>,
-                ::xst::internal::ParamOutput<'i, T>,
-            )>,
-        )>;
+                    0,
+                ),
+            ]));
     }
 };
 
@@ -1185,53 +880,33 @@ pub struct Spanned {
     ws: WS,
 }
 
-pub struct Spanned<'i, T: ::xst::internal::ShardParam> {
+#[derive(::xst::internal::Debug)]
+pub struct Spanned<'i, T: ::xst::internal::Shard>
+where
+    ::xst::internal::ShardField<'i, T>: ::xst::internal::Debug,
+{
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
-    inner: ::xst::internal::FieldOutput<'i, Spanned<'static, T>, 0>,
-    ws: ::xst::internal::FieldOutput<'i, Spanned<'static, T>, 1>,
+    inner: ::xst::internal::ShardField<'i, T>,
+    ws: ::xst::internal::ShardField<'i, WS<'static>>,
 }
 
 const _: () = {
-    impl<'i, T: ::xst::internal::ShardParam> ::core::fmt::Debug for Spanned<'i, T> {
-        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_struct("Spanned")
-                .field("inner", &self.inner)
-                .field("ws", &self.ws)
-                .finish()
-        }
-    }
-
-    impl<'i, T> ::xst::internal::Shard for Spanned<'i, T>
-    where
-        T: ::xst::internal::ShardParam,
-    {
+    impl<T: ::xst::internal::Shard> ::xst::internal::Shard for Spanned<'static, T> {
         type Core = __xst_shard_core_0<T>;
     }
 
     #[allow(dead_code)]
     #[allow(non_camel_case_types)]
-    pub struct __xst_shard_core_0<T>(::xst::internal::PhantomData<fn() -> (T,)>);
+    pub struct __xst_shard_core_0<T: ::xst::internal::Shard>(
+        ::xst::internal::PhantomData<fn() -> (T,)>,
+    );
 
-    impl<T> ::xst::internal::ShardCore for __xst_shard_core_0<T>
-    where
-        T: ::xst::internal::ShardParam,
-    {
+    impl<T: ::xst::internal::Shard> ::xst::internal::ShardCore for __xst_shard_core_0<T> {
         type Output<'i> = Spanned<'i, T>;
-        type Data = ::xst::internal::Seq<(T, ::xst::internal::Ext<WS<'static>>)>;
-    }
-
-    impl<T> ::xst::internal::ShardField<0> for Spanned<'static, T>
-    where
-        T: ::xst::internal::ShardParam,
-    {
-        type Output<'i> = ::xst::internal::ParamOutput<'i, T>;
-    }
-
-    impl<T> ::xst::internal::ShardField<1> for Spanned<'static, T>
-    where
-        T: ::xst::internal::ShardParam,
-    {
-        type Output<'i> = ::xst::internal::Output<'i, WS<'static>>;
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::sequence(&[
+            &::xst::internal::ShardData::reference::<T>(),
+            &::xst::internal::ShardData::reference::<WS<'static>>(),
+        ]);
     }
 };
 
