@@ -28,7 +28,7 @@ pub mod internal {
 
 pub trait StaticShard: Shard {}
 
-pub trait Shard: 'static + Debug {
+pub trait Shard: 'static {
     type Core: ShardCore;
 }
 

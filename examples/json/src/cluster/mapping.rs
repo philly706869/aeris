@@ -72,7 +72,6 @@ pub enum JSONValue {
     Null(JSONNull),
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub enum JSONValue<'i> {
     Object(::xst::internal::ShardField<'i, JSONObject<'static>>),
     Array(::xst::internal::ShardField<'i, JSONArray<'static>>),
@@ -83,6 +82,19 @@ pub enum JSONValue<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONValue<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            match self {
+                Self::Object(value) => f.debug_tuple("Object").field(value).finish(),
+                Self::Array(value) => f.debug_tuple("Array").field(value).finish(),
+                Self::String(value) => f.debug_tuple("String").field(value).finish(),
+                Self::Number(value) => f.debug_tuple("Number").field(value).finish(),
+                Self::Boolean(value) => f.debug_tuple("Boolean").field(value).finish(),
+                Self::Null(value) => f.debug_tuple("Null").field(value).finish(),
+            }
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONValue<'static> {}
 
     impl ::xst::internal::Shard for JSONValue<'static> {
@@ -123,7 +135,6 @@ pub struct JSONObject {
     brace: x! { "}" },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONObject<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
@@ -139,6 +150,17 @@ pub struct JSONObject<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONObject<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONObject")
+                .field("brace", &self.brace.0)
+                .field("ws", &self.ws)
+                .field("content", &self.content)
+                .field("brace", &self.brace.1)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONObject<'static> {}
 
     impl ::xst::internal::Shard for JSONObject<'static> {
@@ -192,7 +214,6 @@ pub struct JSONObjectEntry {
     value: JSONValue,
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONObjectEntry<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     name: ::xst::internal::ShardField<'i, JSONString<'static>>,
@@ -205,6 +226,18 @@ pub struct JSONObjectEntry<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONObjectEntry<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONObjectEntry")
+                .field("name", &self.name)
+                .field("ws", &self.ws.0)
+                .field("colon", &self.colon)
+                .field("ws", &self.ws.1)
+                .field("value", &self.value)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONObjectEntry<'static> {}
 
     impl ::xst::internal::Shard for JSONObjectEntry<'static> {
@@ -243,7 +276,6 @@ pub struct JSONArray {
     bracket: x! { "]" },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONArray<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
@@ -259,6 +291,17 @@ pub struct JSONArray<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONArray<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONArray")
+                .field("bracket", &self.bracket.0)
+                .field("ws", &self.ws)
+                .field("entries", &self.entries)
+                .field("bracket", &self.bracket.1)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONArray<'static> {}
 
     impl ::xst::internal::Shard for JSONArray<'static> {
@@ -285,7 +328,6 @@ const _: () = {
     }
 
     #[allow(non_camel_case_types)]
-    #[derive(Debug)]
     pub struct __xst_shard_closure_0(::xst::internal::PhantomData<fn() -> ()>);
 
     impl ::xst::internal::Shard for __xst_shard_closure_0 {
@@ -318,7 +360,6 @@ pub struct JSONString {
     quote: x! { "\"" },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONString<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     quote: (&'i ::xst::internal::str, &'i ::xst::internal::str),
@@ -326,6 +367,16 @@ pub struct JSONString<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONString<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONString")
+                .field("quote", &self.quote.0)
+                .field("content", &self.content)
+                .field("quote", &self.quote.1)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONString<'static> {}
 
     impl ::xst::internal::Shard for JSONString<'static> {
@@ -354,7 +405,6 @@ type Content = x! {
     ]*
 };
 
-#[derive(::xst::internal::fmt::Debug)]
 struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -393,7 +443,6 @@ type Escape = x! {[
     | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
 ]};
 
-#[derive(::xst::internal::fmt::Debug)]
 struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -455,7 +504,6 @@ pub struct JSONNumber {
     exponent: xopt![JSONExponent],
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONNumber<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     sign: ::xst::internal::Option<&'i ::xst::internal::str>,
@@ -465,6 +513,17 @@ pub struct JSONNumber<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONNumber<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONNumber")
+                .field("sign", &self.sign)
+                .field("integer", &self.integer)
+                .field("fraction", &self.fraction)
+                .field("exponent", &self.exponent)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONNumber<'static> {}
 
     impl ::xst::internal::Shard for JSONNumber<'static> {
@@ -502,7 +561,6 @@ pub struct JSONFraction {
     digits: Digits,
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONFraction<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     point: &'i ::xst::internal::str,
@@ -510,6 +568,15 @@ pub struct JSONFraction<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONFraction<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONFraction")
+                .field("point", &self.point)
+                .field("digits", &self.digits)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONFraction<'static> {}
 
     impl ::xst::internal::Shard for JSONFraction<'static> {
@@ -536,7 +603,6 @@ pub struct JSONExponent {
     digits: Digits,
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONExponent<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     e: &'i ::xst::internal::str,
@@ -545,6 +611,16 @@ pub struct JSONExponent<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONExponent<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONExponent")
+                .field("e", &self.e)
+                .field("sign", &self.sign)
+                .field("digits", &self.digits)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONExponent<'static> {}
 
     impl ::xst::internal::Shard for JSONExponent<'static> {
@@ -571,7 +647,6 @@ const _: () = {
 #[shard]
 type Digits = x! { Digit+ };
 
-#[derive(::xst::internal::fmt::Debug)]
 struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -601,7 +676,6 @@ type Digit = x! {[
     | One2Nine
 ]};
 
-#[derive(::xst::internal::fmt::Debug)]
 struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -628,7 +702,6 @@ const _: () = {
 #[shard]
 type One2Nine = x! { {'1'..'9'} };
 
-#[derive(::xst::internal::fmt::Debug)]
 struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -663,13 +736,21 @@ pub enum JSONBoolean {
     False(JSONFalse),
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub enum JSONBoolean<'i> {
     True(::xst::internal::ShardField<'i, JSONTrue<'static>>),
     False(::xst::internal::ShardField<'i, JSONFalse<'static>>),
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONBoolean<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            match self {
+                Self::True(value) => f.debug_tuple("True").field(value).finish(),
+                Self::False(value) => f.debug_tuple("False").field(value).finish(),
+            }
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONBoolean<'static> {}
 
     impl ::xst::internal::Shard for JSONBoolean<'static> {
@@ -695,13 +776,20 @@ pub struct JSONTrue {
     text: x! { "true" },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONTrue<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     text: &'i ::xst::internal::str,
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONTrue<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONTrue")
+                .field("text", &self.text)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONTrue<'static> {}
 
     impl ::xst::internal::Shard for JSONTrue<'static> {
@@ -724,13 +812,20 @@ pub struct JSONFalse {
     text: x! { "false" },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONFalse<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     text: &'i ::xst::internal::str,
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONFalse<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONFalse")
+                .field("text", &self.text)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONFalse<'static> {}
 
     impl ::xst::internal::Shard for JSONFalse<'static> {
@@ -761,13 +856,20 @@ pub struct JSONNull {
     text: x! { "null" },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONNull<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     text: &'i ::xst::internal::str,
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSONNull<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSONNull")
+                .field("text", &self.text)
+                .finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSONNull<'static> {}
 
     impl ::xst::internal::Shard for JSONNull<'static> {
@@ -798,13 +900,18 @@ pub struct WS {
     space: x! { {' ' '\t' '\n' '\r'}* },
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct WS<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     space: &'i ::xst::internal::str,
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for WS<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("WS").field("space", &self.space).finish()
+        }
+    }
+
     impl ::xst::internal::StaticShard for WS<'static> {}
 
     impl ::xst::internal::Shard for WS<'static> {
@@ -841,7 +948,6 @@ pub struct Punctuated<T, P> {
     inner: xopt![(xbox![T], xvec![(P, T) | ..])],
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::Option<(
@@ -854,6 +960,16 @@ pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard> 
 }
 
 const _: () = {
+    impl<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard> ::xst::internal::fmt::Debug
+        for Punctuated<'i, T, P>
+    {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("Punctuated")
+                .field("inner", &self.inner)
+                .finish()
+        }
+    }
+
     impl<T: ::xst::internal::Shard, P: ::xst::internal::Shard> ::xst::internal::Shard
         for Punctuated<'static, T, P>
     {
@@ -899,7 +1015,6 @@ pub struct Spanned<T> {
     ws: WS,
 }
 
-#[derive(::xst::internal::fmt::Debug)]
 pub struct Spanned<'i, T: ::xst::internal::Shard> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::ShardField<'i, T>,
@@ -907,6 +1022,15 @@ pub struct Spanned<'i, T: ::xst::internal::Shard> {
 }
 
 const _: () = {
+    impl<'i, T: ::xst::internal::Shard> ::xst::internal::fmt::Debug for Spanned<'i, T> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("Spanned")
+                .field("inner", &self.inner)
+                .field("ws", &self.ws)
+                .finish()
+        }
+    }
+
     impl<T: ::xst::internal::Shard> ::xst::internal::Shard for Spanned<'static, T> {
         type Core = __xst_shard_core_0<T>;
     }
