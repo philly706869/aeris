@@ -24,12 +24,12 @@ pub mod internal {
 
 pub trait StaticShard: Shard {}
 
-pub trait Shard: 'static {
+pub trait Shard: 'static + Debug {
     type Core: ShardCore;
 }
 
 pub trait ShardCore: 'static {
-    type Output<'i>;
+    type Output<'i>: Debug;
     const DATA: &'static ShardData;
 }
 

@@ -317,6 +317,7 @@ type Content = x! {
     ]*
 };
 
+#[derive(::xst::internal::Debug)]
 struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -356,6 +357,7 @@ type Escape = x! {[
     | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
 ]};
 
+#[derive(::xst::internal::Debug)]
 struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -537,6 +539,7 @@ const _: () = {
 #[shard]
 type Digits = x! { Digit+ };
 
+#[derive(::xst::internal::Debug)]
 struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -567,6 +570,7 @@ type Digit = x! {[
     | One2Nine
 ]};
 
+#[derive(::xst::internal::Debug)]
 struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -594,6 +598,7 @@ const _: () = {
 #[shard]
 type One2Nine = x! { {'1'..'9'} };
 
+#[derive(::xst::internal::Debug)]
 struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -813,16 +818,7 @@ pub struct Punctuated<T, P> {
 }
 
 #[derive(::xst::internal::Debug)]
-pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard>
-where
-    ::xst::internal::Option<(
-        ::xst::internal::Box<::xst::internal::ShardField<'i, T>>,
-        ::xst::internal::Vec<(
-            ::xst::internal::ShardField<'i, P>,
-            ::xst::internal::ShardField<'i, T>,
-        )>,
-    )>: ::xst::internal::Debug,
-{
+pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::Option<(
         ::xst::internal::Box<::xst::internal::ShardField<'i, T>>,
@@ -881,10 +877,7 @@ pub struct Spanned {
 }
 
 #[derive(::xst::internal::Debug)]
-pub struct Spanned<'i, T: ::xst::internal::Shard>
-where
-    ::xst::internal::ShardField<'i, T>: ::xst::internal::Debug,
-{
+pub struct Spanned<'i, T: ::xst::internal::Shard> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::ShardField<'i, T>,
     ws: ::xst::internal::ShardField<'i, WS<'static>>,
