@@ -36,9 +36,9 @@ pub trait ShardCore: 'static {
 pub type ShardField<'i, T> = <<T as Shard>::Core as ShardCore>::Output<'i>;
 
 pub type ShardFieldReference<'i, T, const INDEX: usize> =
-    <T as ShardFieldForward<INDEX>>::Field<'i>;
+    <<T as Shard>::Core as ShardFieldForward<INDEX>>::Field<'i>;
 
-pub trait ShardFieldForward<const INDEX: usize>: Shard {
+pub trait ShardFieldForward<const INDEX: usize>: ShardCore {
     type Field<'i>: Debug;
 }
 
