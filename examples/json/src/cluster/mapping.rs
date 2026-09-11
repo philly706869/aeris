@@ -21,7 +21,7 @@ pub struct JSON<'i> {
         ::xst::internal::ShardField<'i, WS<'static>>,
         ::xst::internal::ShardField<'i, WS<'static>>,
     ),
-    value: ::xst::internal::ShardField<'i, WS<'static>>,
+    value: ::xst::internal::ShardField<'i, JSONValue<'static>>,
 }
 
 const _: () = {
@@ -636,8 +636,8 @@ pub enum JSONBoolean {
 
 #[derive(::xst::internal::Debug)]
 pub enum JSONBoolean<'i> {
-    True(::xst::internal::ShardField<'i, JSONBoolean<'static>>),
-    False(::xst::internal::ShardField<'i, JSONBoolean<'static>>),
+    True(::xst::internal::ShardField<'i, JSONTrue<'static>>),
+    False(::xst::internal::ShardField<'i, JSONFalse<'static>>),
 }
 
 const _: () = {
@@ -871,7 +871,7 @@ const _: () = {
 
 // original reference: crate::cluster::spanned::Spanned
 #[shard]
-pub struct Spanned {
+pub struct Spanned<T> {
     inner: T,
     ws: WS,
 }
