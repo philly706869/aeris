@@ -4,6 +4,8 @@ use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 /// This module is not intended for direct use.
 #[doc(hidden)]
 pub mod internal {
+    pub use alloc::boxed::Box;
+    pub use alloc::vec::Vec;
     pub use core::fmt::Debug;
     pub use core::marker::PhantomData;
     pub use core::ops::RangeInclusive;
@@ -11,14 +13,12 @@ pub mod internal {
     pub use core::primitive::char;
     pub use core::primitive::str;
 
-    extern crate alloc;
-    pub use alloc::boxed::Box;
-    pub use alloc::vec::Vec;
-
     pub use super::Shard;
     pub use super::ShardCore;
     pub use super::ShardData;
     pub use super::ShardField;
+    pub use super::ShardFieldForward;
+    pub use super::ShardFieldReference;
     pub use super::StaticShard;
 }
 
@@ -34,6 +34,13 @@ pub trait ShardCore: 'static {
 }
 
 pub type ShardField<'i, T> = <<T as Shard>::Core as ShardCore>::Output<'i>;
+
+pub type ShardFieldReference<'i, T, const INDEX: usize> =
+    <T as ShardFieldForward<INDEX>>::Field<'i>;
+
+pub trait ShardFieldForward<const INDEX: usize>: Shard {
+    type Field<'i>: Debug;
+}
 
 #[derive(Debug)]
 pub struct ShardData {

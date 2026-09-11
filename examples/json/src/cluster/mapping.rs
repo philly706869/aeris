@@ -121,14 +121,7 @@ pub struct JSONObject<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: ::xst::internal::ShardField<'i, WS<'static>>,
-    content: ::xst::internal::ShardField<
-        'i,
-        Punctuated<
-            'static,
-            Spanned<'static, JSONObjectEntry<'static>>,
-            Spanned<'static, WS<'static> /* TODO */>,
-        >,
-    >,
+    content: ::xst::internal::ShardFieldReference<'i, JSONObject<'static>, 0>,
 }
 
 const _: () = {
@@ -151,11 +144,36 @@ const _: () = {
                 Punctuated<
                     'static,
                     Spanned<'static, JSONObjectEntry<'static>>,
-                    Spanned<'static, WS<'static> /* TODO */>,
+                    Spanned<'static, __xst_shard_closure_0>,
                 >,
             >(),
             &::xst::internal::ShardData::literal("}"),
         ]);
+    }
+
+    #[allow(dead_code)]
+    #[allow(non_camel_case_types)]
+    #[derive(Debug)]
+    pub struct __xst_shard_closure_0(::xst::internal::PhantomData<fn() -> ()>);
+
+    impl ::xst::internal::Shard for __xst_shard_closure_0 {
+        type Core = Self;
+    }
+
+    impl ::xst::internal::ShardCore for __xst_shard_closure_0 {
+        type Output<'i> = &'i ::xst::internal::str;
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::literal(",");
+    }
+
+    impl ::xst::internal::ShardFieldForward<0> for JSONObject<'static> {
+        type Field<'i> = ::xst::internal::ShardField<
+            'i,
+            Punctuated<
+                'static,
+                Spanned<'static, JSONObjectEntry<'static>>,
+                Spanned<'static, __xst_shard_closure_0>,
+            >,
+        >;
     }
 };
 
@@ -226,14 +244,7 @@ pub struct JSONArray<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: ::xst::internal::ShardField<'i, WS<'static>>,
-    entries: ::xst::internal::ShardField<
-        'i,
-        Punctuated<
-            'static,
-            Spanned<'static, JSONValue<'static>>,
-            Spanned<'static, WS<'static> /* TODO */>,
-        >,
-    >,
+    entries: ::xst::internal::ShardFieldReference<'i, JSONArray<'static>, 0>,
 }
 
 const _: () = {
@@ -256,11 +267,36 @@ const _: () = {
                 Punctuated<
                     'static,
                     Spanned<'static, JSONValue<'static>>,
-                    Spanned<'static, WS<'static> /* TODO */>,
+                    Spanned<'static, __xst_shard_closure_0>,
                 >,
             >(),
             &::xst::internal::ShardData::literal("]"),
         ]);
+    }
+
+    #[allow(dead_code)]
+    #[allow(non_camel_case_types)]
+    #[derive(Debug)]
+    pub struct __xst_shard_closure_0(::xst::internal::PhantomData<fn() -> ()>);
+
+    impl ::xst::internal::Shard for __xst_shard_closure_0 {
+        type Core = Self;
+    }
+
+    impl ::xst::internal::ShardCore for __xst_shard_closure_0 {
+        type Output<'i> = &'i ::xst::internal::str;
+        const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::literal(",");
+    }
+
+    impl ::xst::internal::ShardFieldForward<0> for JSONArray<'static> {
+        type Field<'i> = ::xst::internal::ShardField<
+            'i,
+            Punctuated<
+                'static,
+                Spanned<'static, JSONValue<'static>>,
+                Spanned<'static, __xst_shard_closure_0>,
+            >,
+        >;
     }
 };
 
