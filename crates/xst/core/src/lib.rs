@@ -7,7 +7,7 @@ mod shard;
 // pub use parser::ParseError;
 pub use shard::internal;
 
-use shard::{ShardCore, StaticShard};
+use shard::StaticShard;
 
 pub struct Cluster<S>
 where

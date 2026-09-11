@@ -119,7 +119,14 @@ pub struct JSONObject<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: ::xst::internal::ShardField<'i, WS<'static>>,
-    content: ::xst::internal::ShardFieldReference<'i, JSONObject<'static>, 0>,
+    content: ::xst::internal::ShardField<
+        'i,
+        Punctuated<
+            'static,
+            Spanned<'static, JSONObjectEntry<'static>>,
+            Spanned<'static, ::xst::internal::ShardClosure<JSONObject<'static>, 0>>,
+        >,
+    >,
 }
 
 const _: () = {
@@ -161,15 +168,8 @@ const _: () = {
         const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::literal(",");
     }
 
-    impl ::xst::internal::ShardFieldForward<0> for __xst_shard_core_0 {
-        type Field<'i> = ::xst::internal::ShardField<
-            'i,
-            Punctuated<
-                'static,
-                Spanned<'static, JSONObjectEntry<'static>>,
-                Spanned<'static, __xst_shard_closure_0>,
-            >,
-        >;
+    impl ::xst::internal::ShardClosureForward<0> for __xst_shard_core_0 {
+        type Closure = __xst_shard_closure_0;
     }
 };
 
@@ -239,7 +239,14 @@ pub struct JSONArray<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
     ws: ::xst::internal::ShardField<'i, WS<'static>>,
-    entries: ::xst::internal::ShardFieldReference<'i, JSONArray<'static>, 0>,
+    entries: ::xst::internal::ShardField<
+        'i,
+        Punctuated<
+            'static,
+            Spanned<'static, JSONValue<'static>>,
+            Spanned<'static, ::xst::internal::ShardClosure<JSONArray<'static>, 0>>,
+        >,
+    >,
 }
 
 const _: () = {
@@ -281,15 +288,8 @@ const _: () = {
         const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::literal(",");
     }
 
-    impl ::xst::internal::ShardFieldForward<0> for __xst_shard_core_0 {
-        type Field<'i> = ::xst::internal::ShardField<
-            'i,
-            Punctuated<
-                'static,
-                Spanned<'static, JSONValue<'static>>,
-                Spanned<'static, __xst_shard_closure_0>,
-            >,
-        >;
+    impl ::xst::internal::ShardClosureForward<0> for __xst_shard_core_0 {
+        type Closure = __xst_shard_closure_0;
     }
 };
 

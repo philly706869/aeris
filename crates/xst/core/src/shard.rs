@@ -14,11 +14,11 @@ pub mod internal {
     pub use std::vec::Vec;
 
     pub use super::Shard;
+    pub use super::ShardClosure;
+    pub use super::ShardClosureForward;
     pub use super::ShardCore;
     pub use super::ShardData;
     pub use super::ShardField;
-    pub use super::ShardFieldForward;
-    pub use super::ShardFieldReference;
     pub use super::StaticShard;
 }
 
@@ -35,11 +35,11 @@ pub trait ShardCore: 'static {
 
 pub type ShardField<'i, T> = <<T as Shard>::Core as ShardCore>::Output<'i>;
 
-pub type ShardFieldReference<'i, T, const INDEX: usize> =
-    <<T as Shard>::Core as ShardFieldForward<INDEX>>::Field<'i>;
+pub type ShardClosure<T, const INDEX: usize> =
+    <<T as Shard>::Core as ShardClosureForward<INDEX>>::Closure;
 
-pub trait ShardFieldForward<const INDEX: usize>: ShardCore {
-    type Field<'i>: Debug;
+pub trait ShardClosureForward<const INDEX: usize>: ShardCore {
+    type Closure: Shard;
 }
 
 #[derive(Debug)]
