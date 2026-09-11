@@ -1,5 +1,3 @@
-extern crate alloc;
-
 use core::marker::PhantomData;
 
 // mod parser;
@@ -24,6 +22,7 @@ where
     S: StaticShard,
 {
     pub fn build() -> Self {
+        let reference = shard::ReferenceData::new::<S>();
         // let table = table::Table::build(TypeId::of::<S::Core>(), <S::Core as ShardCore>::Data::DATA);
 
         Self {

@@ -4,14 +4,14 @@ use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 /// This module is not intended for direct use.
 #[doc(hidden)]
 pub mod internal {
-    pub use alloc::boxed::Box;
-    pub use alloc::vec::Vec;
     pub use core::fmt::Debug;
     pub use core::marker::PhantomData;
     pub use core::ops::RangeInclusive;
     pub use core::option::Option;
     pub use core::primitive::char;
     pub use core::primitive::str;
+    pub use std::boxed::Box;
+    pub use std::vec::Vec;
 
     pub use super::Shard;
     pub use super::ShardCore;
