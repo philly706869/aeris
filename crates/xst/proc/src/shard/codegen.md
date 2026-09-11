@@ -1,122 +1,183 @@
 # Shard expansion rules
 
 `expand_item` is not implemented yet. `examples/json/src/cluster/mapping.rs`
-contains the source declarations followed by their intended expansions. These
-rules describe that expansion contract; they do not imply runtime extraction
-has been implemented.
+contains source declarations followed by their intended expansions. This file
+describes that expansion contract against the current `xst-core` shard API; it
+does not imply that parsing or output construction is implemented.
 
-## Names and scopes
+## Public shape and local helpers
 
-Emit only the source-declared shard identity/binding at module scope. Put all
-literal/set descriptors, grammar aliases, and trait implementations inside a
-per-declaration `const _: () = { ... };`. Helpers may be `pub` inside this block
-when required by associated-type visibility, but must not be nameable in the
-surrounding module. Reuse local names such as `Literal0` across expansions;
-never invent module-level names such as `ObjectComma` to expose a helper.
+A struct or enum shard becomes a binding with an input lifetime. Preserve its
+visibility, name, fields or variants, and declared type parameters. Insert the
+input lifetime before the declared type parameters and bind every declared type
+parameter with `::xst::internal::Shard`.
 
-Forward shard names are source-declared identities, not generated helper names.
-Their `Shard::Output<'i>` is `&'i str`. Binding outputs are their generated
-structs/enums. Do not inspect another declaration to decide its output type.
+A type shard becomes a same-named tuple marker carrying
+`PhantomData<&'i ()>`. Preserve the alias visibility: a private alias produces a
+private marker. Its `ShardCore::Output<'i>` is `&'i str`; struct and enum cores
+output their generated binding.
 
-## Deterministic identifiers
+Derive `::xst::internal::Debug` for each generated binding or marker. A struct
+binding also contains a synthetic
+`__xst_marker_0: PhantomData<&'i ()>` field. If that name is occupied, choose the
+first unused `__xst_marker_N` in ascending order. The marker is not parsed and
+does not appear in `ShardData`.
 
-Traverse each source declaration in source order, depth-first and left-to-right
-through field patterns and generic arguments. Assign a single zero-based leaf
-counter to literal and character-set occurrences: `Literal0`, `Set1`, etc.
-Reset it for each declaration. Count repeated occurrences separately; share the
-assigned identifier between grammar and output generation rather than allocating
-it again. Numbering must not depend on HashMap iteration, other declarations,
-shard kinds, or allocation order. Source field/variant names and declared generic
-parameter names are preserved from the source.
+Put every implementation and generated helper in a per-declaration
+`const _: () = { ... };`. Helpers that occur in public associated types must be
+`pub` inside the block, but remain unnameable from the surrounding module. This
+allows names such as `__xst_shard_core_0` and `__xst_shard_closure_0` to be
+reused for every declaration. Generated identifiers and framework paths must
+use macro hygiene.
 
-The lifetime marker uses `__xst_marker0`; if a source field already owns that
-name, choose the first unused `__xst_markerN` in ascending order. It is a
-synthetic field, not a parsed field, and does not get a ShardField index.
-Forward shard marker storage is likewise not a binding field. Generated helper
-identifiers must use macro hygiene so a same-spelled source path still resolves
-to the source item. If an additional local grammar alias is needed, use
-`GrammarN` with its source field index rather than a semantic name.
+Do not emit `#[allow(dead_code)]` for generated helpers. Emit
+`#[allow(non_camel_case_types)]` for lower-case helper names.
 
-## Two type expressions per field
+## Shard identity and core
 
-Generate the grammar descriptor and the output type independently:
+For a non-generic binding `S`, generate:
 
-- A named shard reference uses `Ext<S>` for grammar and `Output<'i, S>` for output.
-- An inline `x!` expression captures `&'i str`. In generic grammar arguments,
-  wrap its complete descriptor in `Capture<Pattern>` so inner bindings do not
-  affect that output.
-- Generic parameters carry grammar and output through `ShardParam`.
-- Option, vector, tuple, and box bindings compose the corresponding output
-  containers. Grammar lowering does not depend on these output containers.
-- A generic shard application computes its output through `Shard::Output`,
-  rather than assuming that the referenced shard is a binding.
+```rust
+impl StaticShard for S<'static> {}
 
-For every source binding field, unconditionally emit `FieldOutput<'i, Owner, FIELD>` in the struct/enum. Define `ShardField<FIELD>` for the static
-owner inside the anonymous const, where all grammar helpers are in scope. The
-associated output normalizes to the borrowed/binding output and does not store
-grammar descriptors. Reuse a local grammar alias when it avoids generating the
-same expression twice.
+impl Shard for S<'static> {
+    type Core = __xst_shard_core_0;
+}
+```
 
-FIELD is a single zero-based index: the source field index before grouping
-repeated names for structs, or the source variant index for enums. Repeated
-struct field names form tuples of their individual output expressions.
+For a generic binding, implement `Shard` for
+`S<'static, T, ...>` and use `__xst_shard_core_0<T, ...>` as its core. Repeat the
+`T: Shard` bounds on the binding, the `Shard` implementation, the core helper,
+and its `ShardCore` implementation. Generic shards are not `StaticShard` because
+the parameters need not denote a single closed static root.
 
-Enum variants must be `Variant(ShardReference)`: exactly one named struct,
-enum, or forward shard reference. Named-field variants, unit variants, empty
-payloads, multiple payloads, and direct inline patterns/wrapper expressions are
-not allowed. Generic arguments on the referenced shard follow the normal shard
-reference rules. No separate variant index or nested enum field index exists.
-The emitter need not know which kind of shard the reference denotes. Generic owners
-carry the same ShardParam bounds on the binding type, Shard implementation,
-and ShardField implementations. Preserve their grammar parameters in
-Shard::Output: `Spanned<'i, T>`, not `Spanned<'i, T::Output<'i>>`. The input
-lifetime is applied by each field projection. This ensures static grammar
-identities never contain borrowed output parameters. For generated Debug impls,
-bound the field projections instead of grammar parameters; place these impls
-in the anonymous const as well.
+The core helper is a public, zero-sized tuple struct. Its marker is
+`PhantomData<fn() -> ()>` without parameters and
+`PhantomData<fn() -> (T, ...)>` with parameters. Implement `ShardCore` on it:
 
-Do not special-case literals, simple references, or generic parameters in the
-struct/enum field declaration. Direct types and Output/ParamOutput projections
-belong only in the corresponding ShardField implementation. The field
-projection is a type-level indirection;
-it adds no runtime allocation or lookup. Keep the existing typed grammar
-representation unless another requirement needs a value-based representation.
+```rust
+impl ShardCore for __xst_shard_core_0 {
+    type Output<'i> = S<'i>;
+    const DATA: &'static ShardData = /* lowered source grammar */;
+}
+```
 
-## Verification
+`Shard` is the externally named grammar identity. `Shard::Core` is the hidden,
+canonical identity used by `TypeId`, grammar traversal, output projection, and
+field forwarding. Never inspect another declaration or shard kind while
+generating a reference.
 
-Compile expansions with multiple declarations and user types sharing generated
-helper names. Exercise nested generic applications and borrowed output values.
-`xst-core/tests/output.rs` covers these contracts without depending on the
-unfinished procedural macro implementation. Type-check the mapping module as
-well; checking only the proc-macro crate cannot validate expansion examples.
+## Lowering grammar to `ShardData`
 
-## Debug contract
+Lower the source grammar directly to nested const `ShardData` values:
 
-`ShardField::Output<'i>` and generic `ShardParam::Output<'i>` implement Debug.
-`Ext<S>` is a ShardParam when every `S::Output<'i>` implements Debug; grammar-only
-references remain unrestricted. Sequence arguments require Debug on the complete
-output tuple (the standard library implements tuple Debug only up to its supported
-arity). Generated Debug implementations need no additional field-output bounds
-and must not require Debug on grammar descriptor types themselves.
+- string literal: `ShardData::literal(text)`
+- character set: `ShardData::set(negated, &[start..=end, ...])`
+- optional pattern: `ShardData::option(&item)`
+- repetition: `ShardData::vec(&item, min, max)`
+- tuple or concatenation: `ShardData::sequence(&[...])`
+- alternative: `ShardData::alternative(&[...])`
+- named shard or generic parameter: `ShardData::reference::<S>()`
 
-## Private references: compiler-checked limits
+Use `::xst::internal::Option::{None, Some}` for repetition bounds and internal
+re-exports for all other generated framework and standard-library paths.
+Preserve source order, traversing depth-first and left-to-right. A single-item
+struct or alias uses the item's data directly rather than wrapping it in a
+one-element sequence. Repeated struct fields still contribute separate grammar
+items in source order.
 
-An anonymous const isolates names, not visibility checking. A local public
-trait/struct cannot transparently forward a private type through a public
-associated type: `type Output = <Private as Shard>::Output` still produces
-E0446, even through an extra forwarding trait. This also affects private
-forward identities whose output would normalize to a public string slice.
+Every named reference must be a static shard identity. Apply `'static` to the
+input-lifetime position of generated shard bindings, including nested generic
+applications; leave a generic shard parameter such as `T` unchanged. For
+example:
 
-Grammar-only visibility can be solved by a local public `GrammarN` implementing
-ShardDataType, whose DATA constant forwards the private grammar value. The
-public Shard::Data then names GrammarN rather than a private descriptor.
+```rust
+ShardData::reference::<WS<'static>>()
+ShardData::reference::<Spanned<'static, JSONValue<'static>>>()
+ShardData::reference::<T>()
+```
 
-For a private binding output, a local public `OutputN` struct with a private
-field can wrap the output. That compiles, but changes the field's output type:
-it is no longer the referenced enum/struct/string slice. Deref::Target or
-another public associated-type alias to the private output would reintroduce
-the same visibility error. This is therefore an experiment, not the default
-expansion rule; adopting it requires a decision about the public output API.
+`ShardData::reference` resolves the referenced `Shard::Core`, so recursive and
+multiple source identities that share a core retain the core's canonical
+identity.
 
-`xst-core/tests/visibility.rs` checks the grammar adapter and opaque wrapper
-with a private binding and public owner, including borrowed storage and parsing.
+## Binding field outputs
+
+Compute binding output independently from `ShardData` lowering:
+
+- an inline `x!` pattern captures the complete matched slice as `&'i str`
+- a named shard `S` becomes `ShardField<'i, S>`
+- a generic parameter `T` becomes `ShardField<'i, T>`
+- `xopt!`, `xvec!`, `xbox!`, and tuple bindings recursively compose `Option`,
+  `Vec`, `Box`, and tuples around their child outputs
+
+Use the internal re-exports (`str`, `Option`, `Vec`, and `Box`) in emitted code.
+An inline pattern always produces one string slice even when its grammar
+contains alternatives, sequences, repetitions, or references.
+
+For structs, group repeated source field names into one binding field whose
+type is a tuple of the occurrence outputs in source order. Preserve the order of
+the first occurrence when ordering generated fields.
+
+Enum variants must have exactly one unnamed named-shard payload:
+`Variant(ShardReference)`. Unit variants, named fields, multiple payloads, and
+direct inline or wrapper patterns are invalid. Each generated variant stores
+`ShardField<'i, ReferencedShard>`, while the enum grammar is an alternative of
+the corresponding references in variant order.
+
+## Private closure identities and field forwarding
+
+An inline `x!` used as a shard-valued generic argument needs a stable shard
+identity. Generate a public local helper named `__xst_shard_closure_N`, numbered
+from zero in deterministic depth-first, left-to-right order for the declaration.
+The helper:
+
+- is a zero-sized `PhantomData<fn() -> ()>` tuple struct
+- derives `Debug`
+- implements `Shard<Core = Self>`
+- implements `ShardCore<Output<'i> = &'i str>` with the inline pattern's data
+
+The binding cannot name this block-local helper in its module-scope field type.
+For every field whose fully composed output mentions such a helper, emit
+`ShardFieldReference<'i, Owner<'static, ...>, INDEX>` instead. `INDEX` is a
+zero-based counter over forwarded fields only, in source order. Then implement
+the forwarding trait on the owner's core, not on the owner:
+
+```rust
+impl ShardFieldForward<INDEX> for __xst_shard_core_0<...> {
+    type Field<'i> = /* complete output type, local helpers allowed */;
+}
+```
+
+This matches the core API definition:
+
+```rust
+type ShardFieldReference<'i, T, const INDEX: usize> =
+    <<T as Shard>::Core as ShardFieldForward<INDEX>>::Field<'i>;
+```
+
+Do not introduce forwarding for ordinary literals, references, generic
+parameters, or composed outputs that can be named at module scope. The
+projection is compile-time type indirection and adds no runtime allocation or
+lookup.
+
+## Determinism and verification
+
+All generated numbering resets for each source declaration and must depend only
+on source traversal, never on map iteration or allocation order. Preserve source
+field names, variant names, generic parameter names, visibility, and grammar
+order.
+
+Use `examples/json/src/cluster/mapping.rs` as the code-generation golden model.
+In particular, verify:
+
+- ordinary, repeated, optional, tuple, vector, and boxed field outputs
+- type-shard string output
+- struct and enum bindings
+- generic `Punctuated` and `Spanned` identities
+- local comma closures used by `JSONObject` and `JSONArray`
+- `ShardFieldForward` implementations on `__xst_shard_core_0`
+- construction of a `Cluster<JSON>` from the complete mapping
+
+Type-check the mapping and `xst-core` together. Checking only the proc-macro
+crate cannot validate the generated API contract.
