@@ -4,7 +4,11 @@ use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 /// This module is not intended for direct use.
 #[doc(hidden)]
 pub mod internal {
-    pub use core::fmt::Debug;
+    pub mod fmt {
+        pub use core::fmt::Debug;
+        pub use core::fmt::Formatter;
+        pub use core::fmt::Result;
+    }
     pub use core::marker::PhantomData;
     pub use core::ops::RangeInclusive;
     pub use core::option::Option;

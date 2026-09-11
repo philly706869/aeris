@@ -14,7 +14,6 @@ pub struct JSON {
     ws: WS,
 }
 
-#[derive(::xst::internal::Debug)]
 pub struct JSON<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     ws: (
@@ -25,6 +24,11 @@ pub struct JSON<'i> {
 }
 
 const _: () = {
+    impl<'i> ::xst::internal::fmt::Debug for JSON<'i> {
+        fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+        }
+    }
+
     impl ::xst::internal::StaticShard for JSON<'static> {}
 
     impl ::xst::internal::Shard for JSON<'static> {
