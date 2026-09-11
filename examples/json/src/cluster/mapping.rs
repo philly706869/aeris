@@ -72,7 +72,7 @@ pub enum JSONValue {
     Null(JSONNull),
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub enum JSONValue<'i> {
     Object(::xst::internal::ShardField<'i, JSONObject<'static>>),
     Array(::xst::internal::ShardField<'i, JSONArray<'static>>),
@@ -123,7 +123,7 @@ pub struct JSONObject {
     brace: x! { "}" },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONObject<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     brace: (&'i ::xst::internal::str, &'i ::xst::internal::str),
@@ -192,7 +192,7 @@ pub struct JSONObjectEntry {
     value: JSONValue,
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONObjectEntry<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     name: ::xst::internal::ShardField<'i, JSONString<'static>>,
@@ -243,7 +243,7 @@ pub struct JSONArray {
     bracket: x! { "]" },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONArray<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     bracket: (&'i ::xst::internal::str, &'i ::xst::internal::str),
@@ -318,7 +318,7 @@ pub struct JSONString {
     quote: x! { "\"" },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONString<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     quote: (&'i ::xst::internal::str, &'i ::xst::internal::str),
@@ -354,7 +354,7 @@ type Content = x! {
     ]*
 };
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 struct Content<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -393,7 +393,7 @@ type Escape = x! {[
     | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
 ]};
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -455,7 +455,7 @@ pub struct JSONNumber {
     exponent: xopt![JSONExponent],
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONNumber<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     sign: ::xst::internal::Option<&'i ::xst::internal::str>,
@@ -502,7 +502,7 @@ pub struct JSONFraction {
     digits: Digits,
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONFraction<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     point: &'i ::xst::internal::str,
@@ -536,7 +536,7 @@ pub struct JSONExponent {
     digits: Digits,
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONExponent<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     e: &'i ::xst::internal::str,
@@ -571,7 +571,7 @@ const _: () = {
 #[shard]
 type Digits = x! { Digit+ };
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 struct Digits<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -601,7 +601,7 @@ type Digit = x! {[
     | One2Nine
 ]};
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 struct Digit<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -628,7 +628,7 @@ const _: () = {
 #[shard]
 type One2Nine = x! { {'1'..'9'} };
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 struct One2Nine<'i>(::xst::internal::PhantomData<&'i ()>);
 
 const _: () = {
@@ -663,7 +663,7 @@ pub enum JSONBoolean {
     False(JSONFalse),
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub enum JSONBoolean<'i> {
     True(::xst::internal::ShardField<'i, JSONTrue<'static>>),
     False(::xst::internal::ShardField<'i, JSONFalse<'static>>),
@@ -695,7 +695,7 @@ pub struct JSONTrue {
     text: x! { "true" },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONTrue<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     text: &'i ::xst::internal::str,
@@ -724,7 +724,7 @@ pub struct JSONFalse {
     text: x! { "false" },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONFalse<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     text: &'i ::xst::internal::str,
@@ -761,7 +761,7 @@ pub struct JSONNull {
     text: x! { "null" },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct JSONNull<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     text: &'i ::xst::internal::str,
@@ -798,7 +798,7 @@ pub struct WS {
     space: x! { {' ' '\t' '\n' '\r'}* },
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct WS<'i> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     space: &'i ::xst::internal::str,
@@ -841,7 +841,7 @@ pub struct Punctuated<T, P> {
     inner: xopt![(xbox![T], xvec![(P, T) | ..])],
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::Option<(
@@ -899,7 +899,7 @@ pub struct Spanned<T> {
     ws: WS,
 }
 
-#[derive(::xst::internal::Debug)]
+#[derive(::xst::internal::fmt::Debug)]
 pub struct Spanned<'i, T: ::xst::internal::Shard> {
     __xst_marker_0: ::xst::internal::PhantomData<&'i ()>,
     inner: ::xst::internal::ShardField<'i, T>,
