@@ -345,7 +345,7 @@ const _: () = {
                 ]),
             ]),
             0,
-            0,
+            ::xst::internal::Option::None,
         );
     }
 };
@@ -393,7 +393,7 @@ const _: () = {
                     &::xst::internal::ShardData::vec(
                         &::xst::internal::ShardData::set(false, &['0'..='9', 'A'..='F', 'a'..='f']),
                         4,
-                        4,
+                        ::xst::internal::Option::Some(4),
                     ),
                 ]),
             ]);
@@ -558,7 +558,7 @@ const _: () = {
         const DATA: &'static ::xst::internal::ShardData = &::xst::internal::ShardData::vec(
             &::xst::internal::ShardData::reference::<Digit<'static>>(),
             1,
-            0,
+            ::xst::internal::Option::None,
         );
     }
 };
@@ -798,7 +798,7 @@ const _: () = {
                 &[' '..=' ', '\t'..='\t', '\n'..='\n', '\r'..='\r'],
             ),
             0,
-            0,
+            ::xst::internal::Option::None,
         );
     }
 };
@@ -855,7 +855,7 @@ const _: () = {
                         &::xst::internal::ShardData::reference::<T>(),
                     ]),
                     0,
-                    0,
+                    ::xst::internal::Option::None,
                 ),
             ]));
     }

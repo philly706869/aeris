@@ -127,10 +127,9 @@ impl Grammar {
                 self.rule(lhs, vec![N(item)]);
             }
             ShardData::Vec(data) => {
-                assert!(
-                    data.min <= data.max,
-                    "shard repetition minimum exceeds maximum"
-                );
+                if let Some(max) = data.max {
+                    assert!(data.min <= max, "shard repetition minimum exceeds maximum");
+                }
                 let item = self.lower(data.item);
                 let mut current = lhs;
                 // A chain avoids duplicating the mandatory prefix for each length.
@@ -139,17 +138,17 @@ impl Grammar {
                     self.rule(current, vec![N(item), N(next)]);
                     current = next;
                 }
-                if data.max == usize::MAX {
-                    self.rule(current, vec![]);
-                    self.rule(current, vec![N(item), N(current)]);
-                } else {
-                    for _ in data.min..data.max {
+                if let Some(max) = data.max {
+                    for _ in data.min..max {
                         self.rule(current, vec![]);
                         let next = self.nonterminal();
                         self.rule(current, vec![N(item), N(next)]);
                         current = next;
                     }
                     self.rule(current, vec![]);
+                } else {
+                    self.rule(current, vec![]);
+                    self.rule(current, vec![N(item), N(current)]);
                 }
             }
             ShardData::Sequence(data) => {

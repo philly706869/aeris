@@ -57,7 +57,7 @@ impl ShardData {
         Self::new(ShardDataKind::Option(OptionData::new(item)))
     }
 
-    pub const fn vec(item: &'static ShardData, min: usize, max: usize) -> Self {
+    pub const fn vec(item: &'static ShardData, min: usize, max: Option<usize>) -> Self {
         Self::new(ShardDataKind::Vec(VecData::new(item, min, max)))
     }
 
@@ -126,11 +126,11 @@ impl OptionData {
 pub struct VecData {
     item: &'static ShardData,
     min: usize,
-    max: usize,
+    max: Option<usize>,
 }
 
 impl VecData {
-    pub const fn new(item: &'static ShardData, min: usize, max: usize) -> Self {
+    pub const fn new(item: &'static ShardData, min: usize, max: Option<usize>) -> Self {
         Self { item, min, max }
     }
 }
