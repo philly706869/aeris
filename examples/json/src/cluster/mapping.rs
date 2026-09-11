@@ -26,6 +26,11 @@ pub struct JSON<'i> {
 const _: () = {
     impl<'i> ::xst::internal::fmt::Debug for JSON<'i> {
         fn fmt(&self, f: &mut ::xst::internal::fmt::Formatter<'_>) -> ::xst::internal::fmt::Result {
+            f.debug_struct("JSON")
+                .field("ws", &self.ws.0)
+                .field("value", &self.value)
+                .field("ws", &self.ws.1)
+                .finish()
         }
     }
 
