@@ -12,12 +12,7 @@ mod keyword {
 }
 
 #[derive(Debug)]
-pub struct Shard {
-    pub variant: ShardVariant,
-}
-
-#[derive(Debug)]
-pub enum ShardVariant {
+pub enum Shard {
     Struct(StructShard),
     Enum(EnumShard),
     Type(TypeShard),
