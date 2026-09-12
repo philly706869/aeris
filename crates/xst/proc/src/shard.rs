@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{ToTokens, quote};
 use syn::parse2;
 
 mod ast;
@@ -26,42 +26,33 @@ fn expand_item(item: TokenStream) -> TokenStream {
         Err(err) => return err.into_compile_error(),
     };
 
-    use ast::rust_expr::{Expr, keyword};
+    use ast::rust_expr::Expr;
 
-    enum Magic {
-        X(keyword::x),
-        XBox(keyword::xbox),
-        XOpt(keyword::xopt),
-        XVec(keyword::xvec),
-        XLOpt(keyword::xlopt),
-        XLVec(keyword::xlvec),
-    }
-
-    fn expand_magics(magics: &mut Vec<Magic>, expr: &Expr) {
+    fn expand_magics(magics: &mut Vec<TokenStream>, expr: &Expr) {
         let mut stack = vec![expr];
         while let Some(item) = stack.pop() {
             match item {
                 Expr::X(item) => {
-                    magics.push(Magic::X(item.x_token));
+                    magics.push(item.x_token.to_token_stream());
                 }
                 Expr::XBox(item) => {
-                    magics.push(Magic::XBox(item.xbox_token));
+                    magics.push(item.xbox_token.to_token_stream());
                     stack.push(&item.expr);
                 }
                 Expr::XOpt(item) => {
-                    magics.push(Magic::XOpt(item.xopt_token));
+                    magics.push(item.xopt_token.to_token_stream());
                     stack.push(&item.expr);
                 }
                 Expr::XVec(item) => {
-                    magics.push(Magic::XVec(item.xvec_token));
+                    magics.push(item.xvec_token.to_token_stream());
                     stack.push(&item.expr);
                 }
                 Expr::XLOpt(item) => {
-                    magics.push(Magic::XLOpt(item.xlopt_token));
+                    magics.push(item.xlopt_token.to_token_stream());
                     stack.push(&item.expr);
                 }
                 Expr::XLVec(item) => {
-                    magics.push(Magic::XLVec(item.xlvec_token));
+                    magics.push(item.xlvec_token.to_token_stream());
                     stack.push(&item.expr);
                 }
                 Expr::Tuple(item) => {
@@ -90,22 +81,13 @@ fn expand_item(item: TokenStream) -> TokenStream {
             }
         }
         ast::Shard::Type(item) => {
-            magics.push(Magic::X(item.x_expr.x_token));
+            magics.push(item.x_expr.x_token.to_token_stream());
         }
     }
 
-    let magics = magics.iter().map(|magic| match magic {
-        Magic::X(token) => quote! { ::xst::internal::#token! {} },
-        Magic::XBox(token) => quote! { ::xst::internal::#token! []; },
-        Magic::XOpt(token) => quote! { ::xst::internal::#token! []; },
-        Magic::XVec(token) => quote! { ::xst::internal::#token! []; },
-        Magic::XLOpt(token) => quote! { ::xst::internal::#token! []; },
-        Magic::XLVec(token) => quote! { ::xst::internal::#token! []; },
-    });
-
     quote! {
         const _: () = {
-            #(#magics)*
+            #(::xst::internal::#magics!();)*
         };
     }
 }
