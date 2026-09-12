@@ -149,7 +149,7 @@ impl Parse for Params {
         if input.peek(Token![<]) {
             Ok(Self {
                 lt_token: Some(input.parse()?),
-                idents: Punctuated::parse_terminated(input)?,
+                idents: Punctuated::parse_separated_nonempty(input)?,
                 gt_token: Some(input.parse()?),
             })
         } else {
@@ -165,7 +165,7 @@ impl Parse for Params {
 pub mod rust_expr {
     use syn::{
         Ident, LitInt, Token, braced, bracketed, parenthesized,
-        parse::{Parse, ParseStream, discouraged::Speculative},
+        parse::{Parse, ParseStream},
         punctuated::Punctuated,
         token::{Brace, Bracket, Paren},
     };
@@ -385,17 +385,18 @@ pub mod rust_expr {
 
     impl Parse for Limit {
         fn parse(input: ParseStream) -> syn::Result<Self> {
-            let fork = input.fork();
-            if let Ok(limit) = fork.parse() {
-                input.advance_to(&fork);
-                return Ok(Self::Exact(limit));
+            let lookahead = input.lookahead1();
+            if lookahead.peek(LitInt) {
+                if input.peek2(Token![..]) {
+                    Ok(Self::Range(input.parse()?))
+                } else {
+                    Ok(Self::Exact(input.parse()?))
+                }
+            } else if lookahead.peek(Token![..]) {
+                Ok(Self::Range(input.parse()?))
+            } else {
+                Err(lookahead.error())
             }
-            let fork = input.fork();
-            if let Ok(limit) = fork.parse() {
-                input.advance_to(&fork);
-                return Ok(Self::Range(limit));
-            }
-            Err(input.error("expected limit"))
         }
     }
 
@@ -441,7 +442,7 @@ pub mod rust_expr {
             if input.peek(Token![<]) {
                 Ok(Self {
                     lt_token: Some(input.parse()?),
-                    exprs: Punctuated::parse_terminated(input)?,
+                    exprs: Punctuated::parse_separated_nonempty(input)?,
                     gt_token: Some(input.parse()?),
                 })
             } else {
@@ -673,7 +674,7 @@ pub mod prim_expr {
             if input.peek(Token![<]) {
                 Ok(Self {
                     lt_token: Some(input.parse()?),
-                    exprs: Punctuated::parse_terminated(input)?,
+                    exprs: Punctuated::parse_separated_nonempty(input)?,
                     gt_token: Some(input.parse()?),
                 })
             } else {
