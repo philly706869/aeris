@@ -1,5 +1,6 @@
 use syn::{
-    Ident, Token, Visibility,
+    Ident, Token, Visibility, braced, parenthesized,
+    parse::{Parse, ParseStream},
     punctuated::Punctuated,
     token::{Brace, Paren},
 };
@@ -11,14 +12,45 @@ pub enum Shard {
     Type(TypeShard),
 }
 
+impl Parse for Shard {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let fork = input.fork();
+        fork.parse::<Visibility>()?;
+        let lookahead = fork.lookahead1();
+        if lookahead.peek(Token![struct]) {
+            Ok(Self::Struct(input.parse()?))
+        } else if lookahead.peek(Token![enum]) {
+            Ok(Self::Enum(input.parse()?))
+        } else if lookahead.peek(Token![type]) {
+            Ok(Self::Type(input.parse()?))
+        } else {
+            Err(lookahead.error())
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct StructShard {
     pub vis: Visibility,
     pub struct_token: Token![struct],
     pub ident: Ident,
-    pub params: Option<Params>,
+    pub params: Params,
     pub brace: Brace,
     pub fields: Punctuated<Field, Token![,]>,
+}
+
+impl Parse for StructShard {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            vis: input.parse()?,
+            struct_token: input.parse()?,
+            ident: input.parse()?,
+            params: input.parse()?,
+            brace: braced!(content in input),
+            fields: Punctuated::parse_terminated(&content)?,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -26,9 +58,23 @@ pub struct EnumShard {
     pub vis: Visibility,
     pub enum_token: Token![enum],
     pub ident: Ident,
-    pub params: Option<Params>,
+    pub params: Params,
     pub brace: Brace,
     pub variants: Punctuated<Variant, Token![,]>,
+}
+
+impl Parse for EnumShard {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            vis: input.parse()?,
+            enum_token: input.parse()?,
+            ident: input.parse()?,
+            params: input.parse()?,
+            brace: braced!(content in input),
+            variants: Punctuated::parse_terminated(&content)?,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -36,10 +82,24 @@ pub struct TypeShard {
     pub vis: Visibility,
     pub type_token: Token![type],
     pub ident: Ident,
-    pub params: Option<Params>,
+    pub params: Params,
     pub eq_token: Token![=],
     pub x_expr: rust_expr::XExpr,
     pub semi_token: Token![;],
+}
+
+impl Parse for TypeShard {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            vis: input.parse()?,
+            type_token: input.parse()?,
+            ident: input.parse()?,
+            params: input.parse()?,
+            eq_token: input.parse()?,
+            x_expr: input.parse()?,
+            semi_token: input.parse()?,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -49,24 +109,68 @@ pub struct Field {
     pub expr: rust_expr::Expr,
 }
 
+impl Parse for Field {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            ident: input.parse()?,
+            colon_token: input.parse()?,
+            expr: input.parse()?,
+        })
+    }
+}
+
 #[derive(Debug)]
 pub struct Variant {
+    pub ident: Ident,
     pub paren: Paren,
+    pub shard_expr: rust_expr::ShardExpr,
+}
+
+impl Parse for Variant {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            ident: input.parse()?,
+            paren: parenthesized!(content in input),
+            shard_expr: content.parse()?,
+        })
+    }
 }
 
 #[derive(Debug)]
 pub struct Params {
-    pub lt_token: Token![<],
+    pub lt_token: Option<Token![<]>,
     pub idents: Punctuated<Ident, Token![,]>,
-    pub gt_token: Token![>],
+    pub gt_token: Option<Token![>]>,
+}
+
+impl Parse for Params {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        if input.peek(Token![<]) {
+            Ok(Self {
+                lt_token: Some(input.parse()?),
+                idents: Punctuated::parse_terminated(input)?,
+                gt_token: Some(input.parse()?),
+            })
+        } else {
+            Ok(Self {
+                lt_token: None,
+                idents: Punctuated::default(),
+                gt_token: None,
+            })
+        }
+    }
 }
 
 pub mod rust_expr {
     use syn::{
-        Ident, LitInt, Token,
+        Ident, LitInt, Token, braced, bracketed, parenthesized,
+        parse::{Parse, ParseStream, discouraged::Speculative},
         punctuated::Punctuated,
         token::{Brace, Bracket, Paren},
     };
+
+    use super::prim_expr;
 
     pub mod keyword {
         syn::custom_keyword!(x);
@@ -89,11 +193,49 @@ pub mod rust_expr {
         Shard(ShardExpr),
     }
 
+    impl Parse for Expr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(keyword::x) {
+                Ok(Self::X(input.parse()?))
+            } else if lookahead.peek(keyword::xbox) {
+                Ok(Self::XBox(input.parse()?))
+            } else if lookahead.peek(keyword::xopt) {
+                Ok(Self::XOpt(input.parse()?))
+            } else if lookahead.peek(keyword::xvec) {
+                Ok(Self::XVec(input.parse()?))
+            } else if lookahead.peek(keyword::xlopt) {
+                Ok(Self::XLOpt(input.parse()?))
+            } else if lookahead.peek(keyword::xlvec) {
+                Ok(Self::XLVec(input.parse()?))
+            } else if lookahead.peek(Paren) {
+                Ok(Self::Tuple(input.parse()?))
+            } else if lookahead.peek(Ident) {
+                Ok(Self::Shard(input.parse()?))
+            } else {
+                Err(lookahead.error())
+            }
+        }
+    }
+
     #[derive(Debug)]
     pub struct XExpr {
         pub x_token: keyword::x,
         pub bang_token: Token![!],
         pub brace: Brace,
+        pub sequence: prim_expr::Sequence,
+    }
+
+    impl Parse for XExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                x_token: input.parse()?,
+                bang_token: input.parse()?,
+                brace: braced!(content in input),
+                sequence: content.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -104,12 +246,36 @@ pub mod rust_expr {
         pub expr: Box<Expr>,
     }
 
+    impl Parse for XBoxExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                xbox_token: input.parse()?,
+                bang_token: input.parse()?,
+                bracket: bracketed!(content in input),
+                expr: input.parse()?,
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct XOptExpr {
         pub xopt_token: keyword::xopt,
         pub bang_token: Token![!],
         pub bracket: Bracket,
         pub expr: Box<Expr>,
+    }
+
+    impl Parse for XOptExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                xopt_token: input.parse()?,
+                bang_token: input.parse()?,
+                bracket: bracketed!(content in input),
+                expr: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -122,12 +288,38 @@ pub mod rust_expr {
         pub limit: Limit,
     }
 
+    impl Parse for XVecExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                xvec_token: input.parse()?,
+                bang_token: input.parse()?,
+                bracket: bracketed!(content in input),
+                expr: input.parse()?,
+                comma_token: input.parse()?,
+                limit: input.parse()?,
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct XLOptExpr {
         pub xlopt_token: keyword::xlopt,
         pub bang_token: Token![!],
         pub bracket: Bracket,
         pub expr: Box<Expr>,
+    }
+
+    impl Parse for XLOptExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                xlopt_token: input.parse()?,
+                bang_token: input.parse()?,
+                bracket: bracketed!(content in input),
+                expr: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -140,16 +332,49 @@ pub mod rust_expr {
         pub limit: RangeLimit,
     }
 
+    impl Parse for XLVecExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                xlvec_token: input.parse()?,
+                bang_token: input.parse()?,
+                bracket: bracketed!(content in input),
+                expr: input.parse()?,
+                comma_token: input.parse()?,
+                limit: input.parse()?,
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct TupleExpr {
         pub paren: Paren,
         pub exprs: Punctuated<Expr, Token![,]>,
     }
 
+    impl Parse for TupleExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                paren: parenthesized!(content in input),
+                exprs: Punctuated::parse_terminated(&content)?,
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct ShardExpr {
         pub ident: Ident,
-        pub args: Option<Args>,
+        pub args: Args,
+    }
+
+    impl Parse for ShardExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                ident: input.parse()?,
+                args: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -158,9 +383,33 @@ pub mod rust_expr {
         Range(RangeLimit),
     }
 
+    impl Parse for Limit {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let fork = input.fork();
+            if let Ok(limit) = fork.parse() {
+                input.advance_to(&fork);
+                return Ok(Self::Exact(limit));
+            }
+            let fork = input.fork();
+            if let Ok(limit) = fork.parse() {
+                input.advance_to(&fork);
+                return Ok(Self::Range(limit));
+            }
+            Err(input.error("expected limit"))
+        }
+    }
+
     #[derive(Debug)]
     pub struct ExactLimit {
         pub count: LitInt,
+    }
+
+    impl Parse for ExactLimit {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                count: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -170,30 +419,84 @@ pub mod rust_expr {
         pub end: Option<LitInt>,
     }
 
+    impl Parse for RangeLimit {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                start: input.parse()?,
+                dot_dot_token: input.parse()?,
+                end: input.parse()?,
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct Args {
-        pub lt_token: Token![<],
+        pub lt_token: Option<Token![<]>,
         pub exprs: Punctuated<Expr, Token![,]>,
-        pub gt_token: Token![>],
+        pub gt_token: Option<Token![>]>,
+    }
+
+    impl Parse for Args {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            if input.peek(Token![<]) {
+                Ok(Self {
+                    lt_token: Some(input.parse()?),
+                    exprs: Punctuated::parse_terminated(input)?,
+                    gt_token: Some(input.parse()?),
+                })
+            } else {
+                Ok(Self {
+                    lt_token: None,
+                    exprs: Punctuated::default(),
+                    gt_token: None,
+                })
+            }
+        }
     }
 }
 
 pub mod prim_expr {
     use syn::{
-        Ident, LitChar, LitInt, LitStr, Token,
+        Ident, LitChar, LitInt, LitStr, Token, braced, bracketed, parenthesized,
+        parse::{Parse, ParseStream, discouraged::Speculative},
         punctuated::Punctuated,
         token::{Brace, Bracket, Paren},
     };
 
     #[derive(Debug)]
-    pub struct ExprSequence {
+    pub struct Sequence {
         pub exprs: Vec<Expr>,
+    }
+
+    impl Parse for Sequence {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let mut exprs = Vec::new();
+            loop {
+                let fork = input.fork();
+                if let Ok(expr) = fork.parse() {
+                    input.advance_to(&fork);
+                    exprs.push(expr);
+                } else {
+                    break;
+                }
+            }
+            Ok(Self { exprs })
+        }
     }
 
     #[derive(Debug)]
     pub struct Expr {
         pub atom: Atom,
         pub modifier: Modifier,
+    }
+
+    impl Parse for Expr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                atom: input.parse()?,
+                modifier: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -205,9 +508,36 @@ pub mod prim_expr {
         Shard(ShardAtom),
     }
 
+    impl Parse for Atom {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(LitStr) {
+                Ok(Self::Lit(input.parse()?))
+            } else if lookahead.peek(Brace) {
+                Ok(Self::Set(input.parse()?))
+            } else if lookahead.peek(Paren) {
+                Ok(Self::Seq(input.parse()?))
+            } else if lookahead.peek(Bracket) {
+                Ok(Self::Alt(input.parse()?))
+            } else if lookahead.peek(Ident) {
+                Ok(Self::Alt(input.parse()?))
+            } else {
+                Err(lookahead.error())
+            }
+        }
+    }
+
     #[derive(Debug)]
     pub struct LitAtom {
         pub text: LitStr,
+    }
+
+    impl Parse for LitAtom {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                text: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -217,6 +547,29 @@ pub mod prim_expr {
         pub entries: Vec<SetEntry>,
     }
 
+    impl Parse for SetAtom {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                brace: braced!(content in input),
+                bang_token: content.parse()?,
+                entries: {
+                    let mut entries = Vec::new();
+                    loop {
+                        let fork = content.fork();
+                        if let Ok(entry) = fork.parse() {
+                            content.advance_to(&content);
+                            entries.push(entry);
+                        } else {
+                            break;
+                        }
+                    }
+                    entries
+                },
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct SetEntry {
         pub start: LitChar,
@@ -224,10 +577,30 @@ pub mod prim_expr {
         pub end: Option<LitChar>,
     }
 
+    impl Parse for SetEntry {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                start: input.parse()?,
+                dot_dot_token: input.parse()?,
+                end: input.parse()?,
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct SeqAtom {
         pub paren: Paren,
-        pub sequence: ExprSequence,
+        pub sequence: Sequence,
+    }
+
+    impl Parse for SeqAtom {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                paren: parenthesized!(content in input),
+                sequence: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
@@ -236,23 +609,81 @@ pub mod prim_expr {
         pub entries: Vec<AltEntry>,
     }
 
+    impl Parse for AltAtom {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                bracket: bracketed!(content in input),
+                entries: {
+                    let mut entries = Vec::new();
+                    loop {
+                        let fork = content.fork();
+                        if let Ok(entry) = fork.parse() {
+                            content.advance_to(&fork);
+                            entries.push(entry);
+                        } else {
+                            break;
+                        }
+                    }
+                    entries
+                },
+            })
+        }
+    }
+
     #[derive(Debug)]
     pub struct AltEntry {
         pub or_token: Token![|],
-        pub sequence: ExprSequence,
+        pub sequence: Sequence,
+    }
+
+    impl Parse for AltEntry {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                or_token: input.parse()?,
+                sequence: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
     pub struct ShardAtom {
         pub ident: Ident,
-        pub args: Option<Args>,
+        pub args: Args,
+    }
+
+    impl Parse for ShardAtom {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                ident: input.parse()?,
+                args: input.parse()?,
+            })
+        }
     }
 
     #[derive(Debug)]
     pub struct Args {
-        pub lt_token: Token![<],
+        pub lt_token: Option<Token![<]>,
         pub exprs: Punctuated<Expr, Token![,]>,
-        pub gt_token: Token![>],
+        pub gt_token: Option<Token![>]>,
+    }
+
+    impl Parse for Args {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            if input.peek(Token![<]) {
+                Ok(Self {
+                    lt_token: Some(input.parse()?),
+                    exprs: Punctuated::parse_terminated(input)?,
+                    gt_token: Some(input.parse()?),
+                })
+            } else {
+                Ok(Self {
+                    lt_token: None,
+                    exprs: Punctuated::default(),
+                    gt_token: None,
+                })
+            }
+        }
     }
 
     #[derive(Debug)]
@@ -273,16 +704,83 @@ pub mod prim_expr {
         },
     }
 
+    impl Parse for Modifier {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            if input.peek(Token![*]) {
+                Ok(Self::Star {
+                    star_token: input.parse()?,
+                    question_token: input.parse()?,
+                })
+            } else if input.peek(Token![+]) {
+                Ok(Self::Plus {
+                    plus_token: input.parse()?,
+                    question_token: input.parse()?,
+                })
+            } else if input.peek(Token![^]) {
+                let content;
+                Ok(Self::Caret {
+                    caret_token: input.parse()?,
+                    bracket: bracketed!(content in input),
+                    limit: content.parse()?,
+                })
+            } else {
+                Ok(Self::None)
+            }
+        }
+    }
+
     #[derive(Debug)]
     pub enum Limit {
-        Exact {
-            count: LitInt,
-        },
-        Range {
-            start: Option<LitInt>,
-            dot_dot_token: Token![..],
-            end: Option<LitInt>,
-            question_token: Option<Token![?]>,
-        },
+        Exact(ExactLimit),
+        Range(RangeLimit),
+    }
+
+    impl Parse for Limit {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let lookahead = input.lookahead1();
+            if lookahead.peek(LitInt) {
+                if input.peek2(Token![..]) {
+                    Ok(Self::Range(input.parse()?))
+                } else {
+                    Ok(Self::Exact(input.parse()?))
+                }
+            } else if lookahead.peek(Token![..]) {
+                Ok(Self::Range(input.parse()?))
+            } else {
+                Err(lookahead.error())
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct ExactLimit {
+        pub count: LitInt,
+    }
+
+    impl Parse for ExactLimit {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                count: input.parse()?,
+            })
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct RangeLimit {
+        pub start: Option<LitInt>,
+        pub dot_dot_token: Token![..],
+        pub end: Option<LitInt>,
+        pub question_token: Option<Token![?]>,
+    }
+
+    impl Parse for RangeLimit {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            Ok(Self {
+                start: input.parse()?,
+                dot_dot_token: input.parse()?,
+                end: input.parse()?,
+                question_token: input.parse()?,
+            })
+        }
     }
 }
