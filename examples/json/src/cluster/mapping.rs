@@ -945,7 +945,7 @@ const _: () = {
 // original reference: crate::cluster::punctuated::Punctuated
 #[shard]
 pub struct Punctuated<T, P> {
-    inner: xopt![(xbox![T], xvec![(P, T) | ..])],
+    inner: xopt![(xbox![T], xvec![(P, T), ..])],
 }
 
 pub struct Punctuated<'i, T: ::xst::internal::Shard, P: ::xst::internal::Shard> {
