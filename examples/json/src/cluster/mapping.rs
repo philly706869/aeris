@@ -440,7 +440,7 @@ const _: () = {
 #[shard]
 type Escape = x! {[
     | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
-    | "u" {'0'..'9' 'A'..'F' 'a'..'f'}![4]
+    | "u" {'0'..'9' 'A'..'F' 'a'..'f'}^[4]
 ]};
 
 struct Escape<'i>(::xst::internal::PhantomData<&'i ()>);
