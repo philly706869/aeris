@@ -1,8 +1,0 @@
-[package]
-name    = "synx"
-version = { workspace = true }
-edition = { workspace = true }
-publish = { workspace = true }
-
-[dependencies]
-proc-macro2 = { workspace = true }

@@ -518,13 +518,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "synx"
-version = "0.0.0-prenext.1"
-dependencies = [
- "proc-macro2",
-]
-
-[[package]]
 name = "thiserror"
 version = "2.0.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -700,5 +693,4 @@ dependencies = [
  "quote",
  "rustc-hash",
  "syn 3.0.5",
- "synx",
 ]

@@ -8,7 +8,6 @@ members = [
   "crates/xst",
   "crates/xst/core",
   "crates/xst/proc",
-  "crates/synx",
   "apps/aeris",
   "apps/aerisd",
   "examples/json",
@@ -27,7 +26,6 @@ aeris-std-ui       = { path = "crates/aeris-std/ui" }
 xst                = { path = "crates/xst" }
 xst-core           = { path = "crates/xst/core" }
 xst-proc           = { path = "crates/xst/proc" }
-synx               = { path = "crates/synx" }
 aeris-cli          = { path = "apps/aeris" }
 aeris-daemon       = { path = "apps/aerisd" }
 example-json       = { path = "examples/json" }
