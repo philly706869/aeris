@@ -28,34 +28,9 @@ pub struct StructShard {
     pub vis: Visibility,
     pub struct_token: Token![struct],
     pub ident: Ident,
-    pub generics: Option<Generics>,
+    pub params: Option<Params>,
     pub brace: Brace,
     pub fields: Punctuated<Field, Token![,]>,
-}
-
-#[derive(Debug)]
-pub struct EnumShard {
-    pub vis: Visibility,
-    pub enum_token: Token![enum],
-    pub ident: Ident,
-    pub generics: Option<Generics>,
-    pub brace: Brace,
-    pub variants: Punctuated<Variant, Token![,]>,
-}
-
-#[derive(Debug)]
-pub struct TypeShard {
-    pub vis: Visibility,
-    pub type_token: Token![type],
-    pub ident: Ident,
-    pub generics: Option<Generics>,
-}
-
-#[derive(Debug)]
-pub struct Generics {
-    pub lt_token: Token![<],
-    pub params: Punctuated<Ident, Token![,]>,
-    pub gt_token: Token![>],
 }
 
 #[derive(Debug)]
@@ -66,8 +41,36 @@ pub struct Field {
 }
 
 #[derive(Debug)]
+pub struct EnumShard {
+    pub vis: Visibility,
+    pub enum_token: Token![enum],
+    pub ident: Ident,
+    pub params: Option<Params>,
+    pub brace: Brace,
+    pub variants: Punctuated<Variant, Token![,]>,
+}
+
+#[derive(Debug)]
 pub struct Variant {
     pub paren: Paren,
+}
+
+#[derive(Debug)]
+pub struct TypeShard {
+    pub vis: Visibility,
+    pub type_token: Token![type],
+    pub ident: Ident,
+    pub params: Option<Params>,
+    pub eq_token: Token![=],
+    pub x_expr: XExpr,
+    pub semi_token: Token![;],
+}
+
+#[derive(Debug)]
+pub struct Params {
+    pub lt_token: Token![<],
+    pub idents: Punctuated<Ident, Token![,]>,
+    pub gt_token: Token![>],
 }
 
 #[derive(Debug)]
