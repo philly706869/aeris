@@ -1,28 +1,5 @@
 use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 
-pub mod internal {
-    pub mod fmt {
-        pub use core::fmt::Debug;
-        pub use core::fmt::Formatter;
-        pub use core::fmt::Result;
-    }
-    pub use core::marker::PhantomData;
-    pub use core::ops::RangeInclusive;
-    pub use core::option::Option;
-    pub use core::primitive::char;
-    pub use core::primitive::str;
-    pub use std::boxed::Box;
-    pub use std::vec::Vec;
-
-    pub use super::Shard;
-    pub use super::ShardClosure;
-    pub use super::ShardClosureForward;
-    pub use super::ShardCore;
-    pub use super::ShardData;
-    pub use super::ShardField;
-    pub use super::StaticShard;
-}
-
 pub trait StaticShard: Shard {}
 
 pub trait Shard: 'static {

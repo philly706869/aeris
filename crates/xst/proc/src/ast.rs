@@ -176,9 +176,9 @@ pub mod rust_expr {
         syn::custom_keyword!(x);
         syn::custom_keyword!(xbox);
         syn::custom_keyword!(xopt);
+        syn::custom_keyword!(xoptz);
         syn::custom_keyword!(xvec);
-        syn::custom_keyword!(xlopt);
-        syn::custom_keyword!(xlvec);
+        syn::custom_keyword!(xvecz);
     }
 
     #[derive(Debug)]
@@ -186,9 +186,9 @@ pub mod rust_expr {
         X(XExpr),
         XBox(XBoxExpr),
         XOpt(XOptExpr),
+        XOptZ(XOptZExpr),
         XVec(XVecExpr),
-        XLOpt(XLOptExpr),
-        XLVec(XLVecExpr),
+        XVecZ(XVecZExpr),
         Tuple(TupleExpr),
         Shard(ShardExpr),
     }
@@ -196,18 +196,19 @@ pub mod rust_expr {
     impl Parse for Expr {
         fn parse(input: ParseStream) -> syn::Result<Self> {
             let lookahead = input.lookahead1();
-            if lookahead.peek(keyword::x) {
+            let bang = input.peek2(Token![!]);
+            if lookahead.peek(keyword::x) && bang {
                 Ok(Self::X(input.parse()?))
-            } else if lookahead.peek(keyword::xbox) {
+            } else if lookahead.peek(keyword::xbox) && bang {
                 Ok(Self::XBox(input.parse()?))
-            } else if lookahead.peek(keyword::xopt) {
+            } else if lookahead.peek(keyword::xopt) && bang {
                 Ok(Self::XOpt(input.parse()?))
-            } else if lookahead.peek(keyword::xvec) {
+            } else if lookahead.peek(keyword::xoptz) && bang {
+                Ok(Self::XOptZ(input.parse()?))
+            } else if lookahead.peek(keyword::xvec) && bang {
                 Ok(Self::XVec(input.parse()?))
-            } else if lookahead.peek(keyword::xlopt) {
-                Ok(Self::XLOpt(input.parse()?))
-            } else if lookahead.peek(keyword::xlvec) {
-                Ok(Self::XLVec(input.parse()?))
+            } else if lookahead.peek(keyword::xvecz) && bang {
+                Ok(Self::XVecZ(input.parse()?))
             } else if lookahead.peek(Paren) {
                 Ok(Self::Tuple(input.parse()?))
             } else if lookahead.peek(Ident) {
@@ -279,6 +280,26 @@ pub mod rust_expr {
     }
 
     #[derive(Debug)]
+    pub struct XOptZExpr {
+        pub xoptz_token: keyword::xoptz,
+        pub bang_token: Token![!],
+        pub bracket: Bracket,
+        pub expr: Box<Expr>,
+    }
+
+    impl Parse for XOptZExpr {
+        fn parse(input: ParseStream) -> syn::Result<Self> {
+            let content;
+            Ok(Self {
+                xoptz_token: input.parse()?,
+                bang_token: input.parse()?,
+                bracket: bracketed!(content in input),
+                expr: content.parse()?,
+            })
+        }
+    }
+
+    #[derive(Debug)]
     pub struct XVecExpr {
         pub xvec_token: keyword::xvec,
         pub bang_token: Token![!],
@@ -303,28 +324,8 @@ pub mod rust_expr {
     }
 
     #[derive(Debug)]
-    pub struct XLOptExpr {
-        pub xlopt_token: keyword::xlopt,
-        pub bang_token: Token![!],
-        pub bracket: Bracket,
-        pub expr: Box<Expr>,
-    }
-
-    impl Parse for XLOptExpr {
-        fn parse(input: ParseStream) -> syn::Result<Self> {
-            let content;
-            Ok(Self {
-                xlopt_token: input.parse()?,
-                bang_token: input.parse()?,
-                bracket: bracketed!(content in input),
-                expr: content.parse()?,
-            })
-        }
-    }
-
-    #[derive(Debug)]
-    pub struct XLVecExpr {
-        pub xlvec_token: keyword::xlvec,
+    pub struct XVecZExpr {
+        pub xvecz_token: keyword::xvecz,
         pub bang_token: Token![!],
         pub bracket: Bracket,
         pub expr: Box<Expr>,
@@ -332,11 +333,11 @@ pub mod rust_expr {
         pub limit: RangeLimit,
     }
 
-    impl Parse for XLVecExpr {
+    impl Parse for XVecZExpr {
         fn parse(input: ParseStream) -> syn::Result<Self> {
             let content;
             Ok(Self {
-                xlvec_token: input.parse()?,
+                xvecz_token: input.parse()?,
                 bang_token: input.parse()?,
                 bracket: bracketed!(content in input),
                 expr: content.parse()?,
