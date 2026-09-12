@@ -559,7 +559,7 @@ pub mod prim_expr {
                     loop {
                         let fork = content.fork();
                         if let Ok(entry) = fork.parse() {
-                            content.advance_to(&content);
+                            content.advance_to(&fork);
                             entries.push(entry);
                         } else {
                             break;
@@ -599,7 +599,7 @@ pub mod prim_expr {
             let content;
             Ok(Self {
                 paren: parenthesized!(content in input),
-                sequence: input.parse()?,
+                sequence: content.parse()?,
             })
         }
     }

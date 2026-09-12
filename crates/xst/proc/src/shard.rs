@@ -20,7 +20,6 @@ fn expand_attr(attr: TokenStream) -> TokenStream {
 }
 
 fn expand_item(item: TokenStream) -> TokenStream {
-    return TokenStream::new();
     match parse2::<ast::Shard>(item) {
         Ok(_) => TokenStream::new(),
         Err(err) => err.into_compile_error(),
