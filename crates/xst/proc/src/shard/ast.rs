@@ -253,7 +253,7 @@ pub mod rust_expr {
                 xbox_token: input.parse()?,
                 bang_token: input.parse()?,
                 bracket: bracketed!(content in input),
-                expr: input.parse()?,
+                expr: content.parse()?,
             })
         }
     }
@@ -273,7 +273,7 @@ pub mod rust_expr {
                 xopt_token: input.parse()?,
                 bang_token: input.parse()?,
                 bracket: bracketed!(content in input),
-                expr: input.parse()?,
+                expr: content.parse()?,
             })
         }
     }
@@ -295,9 +295,9 @@ pub mod rust_expr {
                 xvec_token: input.parse()?,
                 bang_token: input.parse()?,
                 bracket: bracketed!(content in input),
-                expr: input.parse()?,
-                comma_token: input.parse()?,
-                limit: input.parse()?,
+                expr: content.parse()?,
+                comma_token: content.parse()?,
+                limit: content.parse()?,
             })
         }
     }
@@ -317,7 +317,7 @@ pub mod rust_expr {
                 xlopt_token: input.parse()?,
                 bang_token: input.parse()?,
                 bracket: bracketed!(content in input),
-                expr: input.parse()?,
+                expr: content.parse()?,
             })
         }
     }
@@ -339,9 +339,9 @@ pub mod rust_expr {
                 xlvec_token: input.parse()?,
                 bang_token: input.parse()?,
                 bracket: bracketed!(content in input),
-                expr: input.parse()?,
-                comma_token: input.parse()?,
-                limit: input.parse()?,
+                expr: content.parse()?,
+                comma_token: content.parse()?,
+                limit: content.parse()?,
             })
         }
     }
@@ -521,7 +521,7 @@ pub mod prim_expr {
             } else if lookahead.peek(Bracket) {
                 Ok(Self::Alt(input.parse()?))
             } else if lookahead.peek(Ident) {
-                Ok(Self::Alt(input.parse()?))
+                Ok(Self::Shard(input.parse()?))
             } else {
                 Err(lookahead.error())
             }
@@ -580,11 +580,19 @@ pub mod prim_expr {
 
     impl Parse for SetEntry {
         fn parse(input: ParseStream) -> syn::Result<Self> {
-            Ok(Self {
-                start: input.parse()?,
-                dot_dot_token: input.parse()?,
-                end: input.parse()?,
-            })
+            if input.peek2(Token![..]) {
+                Ok(Self {
+                    start: input.parse()?,
+                    dot_dot_token: Some(input.parse()?),
+                    end: Some(input.parse()?),
+                })
+            } else {
+                Ok(Self {
+                    start: input.parse()?,
+                    dot_dot_token: None,
+                    end: None,
+                })
+            }
         }
     }
 
