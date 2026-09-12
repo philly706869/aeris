@@ -1,0 +1,32 @@
+use core::marker::PhantomData;
+
+use crate::shard::{self, StaticShard};
+
+pub struct Cluster<S>
+where
+    S: StaticShard,
+{
+    _shard: PhantomData<fn() -> S>,
+    // table: table::Table,
+}
+
+impl<S> Cluster<S>
+where
+    S: StaticShard,
+{
+    pub fn build() -> Self {
+        let reference = shard::ReferenceData::new::<S>();
+        // let table = table::Table::build(TypeId::of::<S::Core>(), <S::Core as ShardCore>::Data::DATA);
+
+        Self {
+            _shard: PhantomData,
+            // table: todo!(),
+        }
+    }
+
+    // /// Recognizes the entire input, accepting if any GLR branch succeeds.
+    // /// Output extraction and mapping are not performed yet.
+    // pub fn parse(&self, input: &str) -> Result<(), ParseError> {
+    //     self.table.parse(input)
+    // }
+}

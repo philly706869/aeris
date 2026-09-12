@@ -95,40 +95,16 @@ fn expand_item(item: TokenStream) -> TokenStream {
     }
 
     let magics = magics.iter().map(|magic| match magic {
-        Magic::X(token) => quote! { #token! {} },
-        Magic::XBox(token) => quote! { #token! []; },
-        Magic::XOpt(token) => quote! { #token! []; },
-        Magic::XVec(token) => quote! { #token! []; },
-        Magic::XLOpt(token) => quote! { #token! []; },
-        Magic::XLVec(token) => quote! { #token! []; },
+        Magic::X(token) => quote! { ::xst::internal::#token! {} },
+        Magic::XBox(token) => quote! { ::xst::internal::#token! []; },
+        Magic::XOpt(token) => quote! { ::xst::internal::#token! []; },
+        Magic::XVec(token) => quote! { ::xst::internal::#token! []; },
+        Magic::XLOpt(token) => quote! { ::xst::internal::#token! []; },
+        Magic::XLVec(token) => quote! { ::xst::internal::#token! []; },
     });
 
     quote! {
         const _: () = {
-            /// # XST x!
-            macro_rules! x {
-                {} => {}
-            }
-            /// # XST xbox!
-            macro_rules! xbox {
-                [] => {}
-            }
-            /// # XST xopt!
-            macro_rules! xopt {
-                [] => {}
-            }
-            /// # XST xvec!
-            macro_rules! xvec {
-                [] => {}
-            }
-            /// # XST xlopt!
-            macro_rules! xlopt {
-                [] => {}
-            }
-            /// # XST xlvec!
-            macro_rules! xlvec {
-                [] => {}
-            }
             #(#magics)*
         };
     }

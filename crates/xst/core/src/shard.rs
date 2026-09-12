@@ -1,8 +1,5 @@
 use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 
-/// Internal API for generated code.
-/// This module is not intended for direct use.
-#[doc(hidden)]
 pub mod internal {
     pub mod fmt {
         pub use core::fmt::Debug;
