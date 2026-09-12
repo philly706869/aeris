@@ -147,10 +147,20 @@ pub struct Params {
 impl Parse for Params {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         if input.peek(Token![<]) {
+            let lt_token = input.parse()?;
+            let mut idents = Punctuated::new();
+            while !input.peek(Token![>]) {
+                idents.push_value(input.parse()?);
+                if input.peek(Token![>]) {
+                    break;
+                }
+                idents.push_punct(input.parse()?);
+            }
+            let gt_token = input.parse()?;
             Ok(Self {
-                lt_token: Some(input.parse()?),
-                idents: Punctuated::parse_separated_nonempty(input)?,
-                gt_token: Some(input.parse()?),
+                lt_token: Some(lt_token),
+                idents,
+                gt_token: Some(gt_token),
             })
         } else {
             Ok(Self {
@@ -440,10 +450,20 @@ pub mod rust_expr {
     impl Parse for Args {
         fn parse(input: ParseStream) -> syn::Result<Self> {
             if input.peek(Token![<]) {
+                let lt_token = input.parse()?;
+                let mut exprs = Punctuated::new();
+                while !input.peek(Token![>]) {
+                    exprs.push_value(input.parse()?);
+                    if input.peek(Token![>]) {
+                        break;
+                    }
+                    exprs.push_punct(input.parse()?);
+                }
+                let gt_token = input.parse()?;
                 Ok(Self {
-                    lt_token: Some(input.parse()?),
-                    exprs: Punctuated::parse_separated_nonempty(input)?,
-                    gt_token: Some(input.parse()?),
+                    lt_token: Some(lt_token),
+                    exprs,
+                    gt_token: Some(gt_token),
                 })
             } else {
                 Ok(Self {
@@ -551,22 +571,22 @@ pub mod prim_expr {
     impl Parse for SetAtom {
         fn parse(input: ParseStream) -> syn::Result<Self> {
             let content;
+            let brace = braced!(content in input);
+            let bang_token = content.parse()?;
+            let mut entries = Vec::new();
+            loop {
+                let fork = content.fork();
+                if let Ok(entry) = fork.parse() {
+                    content.advance_to(&fork);
+                    entries.push(entry);
+                } else {
+                    break;
+                }
+            }
             Ok(Self {
-                brace: braced!(content in input),
-                bang_token: content.parse()?,
-                entries: {
-                    let mut entries = Vec::new();
-                    loop {
-                        let fork = content.fork();
-                        if let Ok(entry) = fork.parse() {
-                            content.advance_to(&fork);
-                            entries.push(entry);
-                        } else {
-                            break;
-                        }
-                    }
-                    entries
-                },
+                brace,
+                bang_token,
+                entries,
             })
         }
     }
@@ -613,22 +633,18 @@ pub mod prim_expr {
     impl Parse for AltAtom {
         fn parse(input: ParseStream) -> syn::Result<Self> {
             let content;
-            Ok(Self {
-                bracket: bracketed!(content in input),
-                entries: {
-                    let mut entries = Vec::new();
-                    loop {
-                        let fork = content.fork();
-                        if let Ok(entry) = fork.parse() {
-                            content.advance_to(&fork);
-                            entries.push(entry);
-                        } else {
-                            break;
-                        }
-                    }
-                    entries
-                },
-            })
+            let bracket = bracketed!(content in input);
+            let mut entries = Vec::new();
+            loop {
+                let fork = content.fork();
+                if let Ok(entry) = fork.parse() {
+                    content.advance_to(&fork);
+                    entries.push(entry);
+                } else {
+                    break;
+                }
+            }
+            Ok(Self { bracket, entries })
         }
     }
 
@@ -672,10 +688,20 @@ pub mod prim_expr {
     impl Parse for Args {
         fn parse(input: ParseStream) -> syn::Result<Self> {
             if input.peek(Token![<]) {
+                let lt_token = input.parse()?;
+                let mut exprs = Punctuated::new();
+                while !input.peek(Token![>]) {
+                    exprs.push_value(input.parse()?);
+                    if input.peek(Token![>]) {
+                        break;
+                    }
+                    exprs.push_punct(input.parse()?);
+                }
+                let gt_token = input.parse()?;
                 Ok(Self {
-                    lt_token: Some(input.parse()?),
-                    exprs: Punctuated::parse_separated_nonempty(input)?,
-                    gt_token: Some(input.parse()?),
+                    lt_token: Some(lt_token),
+                    exprs,
+                    gt_token: Some(gt_token),
                 })
             } else {
                 Ok(Self {
