@@ -3,9 +3,9 @@ use quote::quote;
 use syn::{Ident, LitInt};
 
 use crate::{
-    ast::{self, prim_expr as prim, rust_expr as rust},
-    ir,
     names::Names,
+    shard::ast::{self, prim_expr as prim, rust_expr as rust},
+    shard::ir,
 };
 
 pub fn lower(input: TokenStream) -> syn::Result<ir::Shard> {

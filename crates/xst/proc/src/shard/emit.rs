@@ -2,7 +2,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Ident, Index};
 
-use crate::ir::{Kind, Shard};
+use crate::shard::ir::{Kind, Shard};
 
 pub fn emit(shard: Shard) -> TokenStream {
     let Shard {
