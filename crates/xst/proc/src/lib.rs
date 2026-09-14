@@ -6,7 +6,10 @@ mod shard;
 ///
 #[proc_macro_attribute]
 pub fn shard(attr: TokenStream, item: TokenStream) -> TokenStream {
-    shard::expand(attr.into(), item.into()).into()
+    match shard::expand(attr.into(), item.into()) {
+        Ok(res) => res.into(),
+        Err(err) => err.into_compile_error().into(),
+    }
 }
 
 /// # XST x! rune

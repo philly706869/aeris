@@ -2,10 +2,10 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{Ident, Index};
 
-use crate::shard::ir::{Kind, Shard};
+use crate::shard::ir;
 
-pub fn emit(shard: Shard) -> TokenStream {
-    let Shard {
+pub fn emit(shard: ir::Shard) -> TokenStream {
+    let ir::Shard {
         vis,
         ident,
         params,
@@ -29,7 +29,7 @@ pub fn emit(shard: Shard) -> TokenStream {
     let marker = quote!(::xst::internal::PhantomData<fn() -> (#(#params,)*)>);
     let name = ident.to_string();
     let (main, debug, output) = match kind {
-        Kind::Struct(fields) => {
+        ir::Kind::Struct(fields) => {
             // Group storage by name, but retain declaration order for Debug and DATA.
             let mut groups: Vec<(Ident, Vec<TokenStream>)> = Vec::new();
             let mut order = Vec::new();
@@ -80,7 +80,7 @@ pub fn emit(shard: Shard) -> TokenStream {
                 quote!(#ident<'i, #(#params),*>),
             )
         }
-        Kind::Enum(variants) => {
+        ir::Kind::Enum(variants) => {
             let declarations = variants.iter().map(|(ident, ty)| quote!(#ident(#ty)));
             let arms = variants.iter().map(|(ident, _)| {
                 let name = ident.to_string();
@@ -98,7 +98,7 @@ pub fn emit(shard: Shard) -> TokenStream {
                 quote!(#ident<'i, #(#params),*>),
             )
         }
-        Kind::Type => (
+        ir::Kind::Type => (
             quote!(#vis struct #ident<'i, #bounds>(::xst::internal::PhantomData<&'i ()>);),
             quote!(),
             quote!(&'i ::xst::internal::str),

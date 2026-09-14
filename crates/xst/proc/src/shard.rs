@@ -5,23 +5,26 @@ mod emit;
 mod ir;
 mod lower;
 
-pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
+use crate::names::Names;
+
+pub fn expand(attr: TokenStream, item: TokenStream) -> syn::Result<TokenStream> {
     if !attr.is_empty() {
-        return syn::Error::new_spanned(attr, "unexpected argument").into_compile_error();
+        return Err(syn::Error::new_spanned(attr, "unexpected argument"));
     }
-    match lower::lower(item) {
-        Ok(shard) => emit::emit(shard),
-        Err(err) => err.into_compile_error(),
-    }
+    let shard: ast::Shard = syn::parse2(item.clone())?;
+    let names = Names::new(item);
+    let ir = lower::lower(shard, names)?;
+    Ok(emit::emit(ir))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proc_macro2::TokenStream;
     use quote::quote;
 
-    fn expand(input: proc_macro2::TokenStream) -> syn::Result<proc_macro2::TokenStream> {
-        lower::lower(input).map(emit::emit)
+    fn expand(input: TokenStream) -> syn::Result<TokenStream> {
+        super::expand(TokenStream::new(), input)
     }
 
     #[test]
@@ -182,8 +185,11 @@ mod tests {
 
     #[test]
     fn z_and_question_modifiers_generate_lazy_data() {
-        fn data(input: proc_macro2::TokenStream) -> String {
-            lower::lower(input).unwrap().data.to_string()
+        fn data(input: TokenStream) -> String {
+            let ast = syn::parse2(input.clone()).unwrap();
+            let names = Names::new(input);
+            let ir = lower::lower(ast, names).unwrap();
+            ir.data.to_string()
         }
         for (greedy, lazy) in [
             (

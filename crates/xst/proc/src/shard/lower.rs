@@ -8,9 +8,7 @@ use crate::{
     shard::ir,
 };
 
-pub fn lower(input: TokenStream) -> syn::Result<ir::Shard> {
-    let mut names = Names::new(input.clone());
-    let shard: ast::Shard = syn::parse2(input)?;
+pub fn lower(shard: ast::Shard, mut names: Names) -> syn::Result<ir::Shard> {
     let core_ident = names.fresh("shard_core");
     let marker_ident = names.fresh("marker");
     let (vis, ident, params) = match &shard {
