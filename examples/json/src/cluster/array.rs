@@ -6,6 +6,6 @@ use crate::cluster::{JSONValue, Punctuated, Spanned, WS};
 pub struct JSONArray {
     bracket: x! { "[" },
     ws: WS,
-    entries: Punctuated<Spanned<xbox![JSONValue]>, Spanned<x! { "," }>>,
+    entries: Punctuated<Spanned<JSONValue>, Spanned<x! { "," }>>,
     bracket: x! { "]" },
 }
