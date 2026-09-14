@@ -72,7 +72,7 @@ pub fn emit(shard: Shard) -> TokenStream {
             (
                 quote! {
                     #vis struct #ident<'i, #bounds> {
-                        #marker_ident: ::xst::internal::PhantomData<(&'i (), fn() -> (#(#params,)*))>,
+                        #marker_ident: ::xst::internal::PhantomData<&'i ()>,
                         #(#fields,)*
                     }
                 },
@@ -105,7 +105,7 @@ pub fn emit(shard: Shard) -> TokenStream {
             )
         }
         Kind::Type => (
-            quote!(#vis struct #ident<'i, #bounds>(::xst::internal::PhantomData<(&'i (), fn() -> (#(#params,)*))>);),
+            quote!(#vis struct #ident<'i, #bounds>(::xst::internal::PhantomData<&'i ()>);),
             quote!(),
             quote!(&'i ::xst::internal::str),
         ),

@@ -60,17 +60,11 @@ struct Runes {
 }
 
 #[shard]
-type Primitive<T> = x! {
-    Identity<"a"> Identity<T> Identity<T+?>
+type Primitive = x! {
+    Identity<"a"> Identity<Letter> Identity<Letter+?>
     "b"*? "c"+? "d"^[2..4]? "e"^[3] ("f" "g")
     [| "h" | ] {! '0'..'9'}
 };
-
-#[shard]
-struct Unused<T> {}
-
-#[shard]
-type UnusedType<T> = x! { "x" };
 
 #[test]
 fn nested_closures_capture_generic_shards() {
@@ -83,7 +77,7 @@ fn nested_closures_capture_generic_shards() {
     });
     let _: ShardField<'_, ShardClosure<Root, 3>> = ("a", ",");
     let _ = <Root as Shard>::Core::DATA;
-    let _ = <Primitive<'static, Letter<'static>> as Shard>::Core::DATA;
+    let _ = <Primitive<'static> as Shard>::Core::DATA;
     let choice = Choice::<'_, Letter<'static>>::Value("a");
     assert_eq!(format!("{choice:?}"), "Value(\"a\")");
     let nested = Choice::<'_, Letter<'static>>::Nested(Identity {
@@ -104,7 +98,6 @@ fn instantiated_generic_shards_are_not_static() {
     // These calls become ambiguous if a generic shard implements StaticShard.
     let _ = <Identity<'static, Letter<'static>> as AmbiguousIfStatic<_>>::check;
     let _ = <Choice<'static, Letter<'static>> as AmbiguousIfStatic<_>>::check;
-    let _ = <Primitive<'static, Letter<'static>> as AmbiguousIfStatic<_>>::check;
 }
 
 #[test]

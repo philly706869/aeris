@@ -18,6 +18,8 @@ pub use json::JSON;
 pub use null::JSONNull;
 pub use number::{JSONExponent, JSONFraction, JSONNumber};
 pub use object::{JSONObject, JSONObjectEntry};
+pub use punctuated::Punctuated;
+pub use span::Spanned;
 pub use string::JSONString;
 pub use value::JSONValue;
 pub use ws::WS;
