@@ -1,41 +1,50 @@
-use proc_macro2::{Ident, TokenStream, TokenTree};
+use proc_macro2::Ident;
 use quote::format_ident;
 use rustc_hash::FxHashSet;
 
+#[derive(Default)]
 pub struct Names {
     used: FxHashSet<String>,
 }
 
 impl Names {
-    pub fn new(input: TokenStream) -> Self {
-        let mut names = Self {
-            used: FxHashSet::default(),
-        };
-        names.reserve(input);
-        names
+    pub fn reserve(&mut self, ident: Ident) {
+        let name = ident.to_string();
+        let name = name.strip_prefix("r#").unwrap_or(&name).to_owned();
+        self.used.insert(name);
     }
 
-    fn reserve(&mut self, tokens: TokenStream) {
-        for token in tokens {
-            match token {
-                TokenTree::Ident(ident) => {
-                    let name = ident.to_string();
-                    self.used
-                        .insert(name.strip_prefix("r#").unwrap_or(&name).to_owned());
-                }
-                TokenTree::Group(group) => self.reserve(group.stream()),
-                _ => {}
-            }
+    pub fn generator<'a>(&'a self, namespace: &'a str) -> NameGenerator<'a> {
+        NameGenerator::new(&self.used, namespace)
+    }
+}
+
+pub struct NameGenerator<'a> {
+    used: &'a FxHashSet<String>,
+    namespace: &'a str,
+    index: usize,
+}
+
+impl<'a> NameGenerator<'a> {
+    fn new(used: &'a FxHashSet<String>, namespace: &'a str) -> Self {
+        Self {
+            used,
+            namespace,
+            index: 0,
         }
     }
 
-    pub fn fresh(&mut self, kind: &str) -> Ident {
-        for index in 0usize.. {
-            let name = format!("__xst_{kind}_{index}");
-            if self.used.insert(name.clone()) {
+    pub fn next(&mut self) -> Ident {
+        loop {
+            let index = self.index;
+            self.index = self
+                .index
+                .checked_add(1)
+                .expect("generated identifier space exhausted");
+            let name = format!("__xst_{}_{}", self.namespace, index);
+            if !self.used.contains(&name) {
                 return format_ident!("{name}");
             }
         }
-        unreachable!("generated identifier space exhausted")
     }
 }
