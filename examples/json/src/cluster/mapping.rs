@@ -1,12 +1,11 @@
 //! #[shard] macro code generation example
 
-use xst::shard;
-
 // ////////////////
 // JSON
 // ////////////////
 
 // original reference: crate::cluster::json::JSON
+#[cfg(false)]
 #[shard]
 pub struct JSON {
     ws: WS,
@@ -62,6 +61,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::value::JSONValue
+#[cfg(false)]
 #[shard]
 pub enum JSONValue {
     Object(JSONObject),
@@ -127,6 +127,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::object::JSONObject
+#[cfg(false)]
 #[shard]
 pub struct JSONObject {
     brace: x! { "{" },
@@ -205,6 +206,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::object::JSONObjectEntry
+#[cfg(false)]
 #[shard]
 pub struct JSONObjectEntry {
     name: JSONString,
@@ -268,6 +270,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::array::JSONArray
+#[cfg(false)]
 #[shard]
 pub struct JSONArray {
     bracket: x! { "[" },
@@ -353,6 +356,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::string::JSONString
+#[cfg(false)]
 #[shard]
 pub struct JSONString {
     quote: x! { "\"" },
@@ -397,6 +401,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::string::Content
+#[cfg(false)]
 #[shard]
 type Content = x! {
     [
@@ -437,6 +442,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::string::Escape
+#[cfg(false)]
 #[shard]
 type Escape = x! {[
     | {'"' '\\' '/' 'b' 'f' 'n' 'r' 't'}
@@ -493,6 +499,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::number::JSONNumber
+#[cfg(false)]
 #[shard]
 pub struct JSONNumber {
     sign: xopt![x! { "-" }],
@@ -555,6 +562,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::number::JSONFraction
+#[cfg(false)]
 #[shard]
 pub struct JSONFraction {
     point: x! { "." },
@@ -596,6 +604,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::number::JSONExponent
+#[cfg(false)]
 #[shard]
 pub struct JSONExponent {
     e: x! { {'E' 'e'} },
@@ -644,6 +653,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::number::Digits
+#[cfg(false)]
 #[shard]
 type Digits = x! { Digit+ };
 
@@ -670,6 +680,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::number::Digit
+#[cfg(false)]
 #[shard]
 type Digit = x! {[
     | "0"
@@ -699,6 +710,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::number::One2Nine
+#[cfg(false)]
 #[shard]
 type One2Nine = x! { {'1'..'9'} };
 
@@ -730,6 +742,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::boolean::JSONBoolean
+#[cfg(false)]
 #[shard]
 pub enum JSONBoolean {
     True(JSONTrue),
@@ -771,6 +784,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::boolean::JSONTrue
+#[cfg(false)]
 #[shard]
 pub struct JSONTrue {
     text: x! { "true" },
@@ -807,6 +821,7 @@ const _: () = {
 };
 
 // original reference: crate::cluster::boolean::JSONFalse
+#[cfg(false)]
 #[shard]
 pub struct JSONFalse {
     text: x! { "false" },
@@ -851,6 +866,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::null::JSONNull
+#[cfg(false)]
 #[shard]
 pub struct JSONNull {
     text: x! { "null" },
@@ -895,6 +911,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::ws::WS
+#[cfg(false)]
 #[shard]
 pub struct WS {
     space: x! { {' ' '\t' '\n' '\r'}* },
@@ -943,6 +960,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::punctuated::Punctuated
+#[cfg(false)]
 #[shard]
 pub struct Punctuated<T, P> {
     inner: xopt![(xbox![T], xvec![(P, T), ..])],
@@ -1009,6 +1027,7 @@ const _: () = {
 // ////////////////
 
 // original reference: crate::cluster::spanned::Spanned
+#[cfg(false)]
 #[shard]
 pub struct Spanned<T> {
     inner: T,
