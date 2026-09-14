@@ -62,7 +62,7 @@ struct Runes {
 #[shard]
 type Primitive<T> = x! {
     Identity<"a"> Identity<T> Identity<T+?>
-    "b"*? "c"+? "d"^[2..4?] "e"^[3] ("f" "g")
+    "b"*? "c"+? "d"^[2..4]? "e"^[3] ("f" "g")
     [| "h" | ] {! '0'..'9'}
 };
 
@@ -146,21 +146,27 @@ struct Lazy {
     vec: xvecz![x! { "vec" }, 2..4],
     star: x! { "star"*? },
     plus: x! { "plus"+? },
-    range: x! { "range"^[1..3?] },
-    unbounded: x! { "unbounded"^[..?] },
+    range: x! { "range"^[1..3]? },
+    unbounded: x! { "unbounded"^[..]? },
+    lower_bound: x! { "lower"^[10..]? },
+    upper_bound: x! { "upper"^[..10]? },
+    both_bounds: x! { "both"^[10..20]? },
     nested: Identity<xoptz![xvec![x! { "nested" }, 1..2]]>,
 }
 
 #[test]
 fn lazy_flags_reach_grammar_data_and_closures() {
     let data = format!("{:?}", <Lazy<'static> as Shard>::Core::DATA);
-    assert_eq!(data.matches("lazy: true").count(), 6);
+    assert_eq!(data.matches("lazy: true").count(), 9);
     assert_eq!(data.matches("lazy: false").count(), 0);
     for bounds in [
         "min: 2, max: Some(4), lazy: true",
         "min: 0, max: None, lazy: true",
         "min: 1, max: None, lazy: true",
         "min: 1, max: Some(3), lazy: true",
+        "min: 10, max: None, lazy: true",
+        "min: 0, max: Some(10), lazy: true",
+        "min: 10, max: Some(20), lazy: true",
     ] {
         assert!(data.contains(bounds), "{data}");
     }

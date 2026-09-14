@@ -707,6 +707,7 @@ pub mod prim_expr {
             caret_token: Token![^],
             bracket: Bracket,
             limit: Limit,
+            question_token: Option<Token![?]>,
         },
     }
 
@@ -724,10 +725,23 @@ pub mod prim_expr {
                 })
             } else if input.peek(Token![^]) {
                 let content;
+                let caret_token = input.parse()?;
+                let bracket = bracketed!(content in input);
+                let limit = content.parse()?;
+                let question_token: Option<Token![?]> = input.parse()?;
+                if matches!(limit, Limit::Exact(_)) {
+                    if let Some(question) = &question_token {
+                        return Err(syn::Error::new(
+                            question.span,
+                            "lazy modifier requires a repetition range",
+                        ));
+                    }
+                }
                 Ok(Self::Caret {
-                    caret_token: input.parse()?,
-                    bracket: bracketed!(content in input),
-                    limit: content.parse()?,
+                    caret_token,
+                    bracket,
+                    limit,
+                    question_token,
                 })
             } else {
                 Ok(Self::None)
@@ -776,7 +790,6 @@ pub mod prim_expr {
         pub start: Option<LitInt>,
         pub dot_dot_token: Token![..],
         pub end: Option<LitInt>,
-        pub question_token: Option<Token![?]>,
     }
 
     impl Parse for RangeLimit {
@@ -785,7 +798,6 @@ pub mod prim_expr {
                 start: input.parse()?,
                 dot_dot_token: input.parse()?,
                 end: input.parse()?,
-                question_token: input.parse()?,
             })
         }
     }

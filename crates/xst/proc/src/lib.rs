@@ -100,6 +100,29 @@ mod tests {
     }
 
     #[test]
+    fn rejects_lazy_marker_inside_bounds_or_after_exact_count() {
+        for input in [
+            quote!(
+                type A = x! { "a"^[..?] };
+            ),
+            quote!(
+                type A = x! { "a"^[10..?] };
+            ),
+            quote!(
+                type A = x! { "a"^[..10?] };
+            ),
+            quote!(
+                type A = x! { "a"^[10..20?] };
+            ),
+            quote!(
+                type A = x! { "a"^[10]? };
+            ),
+        ] {
+            assert!(expand(input.clone()).is_err(), "accepted {input}");
+        }
+    }
+
+    #[test]
     fn rejects_invalid_ranges_and_parameters() {
         for input in [
             quote!(
@@ -230,10 +253,10 @@ mod tests {
             ),
             (
                 quote!(
-                    type A = x! { "a"* "b"+ "c"^[1..3] "d"^[..?] };
+                    type A = x! { "a"* "b"+ "c"^[1..3] "d"^[..]? };
                 ),
                 quote!(
-                    type A = x! { "a"*? "b"+? "c"^[1..3?] "d"^[..?] };
+                    type A = x! { "a"*? "b"+? "c"^[1..3]? "d"^[..]? };
                 ),
             ),
         ] {

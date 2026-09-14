@@ -297,12 +297,15 @@ impl Context {
                 (quote!(1), quote!(::xst::internal::Option::None)),
                 question_token.is_some(),
             ),
-            prim::Modifier::Caret { limit, .. } => match limit {
+            prim::Modifier::Caret {
+                limit,
+                question_token,
+                ..
+            } => match limit {
                 prim::Limit::Exact(limit) => (exact(&limit.count), false),
-                prim::Limit::Range(limit) => (
-                    range(&limit.start, &limit.end)?,
-                    limit.question_token.is_some(),
-                ),
+                prim::Limit::Range(limit) => {
+                    (range(&limit.start, &limit.end)?, question_token.is_some())
+                }
             },
         };
         Ok(repetition(data, bounds.0, bounds.1, lazy))
