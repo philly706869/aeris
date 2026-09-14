@@ -91,18 +91,18 @@ impl Context {
                     data,
                 }
             }
-            rust::Expr::XOpt(expr) => self.option(&expr.expr)?,
-            rust::Expr::XOptZ(expr) => self.option(&expr.expr)?,
+            rust::Expr::XOpt(expr) => self.option(&expr.expr, false)?,
+            rust::Expr::XOptZ(expr) => self.option(&expr.expr, true)?,
             rust::Expr::XVec(expr) => {
                 let bounds = match &expr.limit {
                     rust::Limit::Exact(limit) => exact(&limit.count),
                     rust::Limit::Range(limit) => range(&limit.start, &limit.end)?,
                 };
-                self.vec(&expr.expr, bounds)?
+                self.vec(&expr.expr, bounds, false)?
             }
             rust::Expr::XVecZ(expr) => {
                 let bounds = range(&expr.limit.start, &expr.limit.end)?;
-                self.vec(&expr.expr, bounds)?
+                self.vec(&expr.expr, bounds, true)?
             }
             rust::Expr::Tuple(expr) => {
                 let mut outputs = Vec::new();
@@ -127,11 +127,16 @@ impl Context {
         })
     }
 
-    fn option(&mut self, expr: &rust::Expr) -> syn::Result<Expr> {
+    fn option(&mut self, expr: &rust::Expr, lazy: bool) -> syn::Result<Expr> {
         let Expr { output, data } = self.expr(expr)?;
+        let constructor = if lazy {
+            quote!(option_lazy)
+        } else {
+            quote!(option)
+        };
         Ok(Expr {
             output: quote!(::xst::internal::Option<#output>),
-            data: quote!(::xst::internal::ShardData::option(&#data)),
+            data: quote!(::xst::internal::ShardData::#constructor(&#data)),
         })
     }
 
@@ -139,11 +144,12 @@ impl Context {
         &mut self,
         expr: &rust::Expr,
         (min, max): (TokenStream, TokenStream),
+        lazy: bool,
     ) -> syn::Result<Expr> {
         let Expr { output, data } = self.expr(expr)?;
         Ok(Expr {
             output: quote!(::xst::internal::Vec<#output>),
-            data: quote!(::xst::internal::ShardData::vec(&#data, #min, #max)),
+            data: repetition(data, min, max, lazy),
         })
     }
 
@@ -281,17 +287,31 @@ impl Context {
             ),
             prim::Atom::Shard(shard) => reference(self.prim_shard(shard)?),
         };
-        let (min, max) = match &expr.modifier {
+        let (bounds, lazy) = match &expr.modifier {
             prim::Modifier::None => return Ok(data),
-            prim::Modifier::Star { .. } => (quote!(0), quote!(::xst::internal::Option::None)),
-            prim::Modifier::Plus { .. } => (quote!(1), quote!(::xst::internal::Option::None)),
+            prim::Modifier::Star { question_token, .. } => (
+                (quote!(0), quote!(::xst::internal::Option::None)),
+                question_token.is_some(),
+            ),
+            prim::Modifier::Plus { question_token, .. } => (
+                (quote!(1), quote!(::xst::internal::Option::None)),
+                question_token.is_some(),
+            ),
             prim::Modifier::Caret { limit, .. } => match limit {
-                prim::Limit::Exact(limit) => exact(&limit.count),
-                prim::Limit::Range(limit) => range(&limit.start, &limit.end)?,
+                prim::Limit::Exact(limit) => (exact(&limit.count), false),
+                prim::Limit::Range(limit) => (
+                    range(&limit.start, &limit.end)?,
+                    limit.question_token.is_some(),
+                ),
             },
         };
-        Ok(quote!(::xst::internal::ShardData::vec(&#data, #min, #max)))
+        Ok(repetition(data, bounds.0, bounds.1, lazy))
     }
+}
+
+fn repetition(data: TokenStream, min: TokenStream, max: TokenStream, lazy: bool) -> TokenStream {
+    let constructor = if lazy { quote!(vec_lazy) } else { quote!(vec) };
+    quote!(::xst::internal::ShardData::#constructor(&#data, #min, #max))
 }
 
 fn reference(ty: TokenStream) -> TokenStream {

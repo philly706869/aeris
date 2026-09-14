@@ -39,11 +39,19 @@ impl ShardData {
     }
 
     pub const fn option(item: &'static ShardData) -> Self {
-        Self::new(ShardDataKind::Option(OptionData::new(item)))
+        Self::new(ShardDataKind::Option(OptionData::new(item, false)))
+    }
+
+    pub const fn option_lazy(item: &'static ShardData) -> Self {
+        Self::new(ShardDataKind::Option(OptionData::new(item, true)))
     }
 
     pub const fn vec(item: &'static ShardData, min: usize, max: Option<usize>) -> Self {
-        Self::new(ShardDataKind::Vec(VecData::new(item, min, max)))
+        Self::new(ShardDataKind::Vec(VecData::new(item, min, max, false)))
+    }
+
+    pub const fn vec_lazy(item: &'static ShardData, min: usize, max: Option<usize>) -> Self {
+        Self::new(ShardDataKind::Vec(VecData::new(item, min, max, true)))
     }
 
     pub const fn sequence(items: &'static [&'static ShardData]) -> Self {
@@ -99,11 +107,12 @@ impl SetData {
 #[derive(Debug)]
 pub struct OptionData {
     item: &'static ShardData,
+    lazy: bool,
 }
 
 impl OptionData {
-    pub const fn new(item: &'static ShardData) -> Self {
-        Self { item }
+    pub const fn new(item: &'static ShardData, lazy: bool) -> Self {
+        Self { item, lazy }
     }
 }
 
@@ -112,11 +121,17 @@ pub struct VecData {
     item: &'static ShardData,
     min: usize,
     max: Option<usize>,
+    lazy: bool,
 }
 
 impl VecData {
-    pub const fn new(item: &'static ShardData, min: usize, max: Option<usize>) -> Self {
-        Self { item, min, max }
+    pub const fn new(item: &'static ShardData, min: usize, max: Option<usize>, lazy: bool) -> Self {
+        Self {
+            item,
+            min,
+            max,
+            lazy,
+        }
     }
 }
 

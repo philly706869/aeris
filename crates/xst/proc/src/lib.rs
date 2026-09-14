@@ -206,34 +206,41 @@ mod tests {
     }
 
     #[test]
-    fn z_and_question_modifiers_preserve_data() {
+    fn z_and_question_modifiers_generate_lazy_data() {
         fn data(input: proc_macro2::TokenStream) -> String {
             lower::lower(syn::parse2(input).unwrap())
                 .unwrap()
                 .data
                 .to_string()
         }
-        assert_eq!(
-            data(quote!(
-                struct A {
-                    a: xopt![B],
-                    b: xvec![B, 1..3],
-                }
-            )),
-            data(quote!(
-                struct A {
-                    a: xoptz![B],
-                    b: xvecz![B, 1..3],
-                }
-            )),
-        );
-        assert_eq!(
-            data(quote!(
-                type A = x! { "a"* "b"+ "c"^[1..3] };
-            )),
-            data(quote!(
-                type A = x! { "a"*? "b"+? "c"^[1..3?] };
-            )),
-        );
+        for (greedy, lazy) in [
+            (
+                quote!(
+                    struct A {
+                        a: xopt![B],
+                        b: xvec![B, 1..3],
+                    }
+                ),
+                quote!(
+                    struct A {
+                        a: xoptz![B],
+                        b: xvecz![B, 1..3],
+                    }
+                ),
+            ),
+            (
+                quote!(
+                    type A = x! { "a"* "b"+ "c"^[1..3] "d"^[..?] };
+                ),
+                quote!(
+                    type A = x! { "a"*? "b"+? "c"^[1..3?] "d"^[..?] };
+                ),
+            ),
+        ] {
+            let greedy = data(greedy);
+            let lazy = data(lazy);
+            assert_ne!(greedy, lazy);
+            assert_eq!(greedy.replace("_lazy", ""), lazy.replace("_lazy", ""));
+        }
     }
 }

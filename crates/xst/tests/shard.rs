@@ -139,3 +139,39 @@ fn rune_output_types_and_inclusive_bounds() {
     assert!(data.contains("min: 2, max: Some(4)"));
     assert!(data.contains("min: 0, max: Some(2)"));
 }
+
+#[shard]
+struct Lazy {
+    option: xoptz![x! { "option" }],
+    vec: xvecz![x! { "vec" }, 2..4],
+    star: x! { "star"*? },
+    plus: x! { "plus"+? },
+    range: x! { "range"^[1..3?] },
+    unbounded: x! { "unbounded"^[..?] },
+    nested: Identity<xoptz![xvec![x! { "nested" }, 1..2]]>,
+}
+
+#[test]
+fn lazy_flags_reach_grammar_data_and_closures() {
+    let data = format!("{:?}", <Lazy<'static> as Shard>::Core::DATA);
+    assert_eq!(data.matches("lazy: true").count(), 6);
+    assert_eq!(data.matches("lazy: false").count(), 0);
+    for bounds in [
+        "min: 2, max: Some(4), lazy: true",
+        "min: 0, max: None, lazy: true",
+        "min: 1, max: None, lazy: true",
+        "min: 1, max: Some(3), lazy: true",
+    ] {
+        assert!(data.contains(bounds), "{data}");
+    }
+
+    type Nested = ShardClosure<Lazy<'static>, 0>;
+    let nested = format!("{:?}", <Nested as Shard>::Core::DATA);
+    assert!(nested.contains("min: 1, max: Some(2), lazy: false"));
+    assert!(nested.ends_with(", lazy: true }) }"));
+    let _: ShardField<'_, Nested> = Some(vec!["nested"]);
+
+    let greedy = format!("{:?}", <Runes<'static> as Shard>::Core::DATA);
+    assert_eq!(greedy.matches("lazy: false").count(), 3);
+    assert_eq!(greedy.matches("lazy: true").count(), 2);
+}
