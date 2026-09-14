@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{Ident, Index};
 
 use crate::ir::{Kind, Shard};
@@ -9,6 +9,8 @@ pub fn emit(shard: Shard) -> TokenStream {
         vis,
         ident,
         params,
+        core_ident,
+        marker_ident,
         kind,
         data,
         closures,
@@ -43,14 +45,6 @@ pub fn emit(shard: Shard) -> TokenStream {
                 groups[group].1.push(ty);
                 order.push((group, index));
             }
-            let mut marker_index = 0;
-            let marker_ident = loop {
-                let candidate = format_ident!("__xst_marker_{marker_index}");
-                if groups.iter().all(|(ident, _)| ident != &candidate) {
-                    break candidate;
-                }
-                marker_index += 1;
-            };
             let fields = groups.iter().map(|(ident, types)| {
                 if types.len() == 1 {
                     let ty = &types[0];
@@ -116,7 +110,7 @@ pub fn emit(shard: Shard) -> TokenStream {
         }
     });
     let closures = closures.into_iter().map(|closure| {
-        let name = format_ident!("__xst_shard_closure_{}", closure.index);
+        let name = closure.ident;
         let index = Index::from(closure.index);
         let output = closure.output;
         let data = closure.data;
@@ -130,7 +124,7 @@ pub fn emit(shard: Shard) -> TokenStream {
                 type Output<'i> = #output;
                 const DATA: &'static ::xst::internal::ShardData = &#data;
             }
-            impl #generics ::xst::internal::ShardClosureForward<#index> for __xst_shard_core_0 #args {
+            impl #generics ::xst::internal::ShardClosureForward<#index> for #core_ident #args {
                 type Closure = #name #args;
             }
         }
@@ -141,11 +135,11 @@ pub fn emit(shard: Shard) -> TokenStream {
             #debug
             #static_shard
             impl #generics ::xst::internal::Shard for #ident<'static, #(#params),*> {
-                type Core = __xst_shard_core_0 #args;
+                type Core = #core_ident #args;
             }
             #[allow(non_camel_case_types)]
-            #vis struct __xst_shard_core_0 #generics (#marker);
-            impl #generics ::xst::internal::ShardCore for __xst_shard_core_0 #args {
+            #vis struct #core_ident #generics (#marker);
+            impl #generics ::xst::internal::ShardCore for #core_ident #args {
                 type Output<'i> = #output;
                 const DATA: &'static ::xst::internal::ShardData = &#data;
             }

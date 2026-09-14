@@ -1,13 +1,18 @@
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::quote;
 use syn::{Ident, LitInt};
 
 use crate::{
     ast::{self, prim_expr as prim, rust_expr as rust},
     ir,
+    names::Names,
 };
 
-pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
+pub fn lower(input: TokenStream) -> syn::Result<ir::Shard> {
+    let mut names = Names::new(input.clone());
+    let shard: ast::Shard = syn::parse2(input)?;
+    let core_ident = names.fresh("shard_core");
+    let marker_ident = names.fresh("marker");
     let (vis, ident, params) = match &shard {
         ast::Shard::Struct(s) => (&s.vis, &s.ident, &s.params),
         ast::Shard::Enum(s) => (&s.vis, &s.ident, &s.params),
@@ -17,6 +22,7 @@ pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
         ident: ident.clone(),
         params: params.idents.iter().cloned().collect(),
         closures: Vec::new(),
+        names,
     };
     for (index, param) in context.params.iter().enumerate() {
         if context.params[..index].contains(param) {
@@ -58,6 +64,8 @@ pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
     };
     Ok(ir::Shard {
         vis,
+        core_ident,
+        marker_ident,
         ident: context.ident,
         params: context.params,
         kind,
@@ -67,6 +75,7 @@ pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
 }
 
 struct Context {
+    names: Names,
     ident: Ident,
     params: Vec<Ident>,
     closures: Vec<ir::Closure>,
@@ -163,11 +172,8 @@ impl Context {
                 // Reserve the index before lowering nested arguments.
                 let index = self.reserve_closure();
                 let Expr { output, data } = self.expr(arg)?;
-                self.closures[index] = ir::Closure {
-                    index,
-                    output,
-                    data,
-                };
+                self.closures[index].output = output;
+                self.closures[index].data = data;
                 self.closure_types(index)
             };
             public.push(a);
@@ -202,6 +208,7 @@ impl Context {
         let index = self.closures.len();
         self.closures.push(ir::Closure {
             index,
+            ident: self.names.fresh("shard_closure"),
             output: TokenStream::new(),
             data: TokenStream::new(),
         });
@@ -211,7 +218,7 @@ impl Context {
     fn closure_types(&self, index: usize) -> (TokenStream, TokenStream) {
         let ident = &self.ident;
         let params = &self.params;
-        let closure = format_ident!("__xst_shard_closure_{index}");
+        let closure = &self.closures[index].ident;
         let args = if params.is_empty() {
             quote!()
         } else {
@@ -243,11 +250,8 @@ impl Context {
             } else {
                 let index = self.reserve_closure();
                 let data = self.prim(arg)?;
-                self.closures[index] = ir::Closure {
-                    index,
-                    output: quote!(&'i ::xst::internal::str),
-                    data,
-                };
+                self.closures[index].output = quote!(&'i ::xst::internal::str);
+                self.closures[index].data = data;
                 self.closure_types(index).1
             };
             public.push(ty.clone());

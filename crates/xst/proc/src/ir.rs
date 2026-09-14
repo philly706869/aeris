@@ -6,6 +6,8 @@ pub struct Shard {
     pub vis: Visibility,
     pub ident: Ident,
     pub params: Vec<Ident>,
+    pub core_ident: Ident,
+    pub marker_ident: Ident,
     pub kind: Kind,
     pub data: TokenStream,
     pub closures: Vec<Closure>,
@@ -21,6 +23,7 @@ pub enum Kind {
 #[derive(Debug)]
 pub struct Closure {
     pub index: usize,
+    pub ident: Ident,
     pub output: TokenStream,
     pub data: TokenStream,
 }

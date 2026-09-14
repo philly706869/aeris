@@ -4,6 +4,7 @@ mod ast;
 mod emit;
 mod ir;
 mod lower;
+mod names;
 
 /// Defines a shard's output type and its compile-time grammar.
 ///
@@ -20,8 +21,7 @@ pub fn shard(attr: TokenStream, item: TokenStream) -> TokenStream {
         .into_compile_error()
         .into();
     }
-    let shard = syn::parse_macro_input!(item as ast::Shard);
-    match lower::lower(shard) {
+    match lower::lower(item.into()) {
         Ok(shard) => emit::emit(shard).into(),
         Err(error) => error.into_compile_error().into(),
     }
@@ -69,7 +69,7 @@ mod tests {
     use quote::quote;
 
     fn expand(input: proc_macro2::TokenStream) -> syn::Result<proc_macro2::TokenStream> {
-        lower::lower(syn::parse2(input)?).map(emit::emit)
+        lower::lower(input).map(emit::emit)
     }
 
     #[test]
@@ -231,10 +231,7 @@ mod tests {
     #[test]
     fn z_and_question_modifiers_generate_lazy_data() {
         fn data(input: proc_macro2::TokenStream) -> String {
-            lower::lower(syn::parse2(input).unwrap())
-                .unwrap()
-                .data
-                .to_string()
+            lower::lower(input).unwrap().data.to_string()
         }
         for (greedy, lazy) in [
             (
