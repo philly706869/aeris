@@ -10,8 +10,6 @@ mod string;
 mod value;
 mod ws;
 
-mod mapping;
-
 pub use array::JSONArray;
 pub use boolean::JSONBoolean;
 pub use json::JSON;
