@@ -1,6 +1,6 @@
 use xst::shard;
 
-// use crate::cluster::WS;
+use crate::cluster::WS;
 
 #[shard]
 pub struct Spanned<T> {
