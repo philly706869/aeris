@@ -174,25 +174,3 @@ impl ReferenceData {
         }
     }
 }
-
-fn normalize_set(set: &SetData) -> Vec<RangeInclusive<char>> {
-    let mut ranges = Vec::from(set.range);
-    ranges.sort_unstable_by_key(|r| (*r.start(), *r.end()));
-    let mut normalized: Vec<RangeInclusive<char>> = Vec::with_capacity(ranges.len());
-    for range in ranges {
-        let start = *range.start();
-        let end = *range.end();
-        match normalized.last_mut() {
-            Some(last) => {
-                let last_end = *last.end();
-                if start as u32 <= last_end as u32 + 1 && end > last_end {
-                    *last = *last.start()..=end;
-                } else {
-                    normalized.push(range);
-                }
-            }
-            None => normalized.push(range),
-        }
-    }
-    normalized
-}
