@@ -5,15 +5,12 @@ mod emit;
 mod ir;
 mod lower;
 
-use crate::names::Names;
-
 pub fn expand(attr: TokenStream, item: TokenStream) -> syn::Result<TokenStream> {
     if !attr.is_empty() {
         return Err(syn::Error::new_spanned(attr, "unexpected argument"));
     }
-    let shard: ast::Shard = syn::parse2(item.clone())?;
-    let names = Names::new(item);
-    let ir = lower::lower(shard, names)?;
+    let ast: ast::Shard = syn::parse2(item.clone())?;
+    let ir = lower::lower(ast)?;
     Ok(emit::emit(ir))
 }
 
@@ -187,8 +184,7 @@ mod tests {
     fn z_and_question_modifiers_generate_lazy_data() {
         fn data(input: TokenStream) -> String {
             let ast = syn::parse2(input.clone()).unwrap();
-            let names = Names::new(input);
-            let ir = lower::lower(ast, names).unwrap();
+            let ir = lower::lower(ast).unwrap();
             ir.data.to_string()
         }
         for (greedy, lazy) in [
