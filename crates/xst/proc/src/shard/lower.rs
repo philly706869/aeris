@@ -167,7 +167,6 @@ impl Context<'_> {
             let (a, b) = if let rust::Expr::Shard(shard) = arg {
                 self.shard(shard)?
             } else {
-                // Reserve the index before lowering nested arguments.
                 let index = self.reserve_closure();
                 let Expr { output, data } = self.expr(arg)?;
                 self.closures[index].output = output;

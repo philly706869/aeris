@@ -30,7 +30,6 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
     let name = ident.to_string();
     let (main, debug, output) = match kind {
         ir::Kind::Struct(fields) => {
-            // Group storage by name, but retain declaration order for Debug and DATA.
             let mut groups: Vec<(Ident, Vec<TokenStream>)> = Vec::new();
             let mut order = Vec::new();
             for (ident, ty) in fields {
