@@ -3,14 +3,14 @@ use quote::quote;
 use syn::{Ident, LitInt};
 
 use crate::{
-    names::Names,
+    names::{NameGenerator, Names},
     shard::ast::{self, prim_expr as prim, rust_expr as rust},
     shard::ir,
 };
 
-pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
-    let core_ident = names.fresh("shard_core");
-    let marker_ident = names.fresh("marker");
+pub fn lower(shard: ast::Shard, names: Names) -> syn::Result<ir::Shard> {
+    let core_ident = names.generator("shard_core").next();
+    let marker_ident = names.generator("marker").next();
     let (vis, ident, params) = match &shard {
         ast::Shard::Struct(s) => (&s.vis, &s.ident, &s.params),
         ast::Shard::Enum(s) => (&s.vis, &s.ident, &s.params),
@@ -20,7 +20,7 @@ pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
         ident: ident.clone(),
         params: params.idents.iter().cloned().collect(),
         closures: Vec::new(),
-        names,
+        closure_names: names.generator("shard_closure"),
     };
     for (index, param) in context.params.iter().enumerate() {
         if context.params[..index].contains(param) {
@@ -72,8 +72,8 @@ pub fn lower(shard: ast::Shard) -> syn::Result<ir::Shard> {
     })
 }
 
-struct Context {
-    names: Names,
+struct Context<'a> {
+    closure_names: NameGenerator<'a>,
     ident: Ident,
     params: Vec<Ident>,
     closures: Vec<ir::Closure>,
@@ -84,7 +84,7 @@ struct Expr {
     data: TokenStream,
 }
 
-impl Context {
+impl Context<'_> {
     fn expr(&mut self, expr: &rust::Expr) -> syn::Result<Expr> {
         Ok(match expr {
             rust::Expr::X(expr) => Expr {
@@ -206,7 +206,7 @@ impl Context {
         let index = self.closures.len();
         self.closures.push(ir::Closure {
             index,
-            ident: self.names.fresh("shard_closure"),
+            ident: self.closure_names.next(),
             output: TokenStream::new(),
             data: TokenStream::new(),
         });

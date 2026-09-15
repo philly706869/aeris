@@ -1,4 +1,6 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{TokenStream, TokenTree};
+
+use crate::names::Names;
 
 mod ast;
 mod emit;
@@ -10,8 +12,20 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> syn::Result<TokenStream> 
         return Err(syn::Error::new_spanned(attr, "unexpected argument"));
     }
     let ast: ast::Shard = syn::parse2(item.clone())?;
-    let ir = lower::lower(ast)?;
+    let mut names = Names::default();
+    reserve_names(&mut names, item);
+    let ir = lower::lower(ast, names)?;
     Ok(emit::emit(ir))
+}
+
+fn reserve_names(names: &mut Names, tokens: TokenStream) {
+    for token in tokens {
+        match token {
+            TokenTree::Ident(ident) => names.reserve(ident),
+            TokenTree::Group(group) => reserve_names(names, group.stream()),
+            _ => {}
+        }
+    }
 }
 
 #[cfg(test)]
@@ -184,7 +198,9 @@ mod tests {
     fn z_and_question_modifiers_generate_lazy_data() {
         fn data(input: TokenStream) -> String {
             let ast = syn::parse2(input.clone()).unwrap();
-            let ir = lower::lower(ast).unwrap();
+            let mut names = Names::default();
+            reserve_names(&mut names, input);
+            let ir = lower::lower(ast, names).unwrap();
             ir.data.to_string()
         }
         for (greedy, lazy) in [
