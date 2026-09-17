@@ -1,5 +1,15 @@
 use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 
+pub mod internal {
+    pub use crate::shard::Shard;
+    pub use crate::shard::ShardClosure;
+    pub use crate::shard::ShardClosureForward;
+    pub use crate::shard::ShardCore;
+    pub use crate::shard::ShardData;
+    pub use crate::shard::ShardField;
+    pub use crate::shard::StaticShard;
+}
+
 pub trait StaticShard: Shard {}
 
 pub trait Shard: 'static {
@@ -22,7 +32,7 @@ pub trait ShardClosureForward<const INDEX: usize>: ShardCore {
 
 #[derive(Debug)]
 pub struct ShardData {
-    kind: ShardDataKind,
+    pub(crate) kind: ShardDataKind,
 }
 
 impl ShardData {
@@ -83,7 +93,7 @@ pub enum ShardDataKind {
 
 #[derive(Debug)]
 pub struct LiteralData {
-    text: &'static str,
+    pub text: &'static str,
 }
 
 impl LiteralData {
@@ -94,8 +104,8 @@ impl LiteralData {
 
 #[derive(Debug)]
 pub struct SetData {
-    negated: bool,
-    range: &'static [RangeInclusive<char>],
+    pub negated: bool,
+    pub range: &'static [RangeInclusive<char>],
 }
 
 impl SetData {
@@ -106,8 +116,8 @@ impl SetData {
 
 #[derive(Debug)]
 pub struct OptionData {
-    item: &'static ShardData,
-    lazy: bool,
+    pub item: &'static ShardData,
+    pub lazy: bool,
 }
 
 impl OptionData {
@@ -118,10 +128,10 @@ impl OptionData {
 
 #[derive(Debug)]
 pub struct VecData {
-    item: &'static ShardData,
-    min: usize,
-    max: Option<usize>,
-    lazy: bool,
+    pub item: &'static ShardData,
+    pub min: usize,
+    pub max: Option<usize>,
+    pub lazy: bool,
 }
 
 impl VecData {
@@ -137,7 +147,7 @@ impl VecData {
 
 #[derive(Debug)]
 pub struct SequenceData {
-    items: &'static [&'static ShardData],
+    pub items: &'static [&'static ShardData],
 }
 
 impl SequenceData {
@@ -148,7 +158,7 @@ impl SequenceData {
 
 #[derive(Debug)]
 pub struct AlternativeData {
-    items: &'static [&'static ShardData],
+    pub items: &'static [&'static ShardData],
 }
 
 impl AlternativeData {
@@ -159,8 +169,8 @@ impl AlternativeData {
 
 #[derive(Debug)]
 pub struct ReferenceData {
-    id: TypeId,
-    reference: fn() -> &'static ShardData,
+    pub id: TypeId,
+    pub reference: fn() -> &'static ShardData,
 }
 
 impl ReferenceData {
