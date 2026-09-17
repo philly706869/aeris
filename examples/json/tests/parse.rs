@@ -2,18 +2,6 @@ use example_json::JSON;
 use xst::Cluster;
 
 #[test]
-fn parses_json_value() {
-    let cluster = Cluster::<JSON>::build();
-    let json = cluster
-        .parse(r#"{"msg":"영바재보"}"#)
-        .unwrap()
-        .result()
-        .unwrap();
-    dbg!(json);
-    panic!();
-}
-
-#[test]
 fn parses_json_values() {
     let cluster = Cluster::<JSON>::build();
     for input in [
