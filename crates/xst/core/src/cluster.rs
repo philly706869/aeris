@@ -2,7 +2,16 @@ use core::{any::TypeId, marker::PhantomData};
 use rustc_hash::FxHashMap;
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::shard::{ReferenceData, SetData, ShardData, ShardDataKind, StaticShard};
+use crate::shard::{ReferenceData, ShardData, ShardDataKind, StaticShard};
+
+mod optimize;
+mod set;
+
+use optimize::{First, ShiftRange};
+use set::CharSet;
+
+#[cfg(test)]
+mod optimization_tests;
 
 pub struct Cluster<S>
 where
@@ -40,21 +49,6 @@ enum Symbol {
 }
 
 #[derive(Debug)]
-enum Terminal {
-    Char(char),
-    Set(&'static SetData),
-}
-
-impl Terminal {
-    fn matches(&self, ch: char) -> bool {
-        match self {
-            Self::Char(expected) => ch == *expected,
-            Self::Set(set) => set.range.iter().any(|range| range.contains(&ch)) != set.negated,
-        }
-    }
-}
-
-#[derive(Debug)]
 struct Rule {
     lhs: usize,
     rhs: Vec<Symbol>,
@@ -64,13 +58,21 @@ struct Rule {
 struct Grammar {
     rules: Vec<Rule>,
     by_lhs: Vec<Vec<usize>>,
-    terminals: Vec<Terminal>,
-    chars: FxHashMap<char, usize>,
+    terminals: Vec<CharSet>,
+    terminal_ids: FxHashMap<CharSet, usize>,
     references: FxHashMap<TypeId, usize>,
     nodes: FxHashMap<*const ShardData, usize>,
 }
 
 impl Grammar {
+    fn terminal(&mut self, set: CharSet) -> usize {
+        *self.terminal_ids.entry(set.clone()).or_insert_with(|| {
+            let id = self.terminals.len();
+            self.terminals.push(set);
+            id
+        })
+    }
+
     fn nonterminal(&mut self) -> usize {
         let id = self.by_lhs.len();
         self.by_lhs.push(vec![]);
@@ -105,19 +107,14 @@ impl Grammar {
                     .text
                     .chars()
                     .map(|ch| {
-                        let terminal = *self.chars.entry(ch).or_insert_with(|| {
-                            let index = self.terminals.len();
-                            self.terminals.push(Terminal::Char(ch));
-                            index
-                        });
+                        let terminal = self.terminal(CharSet::new([(ch as u32, ch as u32)]));
                         Symbol::Terminal(terminal)
                     })
                     .collect();
                 self.rule(id, rhs);
             }
             ShardDataKind::Set(set) => {
-                let terminal = self.terminals.len();
-                self.terminals.push(Terminal::Set(set));
+                let terminal = self.terminal(CharSet::from_data(set));
                 self.rule(id, vec![Symbol::Terminal(terminal)]);
             }
             ShardDataKind::Reference(reference) => {
@@ -188,19 +185,21 @@ struct Item {
 
 #[derive(Debug, Default)]
 struct State {
-    // All matching terminal predicates must be considered, including overlaps.
+    // Retained only for differential tests against predicate-based dispatch.
+    #[cfg(test)]
     shifts: BTreeMap<usize, usize>,
     gotos: BTreeMap<usize, usize>,
     // LR(0) reductions apply on every lookahead, including EOF. Multiple
     // reductions and shifts coexist rather than resolving conflicts.
     reductions: Vec<usize>,
     accept: bool,
+    first: First,
+    dispatch: Vec<ShiftRange>,
 }
 
 #[derive(Debug)]
 struct Table {
     rules: Vec<Rule>,
-    terminals: Vec<Terminal>,
     states: Vec<State>,
 }
 
@@ -247,7 +246,7 @@ impl Stack {
         frontier
     }
 
-    fn reduce(&mut self, table: &Table) {
+    fn reduce(&mut self, table: &Table, lookahead: Option<char>) {
         loop {
             let mut changed = false;
             let heads: Vec<_> = self.current.values().copied().collect();
@@ -257,6 +256,9 @@ impl Stack {
                     for ancestor in self.ancestors(head, rule.rhs.len()) {
                         let state = &table.states[self.nodes[ancestor].state];
                         if let Some(&target) = state.gotos.get(&rule.lhs) {
+                            if !table.states[target].first.permits(lookahead) {
+                                continue;
+                            }
                             let node = self.node(target);
                             changed |= self.nodes[node].predecessors.insert(ancestor);
                         }
@@ -277,12 +279,16 @@ impl Table {
     fn parse(&self, input: &str) -> bool {
         let mut stack = Stack::default();
         stack.node(0);
-        for ch in input.chars() {
-            stack.reduce(self);
+        let mut chars = input.chars().peekable();
+        if !self.states[0].first.permits(chars.peek().copied()) {
+            return false;
+        }
+        while let Some(ch) = chars.next() {
+            stack.reduce(self, Some(ch));
             let heads = core::mem::take(&mut stack.current);
             for (state, head) in heads {
-                for (&terminal, &target) in &self.states[state].shifts {
-                    if self.terminals[terminal].matches(ch) {
+                for &target in ShiftRange::lookup(&self.states[state].dispatch, ch) {
+                    if self.states[target].first.permits(chars.peek().copied()) {
                         let node = stack.node(target);
                         stack.nodes[node].predecessors.insert(head);
                     }
@@ -292,7 +298,7 @@ impl Table {
                 return false;
             }
         }
-        stack.reduce(self);
+        stack.reduce(self, None);
         stack.current.keys().any(|&state| self.states[state].accept)
     }
 
@@ -318,13 +324,18 @@ impl Table {
     }
 
     fn build(grammar: Grammar) -> Self {
+        let first = First::build(&grammar);
         let initial = Self::closure(&grammar, [Item { rule: 0, dot: 0 }]);
         let mut known = FxHashMap::default();
         known.insert(initial.clone(), 0);
         let mut item_sets = vec![initial];
         let mut states = Vec::new();
         while states.len() < item_sets.len() {
-            let mut state = State::default();
+            let mut state = State {
+                first: First::state(&grammar, &first, &item_sets[states.len()]),
+                ..State::default()
+            };
+            let mut shifts = BTreeMap::new();
             let mut transitions: BTreeMap<Symbol, Vec<Item>> = BTreeMap::new();
             for &item in &item_sets[states.len()] {
                 if let Some(&symbol) = grammar.rules[item.rule].rhs.get(item.dot) {
@@ -347,18 +358,22 @@ impl Table {
                 });
                 match symbol {
                     Symbol::Terminal(id) => {
-                        state.shifts.insert(id, target);
+                        shifts.insert(id, target);
                     }
                     Symbol::Nonterminal(id) => {
                         state.gotos.insert(id, target);
                     }
                 }
             }
+            state.dispatch = ShiftRange::build(&shifts, &grammar.terminals);
+            #[cfg(test)]
+            {
+                state.shifts = shifts;
+            }
             states.push(state);
         }
         Self {
             rules: grammar.rules,
-            terminals: grammar.terminals,
             states,
         }
     }
