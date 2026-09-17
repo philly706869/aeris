@@ -233,9 +233,13 @@ fn emit_mapping(mapping: &ir::Mapping, input: TokenStream, names: &[Ident; 4]) -
         }
         ir::Mapping::Tuple(items) => {
             let count = items.len();
-            let values = items.iter().enumerate().map(|(index, item)| {
-                emit_mapping(item, quote!(#node.field(#index, #count)?), names)
-            }).collect();
+            let values = items
+                .iter()
+                .enumerate()
+                .map(|(index, item)| {
+                    emit_mapping(item, quote!(#node.field(#index, #count)?), names)
+                })
+                .collect();
             let sequence = sequence_tasks(values, names);
             quote!({ #node.sequence(#count)?; #sequence })
         }
@@ -250,12 +254,18 @@ fn emit_mapping(mapping: &ir::Mapping, input: TokenStream, names: &[Ident; 4]) -
 // Each combinator schedules its child; it never recursively runs it.
 fn sequence_tasks(tasks: Vec<TokenStream>, names: &[Ident; 4]) -> TokenStream {
     let count = tasks.len();
-    let mut sequence = quote!(::xst::internal::MappingTask::ready(::xst::internal::Result::Ok(())));
-    for task in tasks { sequence = quote!(#sequence.zip(#task)); }
+    let mut sequence = quote!(::xst::internal::MappingTask::ready(
+        ::xst::internal::Result::Ok(())
+    ));
+    for task in tasks {
+        sequence = quote!(#sequence.zip(#task));
+    }
     let value = &names[1];
     let fields = (0..count).map(|index| {
         let mut field = quote!(#value);
-        for _ in index + 1..count { field = quote!(#field.0); }
+        for _ in index + 1..count {
+            field = quote!(#field.0);
+        }
         quote!(#field.1)
     });
     quote!(#sequence.map(move |#value| ::xst::internal::Result::Ok((#(#fields,)*))))

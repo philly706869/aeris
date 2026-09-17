@@ -446,3 +446,54 @@ fn bounded_and_primitive_repetitions_use_branch_priority() {
         "aaa"
     );
 }
+
+#[shard]
+struct DeepA {
+    open: x! { "(" },
+    next: xopt![xbox![DeepB]],
+    close: x! { ")" },
+}
+
+#[shard]
+struct DeepB {
+    open: x! { "[" },
+    next: xopt![xbox![DeepA]],
+    close: x! { "]" },
+}
+
+#[test]
+fn deeply_nested_mutual_mapping_uses_a_heap_stack() {
+    const DEPTH: usize = 512;
+    let input: String = (0..DEPTH)
+        .map(|i| if i % 2 == 0 { '(' } else { '[' })
+        .chain((0..DEPTH).rev().map(|i| if i % 2 == 0 { ')' } else { ']' }))
+        .collect();
+    let cluster = Cluster::<DeepA>::build();
+    let parsed = cluster.parse(&input).unwrap();
+    std::thread::scope(|scope| {
+        std::thread::Builder::new()
+            .stack_size(128 * 1024)
+            .spawn_scoped(scope, || {
+                let output = parsed.result().unwrap();
+                assert_eq!(output.open.as_ptr(), input.as_ptr());
+                // Rust's Drop for a recursive Box tree is separate from mapping.
+                // Consume the tree iteratively so this specifically tests mapping.
+                let mut next = Some(output);
+                let mut depth = 0;
+                while let Some(a) = next {
+                    depth += 1;
+                    next = match a.next {
+                        None => None,
+                        Some(b) => {
+                            depth += 1;
+                            b.next.map(|a| *a)
+                        }
+                    };
+                }
+                assert_eq!(depth, DEPTH);
+            })
+            .unwrap()
+            .join()
+            .unwrap();
+    });
+}
