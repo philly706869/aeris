@@ -1,9 +1,7 @@
+use rustc_hash::FxHashMap;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
-use rustc_hash::FxHashMap;
-
-use super::mapping::Selected;
-use super::{Cluster, ExtractError, MappingNode, ShiftRange, Symbol, Table};
+use super::{Cluster, ExtractError, MappingNode, ShiftRange, Symbol, Table, mapping::Selected};
 use crate::shard::{ShardField, StaticShard};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -11,12 +9,14 @@ pub struct ParseError {
     /// Farthest consumed UTF-8 byte offset.
     pub offset: usize,
 }
+
 impl core::fmt::Display for ParseError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "input is not accepted at byte {}", self.offset)
     }
 }
-impl std::error::Error for ParseError {}
+
+impl core::error::Error for ParseError {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Label {
@@ -24,6 +24,7 @@ enum Label {
     // `dot` is the start of the shared RHS suffix, constructed backwards.
     Intermediate { rule: usize, dot: usize },
 }
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 struct Key {
     label: Label,
@@ -37,15 +38,18 @@ struct Packed {
     split: usize,
     children: Vec<usize>,
 }
+
 struct Node {
     key: Key,
     alternatives: BTreeSet<Packed>,
 }
+
 #[derive(Default)]
 struct Forest {
     nodes: Vec<Node>,
     ids: FxHashMap<Key, usize>,
 }
+
 impl Forest {
     fn node(&mut self, key: Key) -> usize {
         *self.ids.entry(key).or_insert_with(|| {
@@ -137,12 +141,14 @@ struct Head {
     // (predecessor, forest symbol). Different labels never collapse.
     edges: BTreeSet<(usize, usize)>,
 }
+
 #[derive(Default)]
 struct Parser {
     forest: Forest,
     heads: Vec<Head>,
     current: BTreeMap<usize, usize>,
 }
+
 impl Parser {
     fn head(&mut self, state: usize, offset: usize) -> usize {
         *self.current.entry(state).or_insert_with(|| {
@@ -275,6 +281,7 @@ pub struct Parsed<'c, 'i, S: StaticShard> {
     forest: Forest,
     root: usize,
 }
+
 impl<'c, 'i, S: StaticShard> Parsed<'c, 'i, S> {
     pub(super) fn new(cluster: &'c Cluster<S>, input: &'i str) -> Result<Self, ParseError> {
         let (forest, root) = Parser::default().run(&cluster.table, input)?;
@@ -304,6 +311,7 @@ pub struct Results<'p, 'c, 'i, S: StaticShard> {
     path: Vec<usize>,
     done: bool,
 }
+
 impl<'i, S: StaticShard> Iterator for Results<'_, '_, 'i, S> {
     type Item = Result<ShardField<'i, S>, ExtractError>;
 
@@ -365,4 +373,5 @@ impl<'i, S: StaticShard> Iterator for Results<'_, '_, 'i, S> {
         Some(mapping.reference::<S>())
     }
 }
-impl<S: StaticShard> core::iter::FusedIterator for Results<'_, '_, '_, S> {}
+
+impl<S> core::iter::FusedIterator for Results<'_, '_, '_, S> where S: StaticShard {}

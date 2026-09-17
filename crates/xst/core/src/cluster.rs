@@ -3,20 +3,22 @@ use rustc_hash::FxHashMap;
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::shard::{ReferenceData, ShardData, ShardDataKind, StaticShard};
+use mapping::Shape;
+use optimize::{First, ShiftRange};
+use set::CharSet;
 
 mod forest;
 mod mapping;
 mod optimize;
-pub use forest::{ParseError, Parsed, Results};
-use mapping::Shape;
-pub use mapping::{ExtractError, MappingNode};
 mod set;
 
-use optimize::{First, ShiftRange};
-use set::CharSet;
+pub mod internal {
+    pub use super::ExtractError;
+    pub use super::MappingNode;
+}
 
-#[cfg(test)]
-mod optimization_tests;
+pub use forest::{ParseError, Parsed, Results};
+pub use mapping::{ExtractError, MappingNode};
 
 pub struct Cluster<S>
 where
@@ -421,3 +423,6 @@ impl Table {
         }
     }
 }
+
+#[cfg(test)]
+mod optimization_tests;

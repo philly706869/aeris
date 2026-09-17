@@ -1,14 +1,13 @@
 use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 
 pub mod internal {
-    pub use crate::cluster::{ExtractError, MappingNode};
-    pub use crate::shard::Shard;
-    pub use crate::shard::ShardClosure;
-    pub use crate::shard::ShardClosureForward;
-    pub use crate::shard::ShardCore;
-    pub use crate::shard::ShardData;
-    pub use crate::shard::ShardField;
-    pub use crate::shard::StaticShard;
+    pub use super::Shard;
+    pub use super::ShardClosure;
+    pub use super::ShardClosureForward;
+    pub use super::ShardCore;
+    pub use super::ShardData;
+    pub use super::ShardField;
+    pub use super::StaticShard;
 }
 
 pub trait StaticShard: Shard {}
