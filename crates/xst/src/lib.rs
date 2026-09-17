@@ -8,7 +8,7 @@
 //! let output = {
 //!     let cluster = Cluster::<Word>::build();
 //!     let parsed = cluster.parse(&input).unwrap();
-//!     parsed.results().unwrap().next().unwrap().unwrap()
+//!     parsed.result().unwrap()
 //! };
 //! assert_eq!(output, "hello");
 //! ```
@@ -24,7 +24,7 @@
 //! {
 //!     let input = String::from("hello");
 //!     let parsed = cluster.parse(&input).unwrap();
-//!     output = parsed.results().unwrap().next().unwrap().unwrap();
+//!     output = parsed.result().unwrap();
 //! }
 //! println!("{output}");
 //! ```

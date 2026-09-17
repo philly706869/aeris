@@ -64,7 +64,7 @@ impl Forest {
 
     /// Productive alternatives only, then a topological cycle test reachable
     /// from the accepted root. Neither pass recursively walks the Rust stack.
-    fn choices(&self, root: usize) -> Result<Vec<Vec<Packed>>, ExtractError> {
+    fn choices(&self, root: usize) -> Result<(Vec<Vec<Packed>>, Vec<usize>), ExtractError> {
         let mut productive = vec![false; self.nodes.len()];
         loop {
             let mut changed = false;
@@ -116,9 +116,9 @@ impl Forest {
         let mut queue: VecDeque<_> = (0..self.nodes.len())
             .filter(|&id| reachable[id] && indegree[id] == 0)
             .collect();
-        let mut visited = 0;
+        let mut order = Vec::new();
         while let Some(id) = queue.pop_front() {
-            visited += 1;
+            order.push(id);
             for packed in &choices[id] {
                 for &child in &packed.children {
                     indegree[child] -= 1;
@@ -128,10 +128,11 @@ impl Forest {
                 }
             }
         }
-        if visited != total {
+        if order.len() != total {
             return Err(ExtractError::InfiniteDerivations);
         }
-        Ok(choices)
+        order.reverse();
+        Ok((choices, order))
     }
 }
 
@@ -293,51 +294,41 @@ impl<'c, 'i, S: StaticShard> Parsed<'c, 'i, S> {
         })
     }
 
-    /// Enumerates derivations without applying greedy/lazy ranking or value
-    /// deduplication. A productive accepted cycle is an extraction error.
-    pub fn results(&self) -> Result<Results<'_, 'c, 'i, S>, ExtractError> {
-        Ok(Results {
-            parsed: self,
-            choices: self.forest.choices(self.root)?,
-            path: Vec::new(),
-            done: false,
-        })
-    }
-}
-
-pub struct Results<'p, 'c, 'i, S: StaticShard> {
-    parsed: &'p Parsed<'c, 'i, S>,
-    choices: Vec<Vec<Packed>>,
-    path: Vec<usize>,
-    done: bool,
-}
-
-impl<'i, S: StaticShard> Iterator for Results<'_, '_, 'i, S> {
-    type Item = Result<ShardField<'i, S>, ExtractError>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.done {
-            return None;
-        }
-        // Preorder choice digits form a variable-length odometer. Only one
-        // selected derivation and its output are constructed per next() call.
-        let mut nodes: Vec<Selected> = Vec::new();
-        let mut pending: Vec<(usize, Option<usize>)> = vec![(self.parsed.root, None)];
-        let mut arities = Vec::new();
-        while let Some((forest_id, parent)) = pending.pop() {
-            let node = &self.parsed.forest.nodes[forest_id];
-            let id = nodes.len();
-            let alternatives = &self.choices[forest_id];
-            let packed = if alternatives.is_empty() {
-                None
-            } else {
-                let digit = arities.len();
-                if self.path.len() <= digit {
-                    self.path.push(0);
+    /// Maps the first successful derivation in grammar branch order.
+    /// Greedy option/repetition tries inclusion/continuation first; lazy forms
+    /// try omission/termination first. Only complete parses are candidates.
+    pub fn result(&self) -> Result<ShardField<'i, S>, ExtractError> {
+        let (choices, order) = self.forest.choices(self.root)?;
+        let mut best = vec![None; self.forest.nodes.len()];
+        let mut ranks: Vec<Vec<usize>> = vec![Vec::new(); self.forest.nodes.len()];
+        // Compare the full preorder of original production branches, not SPPF
+        // split offsets. A small split may contradict an earlier greedy choice.
+        // Dynamic programming chooses one alternative per shared node without
+        // enumerating the Cartesian product of complete derivations.
+        for id in order {
+            for (index, packed) in choices[id].iter().enumerate() {
+                let mut rank = Vec::new();
+                if matches!(
+                    self.forest.nodes[id].key.label,
+                    Label::Symbol(Symbol::Nonterminal(_))
+                ) {
+                    rank.push(self.cluster.table.rules[packed.rule].branch);
                 }
-                arities.push(alternatives.len());
-                Some(&alternatives[self.path[digit]])
-            };
+                for &child in &packed.children {
+                    rank.extend_from_slice(&ranks[child]);
+                }
+                if best[id].is_none() || rank < ranks[id] {
+                    best[id] = Some(index);
+                    ranks[id] = rank;
+                }
+            }
+        }
+        let mut nodes: Vec<Selected> = Vec::new();
+        let mut pending: Vec<(usize, Option<usize>)> = vec![(self.root, None)];
+        while let Some((forest_id, parent)) = pending.pop() {
+            let node = &self.forest.nodes[forest_id];
+            let id = nodes.len();
+            let packed = best[forest_id].map(|index| &choices[forest_id][index]);
             nodes.push(Selected {
                 symbol: match node.key.label {
                     Label::Symbol(symbol) => Some(symbol),
@@ -355,23 +346,12 @@ impl<'i, S: StaticShard> Iterator for Results<'_, '_, 'i, S> {
                 pending.extend(packed.children.iter().rev().map(|&child| (child, Some(id))));
             }
         }
-        self.done = true;
-        for digit in (0..arities.len()).rev() {
-            if self.path[digit] + 1 < arities[digit] {
-                self.path[digit] += 1;
-                self.path.truncate(digit + 1);
-                self.done = false;
-                break;
-            }
-        }
-        let mapping = MappingNode {
-            input: self.parsed.input,
+        MappingNode {
+            input: self.input,
             nodes: &nodes,
-            table: &self.parsed.cluster.table,
+            table: &self.cluster.table,
             id: 0,
-        };
-        Some(mapping.reference::<S>())
+        }
+        .reference::<S>()
     }
 }
-
-impl<S> core::iter::FusedIterator for Results<'_, '_, '_, S> where S: StaticShard {}

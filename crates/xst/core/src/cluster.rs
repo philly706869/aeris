@@ -17,7 +17,7 @@ pub mod internal {
     pub use super::MappingNode;
 }
 
-pub use forest::{ParseError, Parsed, Results};
+pub use forest::{ParseError, Parsed};
 pub use mapping::{ExtractError, MappingNode};
 
 pub struct Cluster<S>
@@ -49,7 +49,7 @@ where
         self.table.parse(input)
     }
 
-    /// Parses the complete input, retaining all derivations for lazy mapping.
+    /// Parses the complete input, retaining derivations until the preferred result is mapped.
     pub fn parse<'c, 'i>(&'c self, input: &'i str) -> Result<Parsed<'c, 'i, S>, ParseError> {
         Parsed::new(self, input)
     }

@@ -6,7 +6,6 @@ pub mod public {
     pub use crate::cluster::ExtractError;
     pub use crate::cluster::ParseError;
     pub use crate::cluster::Parsed;
-    pub use crate::cluster::Results;
 }
 
 pub mod internal {

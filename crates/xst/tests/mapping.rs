@@ -27,10 +27,7 @@ fn maps_struct_wrappers_generics_and_duplicate_fields() {
     let output = {
         let cluster = Cluster::<Record>::build();
         let parsed = cluster.parse(&input).unwrap();
-        let mut results = parsed.results().unwrap();
-        let output = results.next().unwrap().unwrap();
-        assert!(results.next().is_none());
-        output
+        parsed.result().unwrap()
     };
     assert_eq!(output.bracket, ("[", "]"));
     assert_eq!(*output.values[0].item, "한");
@@ -50,15 +47,7 @@ struct EmptyOption {
 #[test]
 fn distinguishes_none_from_some_empty() {
     let cluster = Cluster::<EmptyOption>::build();
-    let parsed = cluster.parse("").unwrap();
-    let values: Vec<_> = parsed
-        .results()
-        .unwrap()
-        .map(|r| r.unwrap().value)
-        .collect();
-    assert_eq!(values.len(), 2);
-    assert!(values.contains(&None));
-    assert!(values.contains(&Some("")));
+    assert_eq!(cluster.parse("").unwrap().result().unwrap().value, Some(""));
 }
 
 #[shard]
@@ -70,33 +59,25 @@ struct Pair {
 }
 
 #[test]
-fn keeps_duplicate_values_and_cartesian_derivations() {
+fn selects_one_value_from_ambiguous_fields() {
     let cluster = Cluster::<Pair>::build();
     let parsed = cluster.parse("aa").unwrap();
-    let values: Vec<_> = parsed.results().unwrap().map(Result::unwrap).collect();
-    assert_eq!(values.len(), 4);
-    assert!(values.iter().all(|v| v.left == "a" && v.right == "a"));
+    let value = parsed.result().unwrap();
+    assert_eq!((value.left, value.right), ("a", "a"));
 }
 
 #[shard]
 type Ambiguous = x! { [| Ambiguous Ambiguous | "a"] };
 
 #[test]
-fn enumerates_catalan_derivations_and_is_lazy() {
+fn selects_without_enumerating_catalan_derivations() {
     let cluster = Cluster::<Ambiguous>::build();
-    for (input, count) in [("a", 1), ("aa", 1), ("aaa", 2), ("aaaa", 5), ("aaaaa", 14)] {
-        let parsed = cluster.parse(input).unwrap();
-        let mut actual = 0;
-        for value in parsed.results().unwrap() {
-            assert_eq!(value.unwrap(), input);
-            actual += 1;
-        }
-        assert_eq!(actual, count, "{input}");
+    for input in ["a", "aa", "aaa", "aaaa", "aaaaa"] {
+        assert_eq!(cluster.parse(input).unwrap().result().unwrap(), input);
     }
-    // There are 1,767,263,190 derivations; next() must not enumerate them first.
+    // Select from 1,767,263,190 derivations without enumerating all of them.
     let input = "a".repeat(20);
-    let parsed = cluster.parse(&input).unwrap();
-    assert_eq!(parsed.results().unwrap().next().unwrap().unwrap(), input);
+    assert_eq!(cluster.parse(&input).unwrap().result().unwrap(), input);
 }
 
 #[shard]
@@ -111,17 +92,17 @@ fn only_productive_accepted_cycles_block_extraction() {
     let cluster = Cluster::<Cycle>::build();
     assert!(cluster.recognizes("a"));
     assert!(matches!(
-        cluster.parse("a").unwrap().results(),
+        cluster.parse("a").unwrap().result(),
         Err(ExtractError::InfiniteDerivations)
     ));
     let cluster = Cluster::<EmptyCycle>::build();
     assert!(matches!(
-        cluster.parse("").unwrap().results(),
+        cluster.parse("").unwrap().result(),
         Err(ExtractError::InfiniteDerivations)
     ));
     let cluster = Cluster::<FailedCycle>::build();
     let parsed = cluster.parse("a").unwrap();
-    assert_eq!(parsed.results().unwrap().next().unwrap().unwrap(), "a");
+    assert_eq!(parsed.result().unwrap(), "a");
 }
 
 #[shard]
@@ -138,16 +119,7 @@ enum Choice {
 fn variants_survive_terminal_sharing_in_declaration_order() {
     let cluster = Cluster::<Choice>::build();
     let parsed = cluster.parse("a").unwrap();
-    let mut results = parsed.results().unwrap();
-    assert!(matches!(
-        results.next().unwrap().unwrap(),
-        Choice::First("a")
-    ));
-    assert!(matches!(
-        results.next().unwrap().unwrap(),
-        Choice::Second("a")
-    ));
-    assert!(results.next().is_none());
+    assert!(matches!(parsed.result().unwrap(), Choice::First("a")));
 }
 
 #[shard]
@@ -159,7 +131,7 @@ struct NestedClosure {
 fn maps_nested_generic_closures() {
     let cluster = Cluster::<NestedClosure>::build();
     let parsed = cluster.parse("한🦀").unwrap();
-    let value = parsed.results().unwrap().next().unwrap().unwrap();
+    let value = parsed.result().unwrap();
     assert_eq!(value.value.item.unwrap().item, vec!["한", "🦀"]);
 }
 
@@ -179,7 +151,7 @@ mod json {
     fn maps_nested_json() {
         let cluster = xst::Cluster::<JSON>::build();
         let parsed = cluster.parse(r#"{"한🦀":[true,null,12.5]}"#).unwrap();
-        let output = parsed.results().unwrap().next().unwrap().unwrap();
+        let output = parsed.result().unwrap();
         let JSONValue::Object(object) = output.value else {
             panic!("object expected")
         };
@@ -204,7 +176,7 @@ mod json {
 }
 
 #[test]
-fn mapping_occurs_only_when_next_is_requested() {
+fn mapping_occurs_only_for_the_requested_result() {
     use std::sync::atomic::{AtomicUsize, Ordering};
     use xst::internal::{MappingNode, Shard, ShardCore, ShardData, StaticShard};
     static CALLS: AtomicUsize = AtomicUsize::new(0);
@@ -224,11 +196,8 @@ fn mapping_occurs_only_when_next_is_requested() {
     }
     let cluster = Cluster::<Counted>::build();
     let parsed = cluster.parse("a").unwrap();
-    let mut results = parsed.results().unwrap();
     assert_eq!(CALLS.load(Ordering::SeqCst), 0);
-    assert_eq!(results.next().unwrap().unwrap(), "a");
-    assert_eq!(CALLS.load(Ordering::SeqCst), 1);
-    drop(results);
+    assert_eq!(parsed.result().unwrap(), "a");
     assert_eq!(CALLS.load(Ordering::SeqCst), 1);
 }
 
@@ -249,10 +218,7 @@ fn mismatched_mapping_returns_an_error() {
     }
     let cluster = Cluster::<Wrong>::build();
     let parsed = cluster.parse("a").unwrap();
-    assert_eq!(
-        parsed.results().unwrap().next().unwrap(),
-        Err(ExtractError::InvalidMapping)
-    );
+    assert_eq!(parsed.result(), Err(ExtractError::InvalidMapping));
 }
 
 #[shard]
@@ -269,27 +235,214 @@ struct Unbounded {
 #[test]
 fn restores_empty_bounded_and_unbounded_repetition() {
     let cluster = Cluster::<EmptyRecord>::build();
-    assert!(
-        cluster
+    assert!(cluster.parse("").unwrap().result().is_ok());
+    let cluster = Cluster::<FiniteEmpty>::build();
+    assert_eq!(cluster.parse("").unwrap().result().unwrap().items.len(), 2);
+    let cluster = Cluster::<Unbounded>::build();
+    let value = cluster.parse("한🦀한").unwrap().result().unwrap();
+    assert_eq!(value.items, vec!["한", "🦀", "한"]);
+}
+
+#[shard]
+struct GreedySplit {
+    first: xvec![x! { "a" }, ..],
+    rest: x! { "a"* },
+}
+#[shard]
+struct LazySplit {
+    first: xvecz![x! { "a" }, ..],
+    rest: x! { "a"* },
+}
+#[shard]
+struct GreedyOption {
+    first: xopt![x! { "a" }],
+    rest: x! { "a"* },
+}
+#[shard]
+struct LazyOption {
+    first: xoptz![x! { "a" }],
+    rest: x! { "a"* },
+}
+#[shard]
+struct LazyEmptyOption {
+    first: xoptz![x! { "" }],
+}
+#[shard]
+struct LazyEmptyVec {
+    first: xvecz![x! { "" }, 0..2],
+}
+
+#[test]
+fn greedy_and_lazy_prefer_opposite_branches() {
+    let value = Cluster::<GreedySplit>::build()
+        .parse("aaa")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!(value.first, vec!["a", "a", "a"]);
+    assert_eq!(value.rest, "");
+    let value = Cluster::<LazySplit>::build()
+        .parse("aaa")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert!(value.first.is_empty());
+    assert_eq!(value.rest, "aaa");
+    let value = Cluster::<GreedyOption>::build()
+        .parse("a")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!((value.first, value.rest), (Some("a"), ""));
+    let value = Cluster::<LazyOption>::build()
+        .parse("a")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!((value.first, value.rest), (None, "a"));
+    assert_eq!(
+        Cluster::<LazyEmptyOption>::build()
             .parse("")
             .unwrap()
-            .results()
+            .result()
             .unwrap()
-            .next()
-            .unwrap()
-            .is_ok()
+            .first,
+        None
     );
-    let cluster = Cluster::<FiniteEmpty>::build();
-    let parsed = cluster.parse("").unwrap();
-    let mut lengths: Vec<_> = parsed
-        .results()
+    assert!(
+        Cluster::<LazyEmptyVec>::build()
+            .parse("")
+            .unwrap()
+            .result()
+            .unwrap()
+            .first
+            .is_empty()
+    );
+}
+
+#[shard]
+struct BacktrackGreedy {
+    first: xvec![x! { "a" }, ..],
+    required: x! { "a" },
+}
+#[shard]
+struct BacktrackLazy {
+    first: xvecz![x! { "a" }, ..],
+    required: x! { "a" },
+}
+#[shard]
+type LongFirst = x! { [| "aa" | "a"] };
+#[shard]
+type ShortFirst = x! { [| "a" | "aa"] };
+#[shard]
+struct EarlierLong {
+    first: LongFirst,
+    rest: x! { "a"* },
+}
+#[shard]
+struct EarlierShort {
+    first: ShortFirst,
+    rest: x! { "a"* },
+}
+#[shard]
+struct Fallback {
+    first: LongFirst,
+    required: x! { "a" },
+}
+
+#[test]
+fn priority_uses_grammar_order_and_requires_complete_success() {
+    let value = Cluster::<EarlierLong>::build()
+        .parse("aa")
         .unwrap()
-        .map(|r| r.unwrap().items.len())
-        .collect();
-    lengths.sort();
-    assert_eq!(lengths, vec![0, 1, 2]);
-    let cluster = Cluster::<Unbounded>::build();
-    let parsed = cluster.parse("한🦀한").unwrap();
-    let value = parsed.results().unwrap().next().unwrap().unwrap();
-    assert_eq!(value.items, vec!["한", "🦀", "한"]);
+        .result()
+        .unwrap();
+    assert_eq!((value.first, value.rest), ("aa", ""));
+    let value = Cluster::<EarlierShort>::build()
+        .parse("aa")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!((value.first, value.rest), ("a", "a"));
+    let value = Cluster::<Fallback>::build()
+        .parse("aa")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!(value.first, "a");
+    let value = Cluster::<BacktrackGreedy>::build()
+        .parse("aaa")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!(value.first.len(), 2);
+    let value = Cluster::<BacktrackLazy>::build()
+        .parse("aaa")
+        .unwrap()
+        .result()
+        .unwrap();
+    assert_eq!(value.first.len(), 2);
+}
+
+#[shard]
+struct BoundedGreedy {
+    first: xvec![x! { "a" }, 1..2],
+    rest: x! { "a"* },
+}
+#[shard]
+struct BoundedLazy {
+    first: xvecz![x! { "a" }, 1..2],
+    rest: x! { "a"* },
+}
+#[shard]
+struct PrimitiveLazy {
+    first: x! { "a"*? },
+    rest: x! { "a"* },
+}
+#[shard]
+struct PrimitiveGreedy {
+    first: x! { "a"* },
+    rest: x! { "a"* },
+}
+
+#[test]
+fn bounded_and_primitive_repetitions_use_branch_priority() {
+    assert_eq!(
+        Cluster::<BoundedGreedy>::build()
+            .parse("aaa")
+            .unwrap()
+            .result()
+            .unwrap()
+            .first
+            .len(),
+        2
+    );
+    assert_eq!(
+        Cluster::<BoundedLazy>::build()
+            .parse("aaa")
+            .unwrap()
+            .result()
+            .unwrap()
+            .first
+            .len(),
+        1
+    );
+    assert_eq!(
+        Cluster::<PrimitiveLazy>::build()
+            .parse("aaa")
+            .unwrap()
+            .result()
+            .unwrap()
+            .first,
+        ""
+    );
+    assert_eq!(
+        Cluster::<PrimitiveGreedy>::build()
+            .parse("aaa")
+            .unwrap()
+            .result()
+            .unwrap()
+            .first,
+        "aaa"
+    );
 }

@@ -243,15 +243,7 @@ fn optimization_preserves_derivation_structure_and_spans() {
             let collect = |cluster: &Cluster<Root>| {
                 cluster
                     .parse(&word)
-                    .map(|parsed| {
-                        let mut values = parsed
-                            .results()
-                            .unwrap()
-                            .map(Result::unwrap)
-                            .collect::<Vec<_>>();
-                        values.sort();
-                        values
-                    })
+                    .map(|parsed| parsed.result().unwrap())
                     .ok()
             };
             assert_eq!(collect(&optimized), collect(&baseline), "{word:?}");
