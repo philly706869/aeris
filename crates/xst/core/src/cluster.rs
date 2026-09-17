@@ -11,14 +11,17 @@ mod forest;
 mod mapping;
 mod optimize;
 mod set;
+mod task;
 
 pub mod internal {
     pub use super::ExtractError;
     pub use super::MappingNode;
+    pub use super::MappingTask;
 }
 
 pub use forest::{ParseError, Parsed};
 pub use mapping::{ExtractError, MappingNode};
+pub use task::MappingTask;
 
 pub struct Cluster<S>
 where

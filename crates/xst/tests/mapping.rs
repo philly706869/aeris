@@ -178,7 +178,7 @@ mod json {
 #[test]
 fn mapping_occurs_only_for_the_requested_result() {
     use std::sync::atomic::{AtomicUsize, Ordering};
-    use xst::internal::{MappingNode, Shard, ShardCore, ShardData, StaticShard};
+    use xst::internal::{MappingNode, MappingTask, Shard, ShardCore, ShardData, StaticShard};
     static CALLS: AtomicUsize = AtomicUsize::new(0);
     struct Counted;
     impl Shard for Counted {
@@ -189,9 +189,9 @@ fn mapping_occurs_only_for_the_requested_result() {
         type Output<'i> = &'i str;
         const DATA: &'static ShardData =
             &ShardData::alternative(&[&ShardData::literal("a"), &ShardData::literal("a")]);
-        fn map<'i>(node: MappingNode<'_, 'i>) -> Result<&'i str, ExtractError> {
+        fn map<'a, 'i: 'a>(node: MappingNode<'a, 'i>) -> MappingTask<'a, &'i str> {
             CALLS.fetch_add(1, Ordering::SeqCst);
-            node.slice()
+            MappingTask::ready(node.slice())
         }
     }
     let cluster = Cluster::<Counted>::build();
@@ -203,7 +203,7 @@ fn mapping_occurs_only_for_the_requested_result() {
 
 #[test]
 fn mismatched_mapping_returns_an_error() {
-    use xst::internal::{MappingNode, Shard, ShardCore, ShardData, StaticShard};
+    use xst::internal::{MappingNode, MappingTask, Shard, ShardCore, ShardData, StaticShard};
     struct Wrong;
     impl Shard for Wrong {
         type Core = Self;
@@ -212,8 +212,8 @@ fn mismatched_mapping_returns_an_error() {
     impl ShardCore for Wrong {
         type Output<'i> = &'i str;
         const DATA: &'static ShardData = &ShardData::literal("a");
-        fn map<'i>(node: MappingNode<'_, 'i>) -> Result<&'i str, ExtractError> {
-            node.reference::<A<'static>>()
+        fn map<'a, 'i: 'a>(node: MappingNode<'a, 'i>) -> MappingTask<'a, &'i str> {
+            node.reference_task::<A<'static>>()
         }
     }
     let cluster = Cluster::<Wrong>::build();

@@ -1,6 +1,6 @@
 use core::any::TypeId;
 
-use super::{Symbol, Table};
+use super::{MappingTask, Symbol, Table};
 use crate::shard::{Shard, ShardCore};
 
 #[derive(Clone, Copy, Debug)]
@@ -173,14 +173,26 @@ impl<'a, 'i> MappingNode<'a, 'i> {
     }
 
     pub fn reference<T: Shard>(self) -> Result<<T::Core as ShardCore>::Output<'i>, ExtractError> {
-        let node = self.resolved()?;
-        if !matches!(node.shape()?, Shape::Reference(id) if id == TypeId::of::<T::Core>()) {
-            return Err(ExtractError::InvalidMapping);
-        }
-        let children = node.raw_children();
-        if children.len() != 1 {
-            return Err(ExtractError::InvalidMapping);
-        }
-        T::Core::map(children[0])
+        self.reference_task::<T>().run()
+    }
+
+    /// Defer the cross-shard call so recursive grammars do not recurse through
+    /// Rust function calls. Only the driver executes a task's continuation.
+    pub fn reference_task<'m, T: Shard>(self) -> MappingTask<'m, <T::Core as ShardCore>::Output<'i>>
+    where
+        'a: 'm,
+        'i: 'm,
+    {
+        MappingTask::defer(move || {
+            let node = self.resolved()?;
+            if !matches!(node.shape()?, Shape::Reference(id) if id == TypeId::of::<T::Core>()) {
+                return Err(ExtractError::InvalidMapping);
+            }
+            let children = node.raw_children();
+            if children.len() != 1 {
+                return Err(ExtractError::InvalidMapping);
+            }
+            Ok(T::Core::map(children[0]))
+        })
     }
 }

@@ -17,12 +17,13 @@ pub trait Shard: 'static {
 }
 
 pub trait ShardCore: 'static {
-    type Output<'i>: Debug;
+    type Output<'i>: Debug + 'i;
     const DATA: &'static ShardData;
-    fn map<'i>(
-        _node: crate::cluster::MappingNode<'_, 'i>,
-    ) -> Result<Self::Output<'i>, crate::cluster::ExtractError> {
-        Err(crate::cluster::ExtractError::InvalidMapping)
+    /// Build deferred work; child shard calls must be deferred as well.
+    fn map<'a, 'i: 'a>(
+        _node: crate::cluster::MappingNode<'a, 'i>,
+    ) -> crate::cluster::MappingTask<'a, Self::Output<'i>> {
+        crate::cluster::MappingTask::ready(Err(crate::cluster::ExtractError::InvalidMapping))
     }
 }
 

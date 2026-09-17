@@ -54,11 +54,12 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
                     quote!(#node.field(#offset, #count)?),
                     &mapping_names,
                 );
-                mapped_order.push(quote!(#value?));
+                mapped_order.push(value);
                 let offset = Index::from(offset);
                 mapped_groups[group].push(quote!(#values.#offset));
                 order.push((group, index));
             }
+            let mapped_order = sequence_tasks(mapped_order, &mapping_names);
             let mapped_fields = groups
                 .iter()
                 .zip(&mapped_groups)
@@ -103,14 +104,15 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
                     }
                 },
                 quote!(#ident<'i, #(#params),*>),
-                quote!({
+                quote!(::xst::internal::MappingTask::defer(move || {
                     #node.sequence(#count)?;
-                    let #values = (#(#mapped_order,)*);
-                    ::xst::internal::Result::Ok(#ident {
-                        #marker_ident: ::xst::internal::PhantomData,
-                        #(#mapped_fields,)*
-                    })
-                }),
+                    ::xst::internal::Result::Ok(#mapped_order.map(move |#values| {
+                        ::xst::internal::Result::Ok(#ident {
+                            #marker_ident: ::xst::internal::PhantomData,
+                            #(#mapped_fields,)*
+                        })
+                    }))
+                })),
             )
         }
         ir::Kind::Enum(variants) => {
@@ -120,7 +122,7 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
                 .enumerate()
                 .map(|(index, (variant, _, mapping))| {
                     let value = emit_mapping(mapping, quote!(#node), &mapping_names);
-                    quote!(#index => ::xst::internal::Result::Ok(#ident::#variant(#value?)))
+                    quote!(#index => #value.map(move |#node| ::xst::internal::Result::Ok(#ident::#variant(#node))))
                 });
             let declarations = variants.iter().map(|(ident, ty, _)| quote!(#ident(#ty)));
             let arms = variants.iter().map(|(ident, _, _)| {
@@ -137,20 +139,20 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
                     }
                 },
                 quote!(#ident<'i, #(#params),*>),
-                quote!({
+                quote!(::xst::internal::MappingTask::defer(move || {
                     let (#variant_index, #node) = #node.alternative()?;
-                    match #variant_index {
+                    ::xst::internal::Result::Ok(match #variant_index {
                         #(#mapped_arms,)*
-                        _ => ::xst::internal::Result::Err(::xst::internal::ExtractError::InvalidMapping),
-                    }
-                }),
+                        _ => ::xst::internal::MappingTask::ready(::xst::internal::Result::Err(::xst::internal::ExtractError::InvalidMapping)),
+                    })
+                })),
             )
         }
         ir::Kind::Type => (
             quote!(#vis struct #ident<'i, #bounds>(::xst::internal::PhantomData<&'i ()>);),
             quote!(),
             quote!(&'i ::xst::internal::str),
-            quote!(#node.slice()),
+            quote!(::xst::internal::MappingTask::ready(#node.slice())),
         ),
     };
     let static_shard = params.is_empty().then(|| {
@@ -173,7 +175,7 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
             impl #generics ::xst::internal::ShardCore for #name #args {
                 type Output<'i> = #output;
                 const DATA: &'static ::xst::internal::ShardData = &#data;
-                fn map<'i>(#node: ::xst::internal::MappingNode<'_, 'i>) -> ::xst::internal::Result<Self::Output<'i>, ::xst::internal::ExtractError> {
+                fn map<'a, 'i: 'a>(#node: ::xst::internal::MappingNode<'a, 'i>) -> ::xst::internal::MappingTask<'a, Self::Output<'i>> {
                     #mapping
                 }
             }
@@ -195,7 +197,7 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
             impl #generics ::xst::internal::ShardCore for #core_ident #args {
                 type Output<'i> = #output;
                 const DATA: &'static ::xst::internal::ShardData = &#data;
-                fn map<'i>(#node: ::xst::internal::MappingNode<'_, 'i>) -> ::xst::internal::Result<Self::Output<'i>, ::xst::internal::ExtractError> {
+                fn map<'a, 'i: 'a>(#node: ::xst::internal::MappingNode<'a, 'i>) -> ::xst::internal::MappingTask<'a, Self::Output<'i>> {
                     #mapping
                 }
             }
@@ -207,17 +209,17 @@ pub fn emit(shard: ir::Shard) -> TokenStream {
 fn emit_mapping(mapping: &ir::Mapping, input: TokenStream, names: &[Ident; 4]) -> TokenStream {
     let node = &names[1];
     let body = match mapping {
-        ir::Mapping::Slice => quote!(#node.slice()),
-        ir::Mapping::Reference(ty) => quote!(#node.reference::<#ty>()),
+        ir::Mapping::Slice => quote!(::xst::internal::MappingTask::ready(#node.slice())),
+        ir::Mapping::Reference(ty) => quote!(#node.reference_task::<#ty>()),
         ir::Mapping::Box(inner) => {
             let value = emit_mapping(inner, quote!(#node), names);
-            quote!(::xst::internal::Result::Ok(::xst::internal::Box::new(#value?)))
+            quote!(#value.map(move |#node| ::xst::internal::Result::Ok(::xst::internal::Box::new(#node))))
         }
         ir::Mapping::Option(inner) => {
             let value = emit_mapping(inner, quote!(#node), names);
             quote!(match #node.optional()? {
-                ::xst::internal::Option::Some(#node) => ::xst::internal::Result::Ok(::xst::internal::Option::Some(#value?)),
-                ::xst::internal::Option::None => ::xst::internal::Result::Ok(::xst::internal::Option::None),
+                ::xst::internal::Option::Some(#node) => #value.map(move |#node| ::xst::internal::Result::Ok(::xst::internal::Option::Some(#node))),
+                ::xst::internal::Option::None => ::xst::internal::MappingTask::ready(::xst::internal::Result::Ok(::xst::internal::Option::None)),
             })
         }
         ir::Mapping::Vec(inner) => {
@@ -225,18 +227,36 @@ fn emit_mapping(mapping: &ir::Mapping, input: TokenStream, names: &[Ident; 4]) -
             let value = emit_mapping(inner, quote!(#node), names);
             quote!({
                 let mut #values = ::xst::internal::Vec::new();
-                for #node in #node.repeated()? { #values.push(#value?); }
-                ::xst::internal::Result::Ok(#values)
+                for #node in #node.repeated()? { #values.push(#value); }
+                ::xst::internal::MappingTask::collect(#values)
             })
         }
         ir::Mapping::Tuple(items) => {
             let count = items.len();
             let values = items.iter().enumerate().map(|(index, item)| {
-                let value = emit_mapping(item, quote!(#node.field(#index, #count)?), names);
-                quote!(#value?)
-            });
-            quote!({ #node.sequence(#count)?; ::xst::internal::Result::Ok((#(#values,)*)) })
+                emit_mapping(item, quote!(#node.field(#index, #count)?), names)
+            }).collect();
+            let sequence = sequence_tasks(values, names);
+            quote!({ #node.sequence(#count)?; #sequence })
         }
     };
-    quote!({ let #node = #input; #body })
+    quote!(::xst::internal::MappingTask::defer(move || {
+        let #node = #input;
+        ::xst::internal::Result::Ok(#body)
+    }))
+}
+
+// Zip statically typed heterogeneous fields, then flatten their nested tuple.
+// Each combinator schedules its child; it never recursively runs it.
+fn sequence_tasks(tasks: Vec<TokenStream>, names: &[Ident; 4]) -> TokenStream {
+    let count = tasks.len();
+    let mut sequence = quote!(::xst::internal::MappingTask::ready(::xst::internal::Result::Ok(())));
+    for task in tasks { sequence = quote!(#sequence.zip(#task)); }
+    let value = &names[1];
+    let fields = (0..count).map(|index| {
+        let mut field = quote!(#value);
+        for _ in index + 1..count { field = quote!(#field.0); }
+        quote!(#field.1)
+    });
+    quote!(#sequence.map(move |#value| ::xst::internal::Result::Ok((#(#fields,)*))))
 }

@@ -190,8 +190,8 @@ fn optimization_preserves_derivation_structure_and_spans() {
             &ShardData::set(false, &['a'..='a']),
             &ShardData::literal(""),
         ]);
-        fn map<'i>(node: MappingNode<'_, 'i>) -> Result<Self::Output<'i>, ExtractError> {
-            Ok(node
+        fn map<'a, 'i: 'a>(node: MappingNode<'a, 'i>) -> MappingTask<'a, Self::Output<'i>> {
+            MappingTask::ready(Ok(node
                 .nodes
                 .iter()
                 .filter_map(|node| {
@@ -200,7 +200,7 @@ fn optimization_preserves_derivation_structure_and_spans() {
                     };
                     Some((id, node.rule.unwrap(), node.start, node.end))
                 })
-                .collect())
+                .collect()))
         }
     }
     let optimized = Cluster::<Root>::build();
