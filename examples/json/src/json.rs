@@ -1,6 +1,6 @@
 use xst::shard;
 
-use crate::cluster::{JSONValue, WS};
+use crate::{JSONValue, WS};
 
 #[shard]
 pub struct JSON {

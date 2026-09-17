@@ -28,8 +28,6 @@ where
         }
     }
 
-    /// Returns whether the grammar accepts the entire input.
-    /// Parse trees and shard outputs are not extracted yet.
     pub fn parse(&self, input: &str) -> bool {
         self.table.parse(input)
     }
@@ -89,7 +87,6 @@ impl Grammar {
             return id;
         }
         let id = self.nonterminal();
-        // Register before descending so direct and mutual recursion terminate.
         self.references.insert(reference.id, id);
         let target = self.lower((reference.reference)());
         self.rule(id, vec![Symbol::Nonterminal(target)]);
@@ -151,7 +148,6 @@ impl Grammar {
                     "invalid repetition bounds"
                 );
                 let item = Symbol::Nonterminal(self.lower(repeat.item));
-                // A chain keeps bounded repetition linear in the upper bound.
                 let mut tail = id;
                 for _ in 0..repeat.min {
                     let next = self.nonterminal();
@@ -173,7 +169,6 @@ impl Grammar {
         id
     }
 
-    // Keep preference in production order without discarding GLR alternatives.
     fn optional(&mut self, lhs: usize, rhs: Vec<Symbol>, lazy: bool) {
         if lazy {
             self.rule(lhs, vec![]);
@@ -199,7 +194,6 @@ struct State {
     // LR(0) reductions apply on every lookahead, including EOF. Multiple
     // reductions and shifts coexist rather than resolving conflicts.
     reductions: Vec<usize>,
-    // Only the completed augmented start rule accepts, and only at EOF.
     accept: bool,
 }
 

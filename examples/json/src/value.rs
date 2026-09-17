@@ -1,6 +1,6 @@
 use xst::shard;
 
-use crate::cluster::{JSONArray, JSONBoolean, JSONNull, JSONNumber, JSONObject, JSONString};
+use crate::{JSONArray, JSONBoolean, JSONNull, JSONNumber, JSONObject, JSONString};
 
 #[shard]
 pub enum JSONValue {
