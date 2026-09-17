@@ -8,6 +8,7 @@ pub struct Shard {
     pub params: Vec<Ident>,
     pub core_ident: Ident,
     pub marker_ident: Ident,
+    pub mapping_names: [Ident; 4],
     pub kind: Kind,
     pub data: TokenStream,
     pub closures: Vec<Closure>,
@@ -15,8 +16,8 @@ pub struct Shard {
 
 #[derive(Debug)]
 pub enum Kind {
-    Struct(Vec<(Ident, TokenStream)>),
-    Enum(Vec<(Ident, TokenStream)>),
+    Struct(Vec<(Ident, TokenStream, Mapping)>),
+    Enum(Vec<(Ident, TokenStream, Mapping)>),
     Type,
 }
 
@@ -25,5 +26,16 @@ pub struct Closure {
     pub index: usize,
     pub ident: Ident,
     pub output: TokenStream,
+    pub mapping: Mapping,
     pub data: TokenStream,
+}
+
+#[derive(Debug)]
+pub enum Mapping {
+    Slice,
+    Reference(TokenStream),
+    Box(Box<Mapping>),
+    Option(Box<Mapping>),
+    Vec(Box<Mapping>),
+    Tuple(Vec<Mapping>),
 }

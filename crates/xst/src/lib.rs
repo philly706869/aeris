@@ -1,3 +1,34 @@
+//! Shard results borrow the input, not the parser or parse forest.
+//!
+//! ```
+//! use xst::{shard, Cluster};
+//! #[shard]
+//! type Word = x! { "hello" };
+//! let input = String::from("hello");
+//! let output = {
+//!     let cluster = Cluster::<Word>::build();
+//!     let parsed = cluster.parse(&input).unwrap();
+//!     parsed.results().unwrap().next().unwrap().unwrap()
+//! };
+//! assert_eq!(output, "hello");
+//! ```
+//!
+//! The input must outlive extracted slices:
+//!
+//! ```compile_fail,E0597
+//! use xst::{shard, Cluster};
+//! #[shard]
+//! type Word = x! { "hello" };
+//! let cluster = Cluster::<Word>::build();
+//! let output;
+//! {
+//!     let input = String::from("hello");
+//!     let parsed = cluster.parse(&input).unwrap();
+//!     output = parsed.results().unwrap().next().unwrap().unwrap();
+//! }
+//! println!("{output}");
+//! ```
+
 extern crate alloc;
 
 pub use xst_core::public::*;
@@ -18,6 +49,7 @@ pub mod internal {
     pub use core::option::Option;
     pub use core::primitive::char;
     pub use core::primitive::str;
+    pub use core::result::Result;
 
     pub use alloc::boxed::Box;
     pub use alloc::vec::Vec;

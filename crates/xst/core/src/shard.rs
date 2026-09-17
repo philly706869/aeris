@@ -1,6 +1,7 @@
 use core::{any::TypeId, fmt::Debug, ops::RangeInclusive};
 
 pub mod internal {
+    pub use crate::cluster::{ExtractError, MappingNode};
     pub use crate::shard::Shard;
     pub use crate::shard::ShardClosure;
     pub use crate::shard::ShardClosureForward;
@@ -19,6 +20,11 @@ pub trait Shard: 'static {
 pub trait ShardCore: 'static {
     type Output<'i>: Debug;
     const DATA: &'static ShardData;
+    fn map<'i>(
+        _node: crate::cluster::MappingNode<'_, 'i>,
+    ) -> Result<Self::Output<'i>, crate::cluster::ExtractError> {
+        Err(crate::cluster::ExtractError::InvalidMapping)
+    }
 }
 
 pub type ShardField<'i, T> = <<T as Shard>::Core as ShardCore>::Output<'i>;

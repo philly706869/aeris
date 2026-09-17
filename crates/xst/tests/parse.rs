@@ -49,21 +49,21 @@ type ReduceConflict = x! { [| ("a" OptionalEmpty) "x" | ("a" ""*?) "y"] };
 #[test]
 fn consumes_the_entire_unicode_input() {
     let cluster = Cluster::<Unicode>::build();
-    assert!(cluster.parse("한🦀"));
+    assert!(cluster.recognizes("한🦀"));
     for input in ["", "한", "🦀", "한🦀x", "x한🦀"] {
-        assert!(!cluster.parse(input), "{input:?}");
+        assert!(!cluster.recognizes(input), "{input:?}");
     }
-    assert!(cluster.parse("한🦀"));
+    assert!(cluster.recognizes("한🦀"));
 }
 
 #[test]
 fn explores_all_matching_terminal_predicates() {
     let cluster = Cluster::<Overlap>::build();
     for input in ["ax", "ay", "az", "bx", "🦀z"] {
-        assert!(cluster.parse(input), "{input:?}");
+        assert!(cluster.recognizes(input), "{input:?}");
     }
     for input in ["", "a", "by", "0z", "axy"] {
-        assert!(!cluster.parse(input), "{input:?}");
+        assert!(!cluster.recognizes(input), "{input:?}");
     }
 }
 
@@ -74,7 +74,7 @@ fn handles_bounded_optional_and_lazy_repetition() {
         for suffix in ["", "b", "c", "bccc", "bb", "cb"] {
             let input = format!("{}{suffix}", "a".repeat(n));
             assert_eq!(
-                cluster.parse(&input),
+                cluster.recognizes(&input),
                 (2..=4).contains(&n) && !["bb", "cb"].contains(&suffix),
                 "{input:?}"
             );
@@ -86,33 +86,33 @@ fn handles_bounded_optional_and_lazy_repetition() {
 fn shares_ambiguous_stacks_and_preserves_reduction_branches() {
     let cluster = Cluster::<Ambiguous>::build();
     for n in [1, 2, 3, 8, 32] {
-        assert!(cluster.parse(&"a".repeat(n)));
+        assert!(cluster.recognizes(&"a".repeat(n)));
     }
-    assert!(!cluster.parse(""));
-    assert!(!cluster.parse("aaab"));
+    assert!(!cluster.recognizes(""));
+    assert!(!cluster.recognizes("aaab"));
     let conflict = Cluster::<ReduceConflict>::build();
-    assert!(conflict.parse("ax"));
-    assert!(conflict.parse("ay"));
-    assert!(!conflict.parse("az"));
+    assert!(conflict.recognizes("ax"));
+    assert!(conflict.recognizes("ay"));
+    assert!(!conflict.recognizes("az"));
 }
 
 #[test]
 fn nullable_and_mutual_cycles_terminate() {
     let nullable = Cluster::<Nullable>::build();
     for input in ["", "a", "aa", "aaaa"] {
-        assert!(nullable.parse(input), "{input:?}");
+        assert!(nullable.recognizes(input), "{input:?}");
     }
-    assert!(!nullable.parse("aab"));
+    assert!(!nullable.recognizes("aab"));
     let empty = Cluster::<EmptyRepeat>::build();
-    assert!(empty.parse(""));
-    assert!(!empty.parse("a"));
+    assert!(empty.recognizes(""));
+    assert!(!empty.recognizes("a"));
     let mutual = Cluster::<MutualA>::build();
-    assert!(mutual.parse("a"));
-    assert!(!mutual.parse(""));
-    assert!(!mutual.parse("aa"));
+    assert!(mutual.recognizes("a"));
+    assert!(!mutual.recognizes(""));
+    assert!(!mutual.recognizes("aa"));
     let unproductive = Cluster::<Unproductive>::build();
-    assert!(!unproductive.parse(""));
-    assert!(!unproductive.parse("a"));
+    assert!(!unproductive.recognizes(""));
+    assert!(!unproductive.recognizes("a"));
 }
 
 #[test]
@@ -126,7 +126,7 @@ fn parses_recursive_json_without_extracting_values() {
         "{}",
         r#"{"한🦀": [null, true, false, -12.5e+2, {"x": "a\n\u0041"}]}"#,
     ] {
-        assert!(cluster.parse(input), "{input:?}");
+        assert!(cluster.recognizes(input), "{input:?}");
     }
     for input in [
         "",
@@ -140,6 +140,6 @@ fn parses_recursive_json_without_extracting_values() {
         "\"bad\nstring\"",
         "\"\\q\"",
     ] {
-        assert!(!cluster.parse(input), "{input:?}");
+        assert!(!cluster.recognizes(input), "{input:?}");
     }
 }

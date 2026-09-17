@@ -4,7 +4,12 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::shard::{ReferenceData, ShardData, ShardDataKind, StaticShard};
 
+mod forest;
+mod mapping;
 mod optimize;
+pub use forest::{ParseError, Parsed, Results};
+use mapping::Shape;
+pub use mapping::{ExtractError, MappingNode};
 mod set;
 
 use optimize::{First, ShiftRange};
@@ -37,8 +42,14 @@ where
         }
     }
 
-    pub fn parse(&self, input: &str) -> bool {
+    /// Recognizes the complete input without allocating a parse forest.
+    pub fn recognizes(&self, input: &str) -> bool {
         self.table.parse(input)
+    }
+
+    /// Parses the complete input, retaining all derivations for lazy mapping.
+    pub fn parse<'c, 'i>(&'c self, input: &'i str) -> Result<Parsed<'c, 'i, S>, ParseError> {
+        Parsed::new(self, input)
     }
 }
 
@@ -48,16 +59,23 @@ enum Symbol {
     Nonterminal(usize),
 }
 
+// The LHS identifies the original grammar node (or repetition helper). Its
+// Shape and this production's branch are the reduction recipe; optimizer
+// passes must preserve both even when recognition symbols are shared.
 #[derive(Debug)]
 struct Rule {
     lhs: usize,
     rhs: Vec<Symbol>,
+    branch: usize,
 }
 
 #[derive(Default)]
 struct Grammar {
+    #[cfg(test)]
+    unshared_terminals: bool,
     rules: Vec<Rule>,
     by_lhs: Vec<Vec<usize>>,
+    shapes: Vec<Shape>,
     terminals: Vec<CharSet>,
     terminal_ids: FxHashMap<CharSet, usize>,
     references: FxHashMap<TypeId, usize>,
@@ -66,6 +84,12 @@ struct Grammar {
 
 impl Grammar {
     fn terminal(&mut self, set: CharSet) -> usize {
+        #[cfg(test)]
+        if self.unshared_terminals {
+            let id = self.terminals.len();
+            self.terminals.push(set);
+            return id;
+        }
         *self.terminal_ids.entry(set.clone()).or_insert_with(|| {
             let id = self.terminals.len();
             self.terminals.push(set);
@@ -76,12 +100,14 @@ impl Grammar {
     fn nonterminal(&mut self) -> usize {
         let id = self.by_lhs.len();
         self.by_lhs.push(vec![]);
+        self.shapes.push(Shape::Transparent);
         id
     }
 
     fn rule(&mut self, lhs: usize, rhs: Vec<Symbol>) {
+        let branch = self.by_lhs[lhs].len();
         self.by_lhs[lhs].push(self.rules.len());
-        self.rules.push(Rule { lhs, rhs });
+        self.rules.push(Rule { lhs, rhs, branch });
     }
 
     fn reference(&mut self, reference: &ReferenceData) -> usize {
@@ -90,6 +116,7 @@ impl Grammar {
         }
         let id = self.nonterminal();
         self.references.insert(reference.id, id);
+        self.shapes[id] = Shape::Reference(reference.id);
         let target = self.lower((reference.reference)());
         self.rule(id, vec![Symbol::Nonterminal(target)]);
         id
@@ -101,6 +128,14 @@ impl Grammar {
         }
         let id = self.nonterminal();
         self.nodes.insert(data as *const _, id);
+        self.shapes[id] = match &data.kind {
+            ShardDataKind::Literal(_) | ShardDataKind::Set(_) => Shape::Span,
+            ShardDataKind::Reference(_) => Shape::Transparent,
+            ShardDataKind::Sequence(_) => Shape::Sequence,
+            ShardDataKind::Alternative(_) => Shape::Alternative,
+            ShardDataKind::Option(_) => Shape::Option,
+            ShardDataKind::Vec(_) => Shape::Repeat,
+        };
         match &data.kind {
             ShardDataKind::Literal(literal) => {
                 let rhs = literal
@@ -148,12 +183,14 @@ impl Grammar {
                 let mut tail = id;
                 for _ in 0..repeat.min {
                     let next = self.nonterminal();
+                    self.shapes[next] = Shape::Repeat;
                     self.rule(tail, vec![item, Symbol::Nonterminal(next)]);
                     tail = next;
                 }
                 if let Some(max) = repeat.max {
                     for _ in repeat.min..max {
                         let next = self.nonterminal();
+                        self.shapes[next] = Shape::Repeat;
                         self.optional(tail, vec![item, Symbol::Nonterminal(next)], repeat.lazy);
                         tail = next;
                     }
@@ -195,11 +232,13 @@ struct State {
     accept: bool,
     first: First,
     dispatch: Vec<ShiftRange>,
+    shift_symbols: BTreeMap<usize, usize>,
 }
 
 #[derive(Debug)]
 struct Table {
     rules: Vec<Rule>,
+    shapes: Vec<Shape>,
     states: Vec<State>,
 }
 
@@ -359,6 +398,9 @@ impl Table {
                 match symbol {
                     Symbol::Terminal(id) => {
                         shifts.insert(id, target);
+                        // Canonical LR states have one incoming grammar symbol.
+                        // Preserve it independently of interval dispatch merging.
+                        assert!(state.shift_symbols.insert(target, id).is_none());
                     }
                     Symbol::Nonterminal(id) => {
                         state.gotos.insert(id, target);
@@ -374,6 +416,7 @@ impl Table {
         }
         Self {
             rules: grammar.rules,
+            shapes: grammar.shapes,
             states,
         }
     }

@@ -87,3 +87,23 @@ fn generated_names_do_not_shadow_input_names() {
             text: "core",
         });
 }
+
+struct values;
+struct index;
+
+#[::xst::shard]
+pub enum MappedChoice {
+    Value(Root),
+}
+
+#[test]
+fn mapping_is_hygienic_without_prelude() {
+    let cluster = ::xst::Cluster::<MappedChoice<'static>>::build();
+    let parsed = cluster.parse("abb").unwrap();
+    let value = ::std::iter::Iterator::next(&mut parsed.results().unwrap())
+        .unwrap()
+        .unwrap();
+    let MappedChoice::Value(root) = value;
+    ::std::assert_eq!(root.__xst_marker_0, "a");
+    ::std::assert_eq!(*root.item.item.unwrap(), ::std::vec!["b", "b"]);
+}

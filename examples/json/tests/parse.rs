@@ -22,7 +22,7 @@ fn parses_json_values() {
         r#"{"a": 1, "b": [null, {"c": "한🦀"}]}"#,
         " \t\r\n [ 1 , 2 ] \n",
     ] {
-        assert!(cluster.parse(input), "expected valid JSON: {input:?}");
+        assert!(cluster.recognizes(input), "expected valid JSON: {input:?}");
     }
 }
 
@@ -57,6 +57,9 @@ fn rejects_invalid_json_values() {
         "[1",
         "{\"a\": 1",
     ] {
-        assert!(!cluster.parse(input), "expected invalid JSON: {input:?}");
+        assert!(
+            !cluster.recognizes(input),
+            "expected invalid JSON: {input:?}"
+        );
     }
 }

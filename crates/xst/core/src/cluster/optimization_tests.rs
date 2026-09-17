@@ -165,3 +165,100 @@ fn optimized_parser_agrees_with_unfiltered_lr0() {
         words = next;
     }
 }
+
+#[test]
+fn optimization_preserves_derivation_structure_and_spans() {
+    use crate::shard::{Shard, ShardCore};
+    struct Root;
+    impl Shard for Root {
+        type Core = Self;
+    }
+    impl StaticShard for Root {}
+    impl ShardCore for Root {
+        type Output<'i> = Vec<(usize, usize, usize, usize)>;
+        const DATA: &'static ShardData = &ShardData::alternative(&[
+            &ShardData::sequence(&[
+                &ShardData::option(&ShardData::literal("a")),
+                &ShardData::set(false, &['a'..='b', 'a'..='a']),
+                &ShardData::vec(&ShardData::literal("b"), 0, Some(2)),
+            ]),
+            &ShardData::sequence(&[
+                &ShardData::set(true, &['b'..='z']),
+                &ShardData::literal("b"),
+            ]),
+            &ShardData::literal("a"),
+            &ShardData::set(false, &['a'..='a']),
+            &ShardData::literal(""),
+        ]);
+        fn map<'i>(node: MappingNode<'_, 'i>) -> Result<Self::Output<'i>, ExtractError> {
+            Ok(node
+                .nodes
+                .iter()
+                .filter_map(|node| {
+                    let Some(Symbol::Nonterminal(id)) = node.symbol else {
+                        return None;
+                    };
+                    Some((id, node.rule.unwrap(), node.start, node.end))
+                })
+                .collect())
+        }
+    }
+    let optimized = Cluster::<Root>::build();
+    let mut grammar = Grammar {
+        unshared_terminals: true,
+        ..Grammar::default()
+    };
+    let start = grammar.nonterminal();
+    grammar.rule(start, vec![]);
+    let root = grammar.reference(&ReferenceData::new::<Root>());
+    grammar.rules[0].rhs.push(Symbol::Nonterminal(root));
+    let terminals = grammar.terminals.clone();
+    let mut table = Table::build(grammar);
+    for state in &mut table.states {
+        state.first.nullable = true; // Disable FIRST pruning.
+        // Independent predicate evaluation, without interval merging, for the
+        // exhaustive test alphabet. Terminal sharing is disabled above.
+        state.dispatch = ['a', 'b', 'z', '🦀']
+            .into_iter()
+            .map(|ch| ShiftRange {
+                lo: ch as u32,
+                hi: ch as u32,
+                targets: state
+                    .shifts
+                    .iter()
+                    .filter(|(id, _)| terminals[**id].matches(ch))
+                    .map(|(_, &target)| target)
+                    .collect(),
+            })
+            .collect();
+    }
+    let baseline = Cluster::<Root> {
+        table,
+        _shard: PhantomData,
+    };
+    let mut words = vec![String::new()];
+    for _ in 0..5 {
+        let mut next = Vec::new();
+        for word in words {
+            let collect = |cluster: &Cluster<Root>| {
+                cluster
+                    .parse(&word)
+                    .map(|parsed| {
+                        let mut values = parsed
+                            .results()
+                            .unwrap()
+                            .map(Result::unwrap)
+                            .collect::<Vec<_>>();
+                        values.sort();
+                        values
+                    })
+                    .ok()
+            };
+            assert_eq!(collect(&optimized), collect(&baseline), "{word:?}");
+            for ch in ['a', 'b', 'z', '🦀'] {
+                next.push(format!("{word}{ch}"));
+            }
+        }
+        words = next;
+    }
+}

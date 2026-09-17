@@ -11,6 +11,8 @@ use crate::{
 pub fn lower(shard: ast::Shard, names: Names) -> syn::Result<ir::Shard> {
     let core_ident = names.generator("shard_core").next();
     let marker_ident = names.generator("marker").next();
+    let mut mapping_names = names.generator("mapping");
+    let mapping_names = core::array::from_fn(|_| mapping_names.next());
     let (vis, ident, params) = match &shard {
         ast::Shard::Struct(s) => (&s.vis, &s.ident, &s.params),
         ast::Shard::Enum(s) => (&s.vis, &s.ident, &s.params),
@@ -34,7 +36,7 @@ pub fn lower(shard: ast::Shard, names: Names) -> syn::Result<ir::Shard> {
             let mut data = Vec::new();
             for field in s.fields {
                 let expr = context.expr(&field.expr)?;
-                fields.push((field.ident, expr.output));
+                fields.push((field.ident, expr.output, expr.mapping));
                 data.push(expr.data);
             }
             (ir::Kind::Struct(fields), sequence(data))
@@ -43,7 +45,7 @@ pub fn lower(shard: ast::Shard, names: Names) -> syn::Result<ir::Shard> {
             let mut variants = Vec::new();
             let mut data = Vec::new();
             for variant in s.variants {
-                if variants.iter().any(|(ident, _)| ident == &variant.ident) {
+                if variants.iter().any(|(ident, _, _)| ident == &variant.ident) {
                     return Err(syn::Error::new(
                         variant.ident.span(),
                         "duplicate shard variant",
@@ -53,6 +55,7 @@ pub fn lower(shard: ast::Shard, names: Names) -> syn::Result<ir::Shard> {
                 variants.push((
                     variant.ident,
                     quote!(::xst::internal::ShardField<'i, #public>),
+                    ir::Mapping::Reference(private.clone()),
                 ));
                 data.push(reference(private));
             }
@@ -64,6 +67,7 @@ pub fn lower(shard: ast::Shard, names: Names) -> syn::Result<ir::Shard> {
         vis,
         core_ident,
         marker_ident,
+        mapping_names,
         ident: context.ident,
         params: context.params,
         kind,
@@ -81,6 +85,7 @@ struct Context<'a> {
 
 struct Expr {
     output: TokenStream,
+    mapping: ir::Mapping,
     data: TokenStream,
 }
 
@@ -88,13 +93,19 @@ impl Context<'_> {
     fn expr(&mut self, expr: &rust::Expr) -> syn::Result<Expr> {
         Ok(match expr {
             rust::Expr::X(expr) => Expr {
+                mapping: ir::Mapping::Slice,
                 output: quote!(&'i ::xst::internal::str),
                 data: self.sequence(&expr.sequence)?,
             },
             rust::Expr::XBox(expr) => {
-                let Expr { output, data } = self.expr(&expr.expr)?;
+                let Expr {
+                    output,
+                    data,
+                    mapping,
+                } = self.expr(&expr.expr)?;
                 Expr {
                     output: quote!(::xst::internal::Box<#output>),
+                    mapping: ir::Mapping::Box(Box::new(mapping)),
                     data,
                 }
             }
@@ -113,14 +124,17 @@ impl Context<'_> {
             }
             rust::Expr::Tuple(expr) => {
                 let mut outputs = Vec::new();
+                let mut mappings = Vec::new();
                 let mut data = Vec::new();
                 for expr in &expr.exprs {
                     let expr = self.expr(expr)?;
                     outputs.push(expr.output);
+                    mappings.push(expr.mapping);
                     data.push(expr.data);
                 }
                 Expr {
                     output: quote!((#(#outputs,)*)),
+                    mapping: ir::Mapping::Tuple(mappings),
                     data: sequence(data),
                 }
             }
@@ -128,6 +142,7 @@ impl Context<'_> {
                 let (public, private) = self.shard(expr)?;
                 Expr {
                     output: quote!(::xst::internal::ShardField<'i, #public>),
+                    mapping: ir::Mapping::Reference(private.clone()),
                     data: reference(private),
                 }
             }
@@ -135,7 +150,11 @@ impl Context<'_> {
     }
 
     fn option(&mut self, expr: &rust::Expr, lazy: bool) -> syn::Result<Expr> {
-        let Expr { output, data } = self.expr(expr)?;
+        let Expr {
+            output,
+            data,
+            mapping,
+        } = self.expr(expr)?;
         let constructor = if lazy {
             quote!(option_lazy)
         } else {
@@ -143,6 +162,7 @@ impl Context<'_> {
         };
         Ok(Expr {
             output: quote!(::xst::internal::Option<#output>),
+            mapping: ir::Mapping::Option(Box::new(mapping)),
             data: quote!(::xst::internal::ShardData::#constructor(&#data)),
         })
     }
@@ -153,9 +173,14 @@ impl Context<'_> {
         (min, max): (TokenStream, TokenStream),
         lazy: bool,
     ) -> syn::Result<Expr> {
-        let Expr { output, data } = self.expr(expr)?;
+        let Expr {
+            output,
+            data,
+            mapping,
+        } = self.expr(expr)?;
         Ok(Expr {
             output: quote!(::xst::internal::Vec<#output>),
+            mapping: ir::Mapping::Vec(Box::new(mapping)),
             data: repetition(data, min, max, lazy),
         })
     }
@@ -168,8 +193,13 @@ impl Context<'_> {
                 self.shard(shard)?
             } else {
                 let index = self.reserve_closure();
-                let Expr { output, data } = self.expr(arg)?;
+                let Expr {
+                    output,
+                    data,
+                    mapping,
+                } = self.expr(arg)?;
                 self.closures[index].output = output;
+                self.closures[index].mapping = mapping;
                 self.closures[index].data = data;
                 self.closure_types(index)
             };
@@ -207,6 +237,7 @@ impl Context<'_> {
             index,
             ident: self.closure_names.next(),
             output: TokenStream::new(),
+            mapping: ir::Mapping::Slice,
             data: TokenStream::new(),
         });
         index
