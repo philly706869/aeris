@@ -3,6 +3,8 @@ pub use aeris_std_ui as ui;
 use aeris::Context;
 
 pub struct StdContext {
+    // TODO
+    #[allow(unused)]
     ctx: Context,
 }
 

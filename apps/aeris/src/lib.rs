@@ -22,5 +22,7 @@ enum DaemonCommands {
 }
 
 pub fn main() {
+    // TODO
+    #[allow(unused)]
     let cli = Cli::parse();
 }

@@ -14,6 +14,8 @@ pub fn main() {
 }
 
 pub struct AERISDaemon {
+    // TODO
+    #[allow(unused)]
     ctx: StdContext,
     root_path: PathBuf,
 }
@@ -69,6 +71,8 @@ impl AERISDaemon {
 
     async fn handler(mut stream: UnixStream) {
         let mut buf = [0u8; 1024];
+        // TODO
+        #[allow(unused)]
         match stream.read(&mut buf).await {
             Ok(0) => {}
             Ok(len) => {}

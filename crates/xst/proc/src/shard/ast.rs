@@ -5,6 +5,7 @@ use syn::{
     token::{Brace, Paren},
 };
 
+#[allow(unused)]
 #[derive(Debug)]
 pub enum Shard {
     Struct(StructShard),
@@ -29,6 +30,7 @@ impl Parse for Shard {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct StructShard {
     pub vis: Visibility,
@@ -53,6 +55,7 @@ impl Parse for StructShard {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct EnumShard {
     pub vis: Visibility,
@@ -77,6 +80,7 @@ impl Parse for EnumShard {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct TypeShard {
     pub vis: Visibility,
@@ -102,6 +106,7 @@ impl Parse for TypeShard {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct Field {
     pub ident: Ident,
@@ -119,6 +124,7 @@ impl Parse for Field {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct Variant {
     pub ident: Ident,
@@ -137,6 +143,7 @@ impl Parse for Variant {
     }
 }
 
+#[allow(unused)]
 #[derive(Debug)]
 pub struct Params {
     pub lt_token: Option<Token![<]>,
@@ -181,6 +188,7 @@ pub mod rust_expr {
         syn::custom_keyword!(xvecz);
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub enum Expr {
         X(XExpr),
@@ -219,6 +227,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct XExpr {
         pub x_token: keyword::x,
@@ -239,6 +248,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct XBoxExpr {
         pub xbox_token: keyword::xbox,
@@ -259,6 +269,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct XOptExpr {
         pub xopt_token: keyword::xopt,
@@ -279,6 +290,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct XOptZExpr {
         pub xoptz_token: keyword::xoptz,
@@ -299,6 +311,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct XVecExpr {
         pub xvec_token: keyword::xvec,
@@ -323,6 +336,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct XVecZExpr {
         pub xvecz_token: keyword::xvecz,
@@ -347,6 +361,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct TupleExpr {
         pub paren: Paren,
@@ -363,6 +378,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct ShardExpr {
         pub ident: Ident,
@@ -378,6 +394,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub enum Limit {
         Exact(ExactLimit),
@@ -401,6 +418,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct ExactLimit {
         pub count: LitInt,
@@ -414,6 +432,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct RangeLimit {
         pub start: Option<LitInt>,
@@ -431,6 +450,7 @@ pub mod rust_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct Args {
         pub lt_token: Option<Token![<]>,
@@ -465,6 +485,7 @@ pub mod prim_expr {
         token::{Brace, Bracket, Paren},
     };
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct Sequence {
         pub exprs: Vec<Expr>,
@@ -486,6 +507,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct Expr {
         pub atom: Atom,
@@ -501,6 +523,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub enum Atom {
         Lit(LitAtom),
@@ -529,6 +552,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct LitAtom {
         pub text: LitStr,
@@ -542,6 +566,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct SetAtom {
         pub brace: Brace,
@@ -572,6 +597,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct SetEntry {
         pub start: LitChar,
@@ -597,6 +623,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct SeqAtom {
         pub paren: Paren,
@@ -613,6 +640,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct AltAtom {
         pub bracket: Bracket,
@@ -637,6 +665,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct AltEntry {
         pub or_token: Token![|],
@@ -652,6 +681,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct ShardAtom {
         pub ident: Ident,
@@ -667,6 +697,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct Args {
         pub lt_token: Option<Token![<]>,
@@ -692,6 +723,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub enum Modifier {
         None,
@@ -749,6 +781,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub enum Limit {
         Exact(ExactLimit),
@@ -772,6 +805,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct ExactLimit {
         pub count: LitInt,
@@ -785,6 +819,7 @@ pub mod prim_expr {
         }
     }
 
+    #[allow(unused)]
     #[derive(Debug)]
     pub struct RangeLimit {
         pub start: Option<LitInt>,
