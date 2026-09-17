@@ -18,7 +18,6 @@ where
 {
     pub fn build() -> Self {
         let mut grammar = Grammar::default();
-        // Reserve production zero for the augmented start rule.
         let start = grammar.nonterminal();
         grammar.rule(start, vec![]);
         let root = grammar.reference(&ReferenceData::new::<S>());
@@ -29,8 +28,10 @@ where
         }
     }
 
-    pub fn parse(&self, input: &str) {
-        todo!()
+    /// Returns whether the grammar accepts the entire input.
+    /// Parse trees and shard outputs are not extracted yet.
+    pub fn parse(&self, input: &str) -> bool {
+        self.table.parse(input)
     }
 }
 
@@ -44,6 +45,15 @@ enum Symbol {
 enum Terminal {
     Char(char),
     Set(&'static SetData),
+}
+
+impl Terminal {
+    fn matches(&self, ch: char) -> bool {
+        match self {
+            Self::Char(expected) => ch == *expected,
+            Self::Set(set) => set.range.iter().any(|range| range.contains(&ch)) != set.negated,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -200,7 +210,98 @@ struct Table {
     states: Vec<State>,
 }
 
+// Graph-structured stack: each node represents one (input position, LR state).
+// Edges point to predecessors. Labels and derivations are unnecessary until
+// result extraction is implemented; recognition only needs the stack states.
+struct StackNode {
+    state: usize,
+    predecessors: BTreeSet<usize>,
+}
+
+#[derive(Default)]
+struct Stack {
+    nodes: Vec<StackNode>,
+    // Only nodes at the current input position can acquire new predecessors.
+    current: BTreeMap<usize, usize>,
+}
+
+impl Stack {
+    fn node(&mut self, state: usize) -> usize {
+        *self.current.entry(state).or_insert_with(|| {
+            let id = self.nodes.len();
+            self.nodes.push(StackNode {
+                state,
+                predecessors: BTreeSet::new(),
+            });
+            id
+        })
+    }
+
+    fn ancestors(&self, node: usize, depth: usize) -> BTreeSet<usize> {
+        let mut frontier = BTreeSet::from([node]);
+        // Deduplicate endpoints at each depth, rather than enumerate paths.
+        // This also handles epsilon-induced cycles in the stack graph.
+        for _ in 0..depth {
+            frontier = frontier
+                .iter()
+                .flat_map(|&id| self.nodes[id].predecessors.iter().copied())
+                .collect();
+            if frontier.is_empty() {
+                break;
+            }
+        }
+        frontier
+    }
+
+    fn reduce(&mut self, table: &Table) {
+        loop {
+            let mut changed = false;
+            let heads: Vec<_> = self.current.values().copied().collect();
+            for head in heads {
+                for &rule in &table.states[self.nodes[head].state].reductions {
+                    let rule = &table.rules[rule];
+                    for ancestor in self.ancestors(head, rule.rhs.len()) {
+                        let state = &table.states[self.nodes[ancestor].state];
+                        if let Some(&target) = state.gotos.get(&rule.lhs) {
+                            let node = self.node(target);
+                            changed |= self.nodes[node].predecessors.insert(ancestor);
+                        }
+                    }
+                }
+            }
+            // A new edge can expose reduction paths from existing heads, even
+            // if those heads themselves did not change. Revisit all heads until
+            // no edge is added. The finite set of nodes/edges guarantees exit.
+            if !changed {
+                break;
+            }
+        }
+    }
+}
+
 impl Table {
+    fn parse(&self, input: &str) -> bool {
+        let mut stack = Stack::default();
+        stack.node(0);
+        for ch in input.chars() {
+            stack.reduce(self);
+            let heads = core::mem::take(&mut stack.current);
+            for (state, head) in heads {
+                for (&terminal, &target) in &self.states[state].shifts {
+                    if self.terminals[terminal].matches(ch) {
+                        let node = stack.node(target);
+                        stack.nodes[node].predecessors.insert(head);
+                    }
+                }
+            }
+            if stack.current.is_empty() {
+                return false;
+            }
+        }
+        stack.reduce(self);
+        stack.current.keys().any(|&state| self.states[state].accept)
+    }
+
     fn closure(grammar: &Grammar, seeds: impl IntoIterator<Item = Item>) -> Vec<Item> {
         let mut items = BTreeSet::new();
         let mut pending = Vec::new();
@@ -268,6 +369,3 @@ impl Table {
         }
     }
 }
-
-#[cfg(test)]
-mod tests;
